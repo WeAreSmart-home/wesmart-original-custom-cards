@@ -7,26 +7,26 @@
 
 (() => {
 
-    const CARD_VERSION = '1.0.0';
+  const CARD_VERSION = '1.0.0';
 
-    // ─── Constants ────────────────────────────────────────────────────────────────
+  // ─── Constants ────────────────────────────────────────────────────────────────
 
-    const TABS = {
-        SUMMARY: 'summary',
-        CONTROLS: 'controls',
-        STATS: 'stats'
-    };
+  const TABS = {
+    SUMMARY: 'summary',
+    CONTROLS: 'controls',
+    STATS: 'stats'
+  };
 
-    const ALERT_DEFINITIONS = {
-        lights: { domain: 'light', state: 'on', icon: 'mdi:lightbulb-on', color: '#D4A84B', label: 'Lights' },
-        locks: { domain: 'lock', state: 'unlocked', icon: 'mdi:lock-open', color: '#D97757', label: 'Unlocked' },
-        covers: { domain: 'cover', state: 'open', icon: 'mdi:window-shutter-open', color: '#60B4D8', label: 'Covers' },
-        battery: { domain: 'sensor', device_class: 'battery', threshold: 20, icon: 'mdi:battery-alert', color: '#D97757', label: 'Low Battery' },
-    };
+  const ALERT_DEFINITIONS = {
+    lights: { domain: 'light', state: 'on', icon: 'mdi:lightbulb-on', color: '#D4A84B', label: 'Lights' },
+    locks: { domain: 'lock', state: 'unlocked', icon: 'mdi:lock-open', color: '#D97757', label: 'Unlocked' },
+    covers: { domain: 'cover', state: 'open', icon: 'mdi:window-shutter-open', color: '#60B4D8', label: 'Covers' },
+    battery: { domain: 'sensor', device_class: 'battery', threshold: 20, icon: 'mdi:battery-alert', color: '#D97757', label: 'Low Battery' },
+  };
 
-    // ─── Styles ───────────────────────────────────────────────────────────────────
+  // ─── Styles ───────────────────────────────────────────────────────────────────
 
-    const styles = `
+  const styles = `
   :host {
     --claude-orange: #D97757;
     --claude-blue: #60B4D8;
@@ -61,6 +61,31 @@
     min-height: 380px;
     display: flex;
     flex-direction: column;
+    transition: var(--transition);
+  }
+
+  .card.theme-light {
+    --bg:            #FFFEFA;
+    --surface:       #F5F0EB;
+    --surface-2:     #E8E2DA;
+    --border:        rgba(28, 25, 23, 0.09);
+    --text:          #1C1917;
+    --text-muted:    #6B5F56;
+    --text-dim:      #A09080;
+    --shadow:        0 4px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .card.theme-auto {
+      --bg:            #FFFEFA;
+      --surface:       #F5F0EB;
+      --surface-2:     #E8E2DA;
+      --border:        rgba(28, 25, 23, 0.09);
+      --text:          #1C1917;
+      --text-muted:    #6B5F56;
+      --text-dim:      #A09080;
+      --shadow:        0 4px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    }
   }
 
   /* Glassmorphic overlay */
@@ -230,44 +255,44 @@
   .stat-value { font-size: 18px; font-weight: 600; }
 `;
 
-    // ─── Custom Element ────────────────────────────────────────────────────────────
+  // ─── Custom Element ────────────────────────────────────────────────────────────
 
-    class ClaudeCommanderHub extends HTMLElement {
-        constructor() {
-            super();
-            this.attachShadow({ mode: 'open' });
-            this._config = {};
-            this._hass = null;
-            this._activeTab = TABS.SUMMARY;
-        }
+  class ClaudeCommanderHub extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({ mode: 'open' });
+      this._config = {};
+      this._hass = null;
+      this._activeTab = TABS.SUMMARY;
+    }
 
-        setConfig(config) {
-            this._config = {
-                title: 'Commander',
-                entities: [], // Controls
-                stats: [],    // Stats
-                ...config
-            };
-            this._render();
-        }
+    setConfig(config) {
+      this._config = {
+        title: 'Commander',
+        entities: [], // Controls
+        stats: [],    // Stats
+        ...config
+      };
+      this._render();
+    }
 
-        set hass(hass) {
-            this._hass = hass;
-            this._updateState();
-        }
+    set hass(hass) {
+      this._hass = hass;
+      this._updateState();
+    }
 
-        _render() {
-            const shadow = this.shadowRoot;
-            shadow.innerHTML = '';
+    _render() {
+      const shadow = this.shadowRoot;
+      shadow.innerHTML = '';
 
-            const style = document.createElement('style');
-            style.textContent = styles;
-            shadow.appendChild(style);
+      const style = document.createElement('style');
+      style.textContent = styles;
+      shadow.appendChild(style);
 
-            this._card = document.createElement('div');
-            this._card.className = 'card';
+      this._card = document.createElement('div');
+      this._card.className = `card theme-${this._config.theme || 'dark'}`;
 
-            this._card.innerHTML = `
+      this._card.innerHTML = `
       <div class="greeting-section">
         <div class="greeting-time" id="greeting-time">System Active</div>
         <div class="greeting-text" id="greeting-text">Welcome back</div>
@@ -292,98 +317,98 @@
       </div>
     `;
 
-            shadow.appendChild(this._card);
-            this._bindEvents();
-            this._updateState();
-        }
+      shadow.appendChild(this._card);
+      this._bindEvents();
+      this._updateState();
+    }
 
-        _updateState() {
-            if (!this._hass || !this._card) return;
+    _updateState() {
+      if (!this._hass || !this._card) return;
 
-            this._updateGreeting();
+      this._updateGreeting();
 
-            if (this._activeTab === TABS.SUMMARY) this._updateSummary();
-            if (this._activeTab === TABS.CONTROLS) this._updateControls();
-            if (this._activeTab === TABS.STATS) this._updateStats();
-        }
+      if (this._activeTab === TABS.SUMMARY) this._updateSummary();
+      if (this._activeTab === TABS.CONTROLS) this._updateControls();
+      if (this._activeTab === TABS.STATS) this._updateStats();
+    }
 
-        _updateGreeting() {
-            const hour = new Date().getHours();
-            let greet = 'Good evening';
-            if (hour < 12) greet = 'Good morning';
-            else if (hour < 18) greet = 'Good afternoon';
+    _updateGreeting() {
+      const hour = new Date().getHours();
+      let greet = 'Good evening';
+      if (hour < 12) greet = 'Good morning';
+      else if (hour < 18) greet = 'Good afternoon';
 
-            const timeText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const timeText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            this._q('#greeting-time').textContent = timeText;
-            this._q('#greeting-text').textContent = greet;
-        }
+      this._q('#greeting-time').textContent = timeText;
+      this._q('#greeting-text').textContent = greet;
+    }
 
-        _updateSummary() {
-            const grid = this._q('#summary-grid');
-            if (!grid) return;
+    _updateSummary() {
+      const grid = this._q('#summary-grid');
+      if (!grid) return;
 
-            const alerts = [];
+      const alerts = [];
 
-            // Logic for lights
-            const lightsOn = Object.values(this._hass.states).filter(s => s.entity_id.startsWith('light.') && s.state === 'on').length;
-            if (lightsOn > 0) alerts.push({ ...ALERT_DEFINITIONS.lights, count: lightsOn });
+      // Logic for lights
+      const lightsOn = Object.values(this._hass.states).filter(s => s.entity_id.startsWith('light.') && s.state === 'on').length;
+      if (lightsOn > 0) alerts.push({ ...ALERT_DEFINITIONS.lights, count: lightsOn });
 
-            // Logic for locks
-            const locksOpen = Object.values(this._hass.states).filter(s => s.entity_id.startsWith('lock.') && s.state === 'unlocked').length;
-            if (locksOpen > 0) alerts.push({ ...ALERT_DEFINITIONS.locks, count: locksOpen });
+      // Logic for locks
+      const locksOpen = Object.values(this._hass.states).filter(s => s.entity_id.startsWith('lock.') && s.state === 'unlocked').length;
+      if (locksOpen > 0) alerts.push({ ...ALERT_DEFINITIONS.locks, count: locksOpen });
 
-            // Logic for covers
-            const coversOpen = Object.values(this._hass.states).filter(s => s.entity_id.startsWith('cover.') && s.state === 'open').length;
-            if (coversOpen > 0) alerts.push({ ...ALERT_DEFINITIONS.covers, count: coversOpen });
+      // Logic for covers
+      const coversOpen = Object.values(this._hass.states).filter(s => s.entity_id.startsWith('cover.') && s.state === 'open').length;
+      if (coversOpen > 0) alerts.push({ ...ALERT_DEFINITIONS.covers, count: coversOpen });
 
-            // Logic for low batteries
-            const lowBatt = Object.values(this._hass.states).filter(s =>
-                s.attributes.device_class === 'battery' && parseFloat(s.state) <= 20
-            ).length;
-            if (lowBatt > 0) alerts.push({ ...ALERT_DEFINITIONS.battery, count: lowBatt });
+      // Logic for low batteries
+      const lowBatt = Object.values(this._hass.states).filter(s =>
+        s.attributes.device_class === 'battery' && parseFloat(s.state) <= 20
+      ).length;
+      if (lowBatt > 0) alerts.push({ ...ALERT_DEFINITIONS.battery, count: lowBatt });
 
-            if (alerts.length === 0) {
-                grid.innerHTML = '<div class="no-alerts">Everything looks optimal. No active alerts.</div>';
-            } else {
-                grid.innerHTML = alerts.map(a => `
+      if (alerts.length === 0) {
+        grid.innerHTML = '<div class="no-alerts">Everything looks optimal. No active alerts.</div>';
+      } else {
+        grid.innerHTML = alerts.map(a => `
         <div class="summary-card">
           <ha-icon icon="${a.icon}" style="color: ${a.color}"></ha-icon>
           <div class="count">${a.count}</div>
           <div class="label">${a.label}</div>
         </div>
       `).join('');
-            }
-        }
+      }
+    }
 
-        _updateControls() {
-            const list = this._q('#controls-list');
-            if (!list) return;
+    _updateControls() {
+      const list = this._q('#controls-list');
+      if (!list) return;
 
-            const entities = this._config.entities || [];
-            list.innerHTML = entities.map(eid => {
-                const state = this._hass.states[eid];
-                if (!state) return '';
-                const on = state.state === 'on' || state.state === 'open';
-                return `
+      const entities = this._config.entities || [];
+      list.innerHTML = entities.map(eid => {
+        const state = this._hass.states[eid];
+        if (!state) return '';
+        const on = state.state === 'on' || state.state === 'open';
+        return `
         <div class="control-row ${on ? 'row-active' : ''}" data-entity="${eid}">
           <ha-icon icon="${state.attributes.icon || 'mdi:toggle-switch-outline'}"></ha-icon>
           <div class="control-name">${state.attributes.friendly_name || eid}</div>
           <div class="control-status" style="color: ${on ? 'var(--claude-orange)' : 'var(--text-dim)'}">${state.state.toUpperCase()}</div>
         </div>
       `;
-            }).join('');
-        }
+      }).join('');
+    }
 
-        _updateStats() {
-            const list = this._q('#stats-list');
-            if (!list) return;
+    _updateStats() {
+      const list = this._q('#stats-list');
+      if (!list) return;
 
-            const stats = this._config.stats || [];
-            list.innerHTML = stats.map(eid => {
-                const state = this._hass.states[eid];
-                if (!state) return '';
-                return `
+      const stats = this._config.stats || [];
+      list.innerHTML = stats.map(eid => {
+        const state = this._hass.states[eid];
+        if (!state) return '';
+        return `
         <div class="stat-block">
           <div class="stat-icon"><ha-icon icon="${state.attributes.icon || 'mdi:chart-line'}"></ha-icon></div>
           <div class="stat-info">
@@ -392,40 +417,40 @@
           </div>
         </div>
       `;
-            }).join('');
-        }
-
-        _bindEvents() {
-            // Tab switching
-            this.shadowRoot.querySelectorAll('.tab-item').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const target = tab.dataset.tab;
-                    this._activeTab = target;
-                    this._render(); // Re-render to clear/show tabs
-                });
-            });
-
-            // Control toggles
-            this._q('#controls-list')?.addEventListener('click', (e) => {
-                const row = e.target.closest('.control-row');
-                if (row) {
-                    const eid = row.dataset.entity;
-                    this._hass.callService('homeassistant', 'toggle', { entity_id: eid });
-                }
-            });
-        }
-
-        _q(s) { return this.shadowRoot.querySelector(s); }
+      }).join('');
     }
 
-    customElements.define('claude-commander-hub', ClaudeCommanderHub);
+    _bindEvents() {
+      // Tab switching
+      this.shadowRoot.querySelectorAll('.tab-item').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const target = tab.dataset.tab;
+          this._activeTab = target;
+          this._render(); // Re-render to clear/show tabs
+        });
+      });
 
-    window.customCards = window.customCards || [];
-    window.customCards.push({
-        type: 'claude-commander-hub',
-        name: 'Claude Commander Hub',
-        description: 'Smart multifunctional dashboard hub with automated alerts and tabbed controls.',
-        preview: true,
-    });
+      // Control toggles
+      this._q('#controls-list')?.addEventListener('click', (e) => {
+        const row = e.target.closest('.control-row');
+        if (row) {
+          const eid = row.dataset.entity;
+          this._hass.callService('homeassistant', 'toggle', { entity_id: eid });
+        }
+      });
+    }
+
+    _q(s) { return this.shadowRoot.querySelector(s); }
+  }
+
+  customElements.define('claude-commander-hub', ClaudeCommanderHub);
+
+  window.customCards = window.customCards || [];
+  window.customCards.push({
+    type: 'claude-commander-hub',
+    name: 'Claude Commander Hub',
+    description: 'Smart multifunctional dashboard hub with automated alerts and tabbed controls.',
+    preview: true,
+  });
 
 })();
