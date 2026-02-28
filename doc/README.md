@@ -12,6 +12,7 @@ A collection of custom cards for Home Assistant Dashboard, styled after the **An
 | [Claude Lights Card](#claude-lights-card) | `Lights/claude-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
 | [Claude Lights Expand Card](#claude-lights-expand-card) | `Lights/claude-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
 | [Claude Climate Card](#claude-climate-card) | `Climate/claude-climate-card.js` | `climate.*` | Dark only |
+| [Claude Climate Compact Card](#claude-climate-compact-card) | `Climate/claude-climate-compact-card.js` | `climate.*` (multi) | Dark / Light / Auto |
 | [Claude Sensors Card](#claude-sensors-card) | `Sensors/claude-sensors-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
 | [Claude Doors Card](#claude-doors-card) | `Doors/claude-doors-card.js` | `binary_sensor.*` (multi) | Dark / Light / Auto |
 | [Claude History Card](#claude-history-card) | `History/claude-history-card.js` | any (multi) | Dark / Light / Auto |
@@ -33,6 +34,7 @@ config/www/claude-light-card.js
 config/www/claude-lights-card.js
 config/www/claude-lights-expand-card.js
 config/www/claude-climate-card.js
+config/www/claude-climate-compact-card.js
 config/www/claude-sensors-card.js
 config/www/claude-doors-card.js
 config/www/claude-history-card.js
@@ -52,6 +54,7 @@ In Home Assistant → **Settings → Dashboards → Resources**, add one entry p
 | `/local/claude-lights-card.js` | JavaScript module |
 | `/local/claude-lights-expand-card.js` | JavaScript module |
 | `/local/claude-climate-card.js` | JavaScript module |
+| `/local/claude-climate-compact-card.js` | JavaScript module |
 | `/local/claude-sensors-card.js` | JavaScript module |
 | `/local/claude-doors-card.js` | JavaScript module |
 | `/local/claude-history-card.js` | JavaScript module |
@@ -557,6 +560,36 @@ entities:
 - **Interactive Icons:** Click the icon to toggle the state; orange glow when ON.
 - **State Labels:** Clear ON/OFF pills for at-a-glance status.
 - **More Info:** Click the row text to open the HA service dialog.
+
+---
+
+## Claude Climate Compact Card
+
+A row-based alternative to the full climate card, optimized for multi-zone management.
+
+```yaml
+type: custom:claude-climate-compact-card
+title: Upstairs Heating
+entities:
+  - climate.master_bedroom
+  - entity: climate.guest_room
+    name: Guest
+  - climate.bathroom
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `title` | string | `'Climate Control'` | Card heading |
+| `icon` | string | `mdi:thermostat` | Header icon |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `entities` | list | — | **Required.** Climate entities |
+
+**Features:**
+- **In-row Controls:** Adjust target temperature using integrated +/- buttons.
+- **Current Temperature:** Small badge showing real-time temperature.
+- **State Coloring:** Icons glow orange (heating), blue (cooling), or muted.
 
 ---
 
