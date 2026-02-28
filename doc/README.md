@@ -17,6 +17,8 @@ A collection of custom cards for Home Assistant Dashboard, styled after the **An
 | [Claude History Card](#claude-history-card) | `History/claude-history-card.js` | any (multi) | Dark / Light / Auto |
 | [Claude Buttons Bar Card](#claude-buttons-bar-card) | `Buttons/claude-buttons-bar-card.js` | any / service | Dark / Light / Auto |
 | [Claude Buttons Grid Card](#claude-buttons-grid-card) | `Buttons/claude-buttons-grid-card.js` | any / service | Dark / Light / Auto |
+| [Claude Battery Status Card](#claude-battery-status-card) | `Battery/claude-battery-status-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
+| [Claude Switches Card](#claude-switches-card) | `Switches/claude-switches-card.js` | `switch.*` (multi) | Dark / Light / Auto |
 
 ---
 
@@ -36,6 +38,8 @@ config/www/claude-doors-card.js
 config/www/claude-history-card.js
 config/www/claude-buttons-bar-card.js
 config/www/claude-buttons-grid-card.js
+config/www/claude-battery-status-card.js
+config/www/claude-switches-card.js
 ```
 
 ### 2. Add resources
@@ -53,6 +57,8 @@ In Home Assistant → **Settings → Dashboards → Resources**, add one entry p
 | `/local/claude-history-card.js` | JavaScript module |
 | `/local/claude-buttons-bar-card.js` | JavaScript module |
 | `/local/claude-buttons-grid-card.js` | JavaScript module |
+| `/local/claude-battery-status-card.js` | JavaScript module |
+| `/local/claude-switches-card.js` | JavaScript module |
 
 ### 3. Reload
 
@@ -521,6 +527,79 @@ buttons:
 
 ---
 
+## Claude Switches Card
+
+Multi-entity toggle card with interactive icon control.
+
+```yaml
+type: custom:claude-switches-card
+title: Kitchen Switches
+entities:
+  - switch.kettle
+  - entity: light.counter_light
+    name: Under-cabinet
+    icon: mdi:led-strip-variant
+  - input_boolean.coffee_timer
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `title` | string | `'Switches'` | Card heading |
+| `icon` | string | `mdi:toggle-switch` | Header icon |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `entities` | list | — | **Required.** Switch entities |
+
+**Entity item fields:** `entity` (req) · `name` · `icon`
+
+**Features:**
+- **Interactive Icons:** Click the icon to toggle the state; orange glow when ON.
+- **State Labels:** Clear ON/OFF pills for at-a-glance status.
+- **More Info:** Click the row text to open the HA service dialog.
+
+---
+
+## Claude Battery Status Card
+
+Multi-entity battery monitoring card with dynamic icons and visualization options.
+
+```yaml
+type: custom:claude-battery-status-card
+title: Battery Status
+display_type: circular  # Visualization: icon | linear | circular
+entities:
+  - sensor.phone_battery
+  - entity: sensor.tablet_battery
+    name: Tablet
+    display_type: linear  # Linear bar override
+  - entity: sensor.watch_battery
+    name: Watch
+    display_type: icon    # Classic icon override
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `title` | string | `'Batteries'` | Card heading |
+| `icon` | string | `mdi:battery-check` | Header icon |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `display_type` | string | `'icon'` | `icon` \| `linear` \| `circular` |
+| `entities` | list | — | **Required.** Battery sensor entities |
+
+**Entity item fields:** `entity` (req) · `name` · `display_type` (override)
+
+**Features:**
+- **Visualizations:** 
+  - `icon`: Dynamic battery MDI icon (updates every 10%).
+  - `linear`: Sleek horizontal progress bar.
+  - `circular`: Animated SVG progression ring.
+- **Color Coding:** Auto-switches based on level (<15% critical orange, <30% warning yellow, >30% muted green).
+- **Summary Header:** Shows "N low" in orange if any battery is ≤ 20%.
+
+---
+
 ## Project Structure
 
 ```
@@ -548,5 +627,12 @@ custom card home assistant/
 │   └── README.md
 └── Buttons/
     ├── claude-buttons-bar-card.js     ← compact horizontal button bar
-    └── claude-buttons-grid-card.js    ← square auto-grid of buttons
+    ├── claude-buttons-grid-card.js    ← square auto-grid of buttons
+    └── README.md
+└── Battery/
+    ├── claude-battery-status-card.js  ← multi-entity battery monitor
+    └── README.md
+├── Switches/
+    ├── claude-switches-card.js        ← multi-entity toggle card
+    └── README.md
 ```
