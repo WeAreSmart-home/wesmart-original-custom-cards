@@ -350,19 +350,19 @@
 
       const alerts = [];
 
-      // Logic for lights
-      const lightsOn = Object.values(this._hass.states).filter(s => s.entity_id.startsWith('light.') && s.state === 'on').length;
+      // Logic for lights (filtered to avoid groups)
+      const lightsOn = this._countEntities('light', 'on');
       if (lightsOn > 0) alerts.push({ ...ALERT_DEFINITIONS.lights, count: lightsOn });
 
       // Logic for locks
-      const locksOpen = Object.values(this._hass.states).filter(s => s.entity_id.startsWith('lock.') && s.state === 'unlocked').length;
+      const locksOpen = Number(this._countEntities('lock', 'unlocked'));
       if (locksOpen > 0) alerts.push({ ...ALERT_DEFINITIONS.locks, count: locksOpen });
 
       // Logic for covers
-      const coversOpen = Object.values(this._hass.states).filter(s => s.entity_id.startsWith('cover.') && s.state === 'open').length;
+      const coversOpen = this._countEntities('cover', 'open');
       if (coversOpen > 0) alerts.push({ ...ALERT_DEFINITIONS.covers, count: coversOpen });
 
-      // Logic for low batteries
+      // Logic for low batteries (already specific enough likely, but we keep it consistent)
       const lowBatt = Object.values(this._hass.states).filter(s =>
         s.attributes.device_class === 'battery' && parseFloat(s.state) <= 20
       ).length;
@@ -372,13 +372,31 @@
         grid.innerHTML = '<div class="no-alerts">Everything looks optimal. No active alerts.</div>';
       } else {
         grid.innerHTML = alerts.map(a => `
-        <div class="summary-card">
-          <ha-icon icon="${a.icon}" style="color: ${a.color}"></ha-icon>
-          <div class="count">${a.count}</div>
-          <div class="label">${a.label}</div>
-        </div>
-      `).join('');
+          <div class="summary-card">
+            <ha-icon icon="${a.icon}" style="color: ${a.color}"></ha-icon>
+            <div class="count">${a.count}</div>
+            <div class="label">${a.label}</div>
+          </div>
+        `).join('');
       }
+    }
+
+    /**
+     * Smart counter that filters out groups to avoid double-counting.
+     * In HA, groups often have an 'entity_id' list in their attributes.
+     */
+    _countEntities(domain, state) {
+      return Object.values(this._hass.states).filter(s => {
+        if (!s.entity_id.startsWith(`${domain}.`)) return false;
+        if (s.state !== state) return false;
+
+        // Filter out groups: they usually have a list of entities they control
+        const attrs = s.attributes || {};
+        if (attrs.entity_id && Array.isArray(attrs.entity_id)) return false;
+        if (attrs.is_hue_group) return false; // Common for Hue groups
+
+        return true;
+      }).length;
     }
 
     _updateControls() {
