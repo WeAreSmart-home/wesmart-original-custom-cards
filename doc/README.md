@@ -8,6 +8,7 @@ A collection of custom cards for Home Assistant Dashboard, styled after the **An
 
 | Card | File | Entity type | Theme |
 |------|------|-------------|-------|
+| [**Claude Commander Hub**](#claude-commander-hub) | `Hub/claude-commander-hub.js` | **Hub / multi** | Dark only |
 | [Claude Light Card](#claude-light-card) | `Light/claude-light-card.js` | `light.*` | Dark only |
 | [Claude Lights Card](#claude-lights-card) | `Lights/claude-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
 | [Claude Lights Expand Card](#claude-lights-expand-card) | `Lights/claude-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
@@ -30,6 +31,7 @@ A collection of custom cards for Home Assistant Dashboard, styled after the **An
 Copy the `.js` file of each card you want to use into `config/www/`:
 
 ```
+config/www/claude-commander-hub.js
 config/www/claude-light-card.js
 config/www/claude-lights-card.js
 config/www/claude-lights-expand-card.js
@@ -50,6 +52,7 @@ In Home Assistant → **Settings → Dashboards → Resources**, add one entry p
 
 | URL | Type |
 |-----|------|
+| `/local/claude-commander-hub.js` | JavaScript module |
 | `/local/claude-light-card.js` | JavaScript module |
 | `/local/claude-lights-card.js` | JavaScript module |
 | `/local/claude-lights-expand-card.js` | JavaScript module |
@@ -118,6 +121,33 @@ window.customCards.push({ type, name, description })
 ```
 
 No build step. No dependencies. Pure vanilla JS.
+
+---
+
+## Claude Commander Hub
+
+The flagship central dashboard card. Features a smart greeting, tabbed navigation, and automated system alerts.
+
+```yaml
+type: custom:claude-commander-hub
+title: System Overview
+entities:
+  - light.living_room
+  - switch.kettle
+stats:
+  - sensor.outdoor_temperature
+  - sensor.energy_consumption
+```
+
+**Tabs:**
+- **Summary**: Auto-scans for active lights, unlocked doors, and low batteries.
+- **Controls**: Quick access to your favorite toggles.
+- **Sensors**: Environmental tracking and statistics.
+
+**Features:**
+- Real-time greeting and clock.
+- Premium glassmorphic UI with radial glow effects.
+- Unified alert system.
 
 ---
 
@@ -639,6 +669,9 @@ entities:
 custom card home assistant/
 ├── doc/
 │   └── README.md                      ← this file
+├── Hub/
+    ├── claude-commander-hub.js        ← flagship central hub
+    └── README.md
 ├── Light/
 │   ├── claude-light-card.js
 │   └── README.md
