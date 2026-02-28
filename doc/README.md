@@ -10,10 +10,13 @@ A collection of custom cards for Home Assistant Dashboard, styled after the **An
 |------|------|-------------|-------|
 | [Claude Light Card](#claude-light-card) | `Light/claude-light-card.js` | `light.*` | Dark only |
 | [Claude Lights Card](#claude-lights-card) | `Lights/claude-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
+| [Claude Lights Expand Card](#claude-lights-expand-card) | `Lights/claude-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
 | [Claude Climate Card](#claude-climate-card) | `Climate/claude-climate-card.js` | `climate.*` | Dark only |
 | [Claude Sensors Card](#claude-sensors-card) | `Sensors/claude-sensors-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
 | [Claude Doors Card](#claude-doors-card) | `Doors/claude-doors-card.js` | `binary_sensor.*` (multi) | Dark / Light / Auto |
 | [Claude History Card](#claude-history-card) | `History/claude-history-card.js` | any (multi) | Dark / Light / Auto |
+| [Claude Buttons Bar Card](#claude-buttons-bar-card) | `Buttons/claude-buttons-bar-card.js` | any / service | Dark / Light / Auto |
+| [Claude Buttons Grid Card](#claude-buttons-grid-card) | `Buttons/claude-buttons-grid-card.js` | any / service | Dark / Light / Auto |
 
 ---
 
@@ -26,10 +29,13 @@ Copy the `.js` file of each card you want to use into `config/www/`:
 ```
 config/www/claude-light-card.js
 config/www/claude-lights-card.js
+config/www/claude-lights-expand-card.js
 config/www/claude-climate-card.js
 config/www/claude-sensors-card.js
 config/www/claude-doors-card.js
 config/www/claude-history-card.js
+config/www/claude-buttons-bar-card.js
+config/www/claude-buttons-grid-card.js
 ```
 
 ### 2. Add resources
@@ -40,10 +46,13 @@ In Home Assistant → **Settings → Dashboards → Resources**, add one entry p
 |-----|------|
 | `/local/claude-light-card.js` | JavaScript module |
 | `/local/claude-lights-card.js` | JavaScript module |
+| `/local/claude-lights-expand-card.js` | JavaScript module |
 | `/local/claude-climate-card.js` | JavaScript module |
 | `/local/claude-sensors-card.js` | JavaScript module |
 | `/local/claude-doors-card.js` | JavaScript module |
 | `/local/claude-history-card.js` | JavaScript module |
+| `/local/claude-buttons-bar-card.js` | JavaScript module |
+| `/local/claude-buttons-grid-card.js` | JavaScript module |
 
 ### 3. Reload
 
@@ -161,6 +170,58 @@ entities:
 - `dark` — warm charcoal (default)
 - `light` — warm cream `#FFFEFA`
 - `auto` — follows system `prefers-color-scheme`
+
+---
+
+## Claude Lights Expand Card
+
+Same list layout as Claude Lights Card, but clicking a row **expands an inline panel** with animated brightness and color-temperature sliders — without leaving the dashboard.
+
+```yaml
+type: custom:claude-lights-expand-card
+title: Living Room
+theme: dark
+entities:
+  - light.ceiling
+  - entity: light.floor_lamp
+    name: Floor Lamp
+    icon: mdi:floor-lamp
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `title` | string | `'Lights'` | Card heading |
+| `icon` | string | `mdi:lightbulb-group` | Header icon |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `entities` | list | — | **Required.** Light entity list |
+
+**Entity item fields:** `entity` (req) · `name` · `icon`
+
+**Features:**
+- Master toggle (all on/off) · per-row toggle
+- Click anywhere on a row (outside the toggle) → **animated expand panel**
+- Only one panel open at a time; clicking the same row again collapses it
+- Expand panel shows:
+  - **Brightness slider** — visible only when light is on and supports brightness
+  - **Color-temp slider** — warm→cool gradient track, visible only when `color_temp` is available
+  - "Turn on to adjust" hint when light is off
+- Slider drag applies changes to HA on pointer release
+- Header subtitle: "N of M on" / "All on" / "All off"
+- Unavailable entities dimmed and non-interactive
+
+**Animations:**
+
+| Element | Effect |
+|---------|--------|
+| Chevron icon | Rotates 180° on expand (`transform` + `cubic-bezier`) |
+| Panel | Accordion: `max-height` + `opacity` transition |
+| Panel content | Slides up into view (`translateY`) |
+| Slider thumb | Glow ring while dragging |
+| Panel border | Fades in as panel opens |
+
+**Themes:** `dark` · `light` · `auto`
 
 ---
 
@@ -351,17 +412,127 @@ entities:
 
 ---
 
+## Claude Buttons Bar Card
+
+Compact horizontal bar of action buttons. Low height, full width — ideal for quick-access rows.
+
+```yaml
+type: custom:claude-buttons-bar-card
+theme: dark
+title: Quick Actions   # optional
+buttons:
+  - name: Lights
+    icon: mdi:lightbulb
+    entity: light.soggiorno
+  - name: Film
+    icon: mdi:movie-open
+    service: scene.turn_on
+    service_data:
+      entity_id: scene.serata_film
+  - name: TV
+    icon: mdi:television
+    entity: switch.tv
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `title` | string | — | Optional small label above buttons |
+| `buttons` | list | — | **Required.** Button list |
+
+**Button item fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Button label |
+| `icon` | string | MDI icon (e.g. `mdi:lightbulb`) |
+| `entity` | string | Optional entity for state tracking + default toggle action |
+| `service` | string | Optional service to call (`domain.service`) |
+| `service_data` | object | Optional data passed to the service |
+
+**Action logic (inferred):**
+- `entity` only → calls `homeassistant.toggle` on click
+- `service` only → calls the service; no active state (press animation on click)
+- Both → calls the service; entity tracks the active/inactive color
+- Neither → decorative button only
+
+**State colors:**
+- **Active** (`on`, `open`, `unlocked`, `detected`, `playing`, `armed_*`, …): orange background + orange icon/label + glow
+- **Inactive**: surface background, muted icon/label
+- **Unavailable**: dimmed (opacity 0.35), non-interactive
+
+**Themes:** `dark` · `light` · `auto`
+
+---
+
+## Claude Buttons Grid Card
+
+Square-ish card with multiple buttons arranged in an automatic grid. Ideal for rooms with many actions.
+
+```yaml
+type: custom:claude-buttons-grid-card
+title: Casa
+icon: mdi:home
+theme: dark
+columns: 3      # optional — auto-fit if omitted
+buttons:
+  - name: Luci Soggiorno
+    icon: mdi:lightbulb
+    entity: light.soggiorno
+  - name: Luci Cucina
+    icon: mdi:ceiling-light
+    entity: light.cucina
+  - name: TV
+    icon: mdi:television
+    entity: switch.tv
+  - name: Film
+    icon: mdi:movie-open
+    service: scene.turn_on
+    service_data:
+      entity_id: scene.serata_film
+  - name: Allarme
+    icon: mdi:shield-home
+    service: alarm_control_panel.alarm_arm_away
+    service_data:
+      entity_id: alarm_control_panel.casa
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `title` | string | — | Optional card heading |
+| `icon` | string | `mdi:gesture-tap` | Header icon (used when `title` is set) |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `columns` | number | auto | Force a fixed number of columns; omit for `auto-fill` |
+| `buttons` | list | — | **Required.** Button list |
+
+**Button item fields:** same as Bar card (`name`, `icon`, `entity`, `service`, `service_data`)
+
+**Features:**
+- Auto-fit grid (columns self-adjust to card width) or fixed column count
+- Optional header with icon + title
+- Same state logic and colors as Bar card
+- Press animation for stateless service buttons
+
+**Themes:** `dark` · `light` · `auto`
+
+---
+
 ## Project Structure
 
 ```
 custom card home assistant/
 ├── doc/
-│   └── README.md            ← this file
+│   └── README.md                      ← this file
 ├── Light/
 │   ├── claude-light-card.js
 │   └── README.md
 ├── Lights/
-│   ├── claude-lights-card.js
+│   ├── claude-lights-card.js          ← list with toggles
+│   ├── claude-lights-expand-card.js   ← list with animated inline sliders
 │   └── README.md
 ├── Climate/
 │   ├── claude-climate-card.js
@@ -372,7 +543,10 @@ custom card home assistant/
 ├── Doors/
 │   ├── claude-doors-card.js
 │   └── README.md
-└── History/
-    ├── claude-history-card.js
-    └── README.md
+├── History/
+│   ├── claude-history-card.js
+│   └── README.md
+└── Buttons/
+    ├── claude-buttons-bar-card.js     ← compact horizontal button bar
+    └── claude-buttons-grid-card.js    ← square auto-grid of buttons
 ```
