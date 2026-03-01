@@ -1,6 +1,6 @@
-# Claude Custom Cards — Home Assistant
+# WeSmart Custom Cards — Home Assistant
 
-A collection of custom cards for Home Assistant Dashboard, styled after the **Anthropic Claude AI** aesthetic: warm charcoal dark theme, orange accent, minimal typography.
+A collection of custom cards for Home Assistant Dashboard, styled after the **Anthropic WeSmart AI** aesthetic: warm charcoal dark theme, orange accent, minimal typography.
 
 ---
 
@@ -8,20 +8,20 @@ A collection of custom cards for Home Assistant Dashboard, styled after the **An
 
 | Card | File | Entity type | Theme |
 |------|------|-------------|-------|
-| [**Claude Commander Hub**](#claude-commander-hub) | `Hub/claude-commander-hub.js` | **Hub / multi** | Dark / Light / Auto |
-| [Claude Light Card](#claude-light-card) | `Light/claude-light-card.js` | `light.*` | Dark / Light / Auto |
-| [Claude Lights Card](#claude-lights-card) | `Lights/claude-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
-| [Claude Lights Expand Card](#claude-lights-expand-card) | `Lights/claude-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
-| [Claude Climate Card](#claude-climate-card) | `Climate/claude-climate-card.js` | `climate.*` | Dark / Light / Auto |
-| [Claude Climate Compact Card](#claude-climate-compact-card) | `Climate/claude-climate-compact-card.js` | `climate.*` (multi) | Dark / Light / Auto |
-| [Claude Sensors Card](#claude-sensors-card) | `Sensors/claude-sensors-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
-| [Claude Doors Card](#claude-doors-card) | `Doors/claude-doors-card.js` | `binary_sensor.*` (multi) | Dark / Light / Auto |
-| [Claude History Card](#claude-history-card) | `History/claude-history-card.js` | any (multi) | Dark / Light / Auto |
-| [Claude Buttons Bar Card](#claude-buttons-bar-card) | `Buttons/claude-buttons-bar-card.js` | any / service | Dark / Light / Auto |
-| [Claude Buttons Grid Card](#claude-buttons-grid-card) | `Buttons/claude-buttons-grid-card.js` | any / service | Dark / Light / Auto |
-| [Claude Battery Status Card](#claude-battery-status-card) | `Battery/claude-battery-status-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
-| [Claude Switches Card](#claude-switches-card) | `Switches/claude-switches-card.js` | `switch.*` (multi) | Dark / Light / Auto |
-| [Claude Clock Card](#claude-clock-card) | `Clock/claude-clock-card.js` | any (max 3 extras) | Dark / Light / Auto |
+| [**WeSmart Commander Hub**](#wesmart-commander-hub) | `Hub/wesmart-commander-hub.js` | **Hub / multi** | Dark / Light / Auto |
+| [WeSmart Light Card](#wesmart-light-card) | `Light/wesmart-light-card.js` | `light.*` | Dark / Light / Auto |
+| [WeSmart Lights Card](#wesmart-lights-card) | `Lights/wesmart-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
+| [WeSmart Lights Expand Card](#wesmart-lights-expand-card) | `Lights/wesmart-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
+| [WeSmart Climate Card](#wesmart-climate-card) | `Climate/wesmart-climate-card.js` | `climate.*` | Dark / Light / Auto |
+| [WeSmart Climate Compact Card](#wesmart-climate-compact-card) | `Climate/wesmart-climate-compact-card.js` | `climate.*` (multi) | Dark / Light / Auto |
+| [WeSmart Sensors Card](#wesmart-sensors-card) | `Sensors/wesmart-sensors-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
+| [WeSmart Doors Card](#wesmart-doors-card) | `Doors/wesmart-doors-card.js` | `binary_sensor.*` (multi) | Dark / Light / Auto |
+| [WeSmart History Card](#wesmart-history-card) | `History/wesmart-history-card.js` | any (multi) | Dark / Light / Auto |
+| [WeSmart Buttons Bar Card](#wesmart-buttons-bar-card) | `Buttons/wesmart-buttons-bar-card.js` | any / service | Dark / Light / Auto |
+| [WeSmart Buttons Grid Card](#wesmart-buttons-grid-card) | `Buttons/wesmart-buttons-grid-card.js` | any / service | Dark / Light / Auto |
+| [WeSmart Battery Status Card](#wesmart-battery-status-card) | `Battery/wesmart-battery-status-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
+| [WeSmart Switches Card](#wesmart-switches-card) | `Switches/wesmart-switches-card.js` | `switch.*` (multi) | Dark / Light / Auto |
+| [WeSmart Clock Card](#wesmart-clock-card) | `Clock/wesmart-clock-card.js` | any (max 3 extras) | Dark / Light / Auto |
 
 ---
 
@@ -32,20 +32,20 @@ A collection of custom cards for Home Assistant Dashboard, styled after the **An
 Copy the `.js` file of each card you want to use into `config/www/`:
 
 ```
-config/www/claude-commander-hub.js
-config/www/claude-light-card.js
-config/www/claude-lights-card.js
-config/www/claude-lights-expand-card.js
-config/www/claude-climate-card.js
-config/www/claude-climate-compact-card.js
-config/www/claude-sensors-card.js
-config/www/claude-doors-card.js
-config/www/claude-history-card.js
-config/www/claude-buttons-bar-card.js
-config/www/claude-buttons-grid-card.js
-config/www/claude-battery-status-card.js
-config/www/claude-switches-card.js
-config/www/claude-clock-card.js
+config/www/wesmart-commander-hub.js
+config/www/wesmart-light-card.js
+config/www/wesmart-lights-card.js
+config/www/wesmart-lights-expand-card.js
+config/www/wesmart-climate-card.js
+config/www/wesmart-climate-compact-card.js
+config/www/wesmart-sensors-card.js
+config/www/wesmart-doors-card.js
+config/www/wesmart-history-card.js
+config/www/wesmart-buttons-bar-card.js
+config/www/wesmart-buttons-grid-card.js
+config/www/wesmart-battery-status-card.js
+config/www/wesmart-switches-card.js
+config/www/wesmart-clock-card.js
 ```
 
 ### 2. Add resources
@@ -54,20 +54,20 @@ In Home Assistant → **Settings → Dashboards → Resources**, add one entry p
 
 | URL | Type |
 |-----|------|
-| `/local/claude-commander-hub.js` | JavaScript module |
-| `/local/claude-light-card.js` | JavaScript module |
-| `/local/claude-lights-card.js` | JavaScript module |
-| `/local/claude-lights-expand-card.js` | JavaScript module |
-| `/local/claude-climate-card.js` | JavaScript module |
-| `/local/claude-climate-compact-card.js` | JavaScript module |
-| `/local/claude-sensors-card.js` | JavaScript module |
-| `/local/claude-doors-card.js` | JavaScript module |
-| `/local/claude-history-card.js` | JavaScript module |
-| `/local/claude-buttons-bar-card.js` | JavaScript module |
-| `/local/claude-buttons-grid-card.js` | JavaScript module |
-| `/local/claude-battery-status-card.js` | JavaScript module |
-| `/local/claude-switches-card.js` | JavaScript module |
-| `/local/claude-clock-card.js` | JavaScript module |
+| `/local/wesmart-commander-hub.js` | JavaScript module |
+| `/local/wesmart-light-card.js` | JavaScript module |
+| `/local/wesmart-lights-card.js` | JavaScript module |
+| `/local/wesmart-lights-expand-card.js` | JavaScript module |
+| `/local/wesmart-climate-card.js` | JavaScript module |
+| `/local/wesmart-climate-compact-card.js` | JavaScript module |
+| `/local/wesmart-sensors-card.js` | JavaScript module |
+| `/local/wesmart-doors-card.js` | JavaScript module |
+| `/local/wesmart-history-card.js` | JavaScript module |
+| `/local/wesmart-buttons-bar-card.js` | JavaScript module |
+| `/local/wesmart-buttons-grid-card.js` | JavaScript module |
+| `/local/wesmart-battery-status-card.js` | JavaScript module |
+| `/local/wesmart-switches-card.js` | JavaScript module |
+| `/local/wesmart-clock-card.js` | JavaScript module |
 
 ### 3. Reload
 
@@ -127,12 +127,12 @@ No build step. No dependencies. Pure vanilla JS.
 
 ---
 
-## Claude Commander Hub
+## WeSmart Commander Hub
 
 The flagship central dashboard card. Features a smart greeting, tabbed navigation, and automated system alerts.
 
 ```yaml
-type: custom:claude-commander-hub
+type: custom:wesmart-commander-hub
 title: System Overview
 entities:
   - light.living_room
@@ -154,12 +154,12 @@ stats:
 
 ---
 
-## Claude Light Card
+## WeSmart Light Card
 
 Single light entity with full controls.
 
 ```yaml
-type: custom:claude-light-card
+type: custom:wesmart-light-card
 entity: light.living_room
 ```
 
@@ -183,12 +183,12 @@ entity: light.living_room
 
 ---
 
-## Claude Lights Card
+## WeSmart Lights Card
 
 Multiple light entities in a compact list with individual toggles.
 
 ```yaml
-type: custom:claude-lights-card
+type: custom:wesmart-lights-card
 title: Living Room
 theme: dark
 entities:
@@ -218,12 +218,12 @@ entities:
 
 ---
 
-## Claude Lights Expand Card
+## WeSmart Lights Expand Card
 
-Same list layout as Claude Lights Card, but clicking a row **expands an inline panel** with animated brightness and color-temperature sliders — without leaving the dashboard.
+Same list layout as WeSmart Lights Card, but clicking a row **expands an inline panel** with animated brightness and color-temperature sliders — without leaving the dashboard.
 
 ```yaml
-type: custom:claude-lights-expand-card
+type: custom:wesmart-lights-expand-card
 title: Living Room
 theme: dark
 entities:
@@ -270,12 +270,12 @@ entities:
 
 ---
 
-## Claude Climate Card
+## WeSmart Climate Card
 
 Single climate entity with temperature controls and mode selector.
 
 ```yaml
-type: custom:claude-climate-card
+type: custom:wesmart-climate-card
 entity: climate.living_room
 ```
 
@@ -300,12 +300,12 @@ entity: climate.living_room
 
 ---
 
-## Claude Sensors Card
+## WeSmart Sensors Card
 
 Multiple sensor entities in a compact list with value badges and alert highlighting.
 
 ```yaml
-type: custom:claude-sensors-card
+type: custom:wesmart-sensors-card
 title: Sensori Casa
 theme: dark
 entities:
@@ -359,12 +359,12 @@ entities:
 
 ---
 
-## Claude Doors Card
+## WeSmart Doors Card
 
 Multiple door / window / contact binary sensors in a list with open/closed status pills.
 
 ```yaml
-type: custom:claude-doors-card
+type: custom:wesmart-doors-card
 title: Porte & Finestre
 theme: dark
 entities:
@@ -416,12 +416,12 @@ entities:
 
 ---
 
-## Claude History Card
+## WeSmart History Card
 
 Multi-entity history graph card. Replaces the default HA History Graph with an improved, interactive version.
 
 ```yaml
-type: custom:claude-history-card
+type: custom:wesmart-history-card
 title: Storico Casa
 theme: dark
 hours: 24
@@ -460,12 +460,12 @@ entities:
 
 ---
 
-## Claude Buttons Bar Card
+## WeSmart Buttons Bar Card
 
 Compact horizontal bar of action buttons. Low height, full width — ideal for quick-access rows.
 
 ```yaml
-type: custom:claude-buttons-bar-card
+type: custom:wesmart-buttons-bar-card
 theme: dark
 title: Quick Actions   # optional
 buttons:
@@ -515,12 +515,12 @@ buttons:
 
 ---
 
-## Claude Buttons Grid Card
+## WeSmart Buttons Grid Card
 
 Square-ish card with multiple buttons arranged in an automatic grid. Ideal for rooms with many actions.
 
 ```yaml
-type: custom:claude-buttons-grid-card
+type: custom:wesmart-buttons-grid-card
 title: Casa
 icon: mdi:home
 theme: dark
@@ -569,12 +569,12 @@ buttons:
 
 ---
 
-## Claude Switches Card
+## WeSmart Switches Card
 
 Multi-entity toggle card with interactive icon control.
 
 ```yaml
-type: custom:claude-switches-card
+type: custom:wesmart-switches-card
 title: Kitchen Switches
 entities:
   - switch.kettle
@@ -602,12 +602,12 @@ entities:
 
 ---
 
-## Claude Climate Compact Card
+## WeSmart Climate Compact Card
 
 A row-based alternative to the full climate card, optimized for multi-zone management.
 
 ```yaml
-type: custom:claude-climate-compact-card
+type: custom:wesmart-climate-compact-card
 title: Upstairs Heating
 entities:
   - climate.master_bedroom
@@ -632,12 +632,12 @@ entities:
 
 ---
 
-## Claude Battery Status Card
+## WeSmart Battery Status Card
 
 Multi-entity battery monitoring card with dynamic icons and visualization options.
 
 ```yaml
-type: custom:claude-battery-status-card
+type: custom:wesmart-battery-status-card
 title: Battery Status
 display_type: circular  # Visualization: icon | linear | circular
 entities:
@@ -672,12 +672,12 @@ entities:
 
 ---
 
-## Claude Clock Card
+## WeSmart Clock Card
 
 Sleek ambient clock with optional extra entity info in a bottom bar or left sidebar.
 
 ```yaml
-type: custom:claude-clock-card
+type: custom:wesmart-clock-card
 theme: dark
 extras_layout: sidebar
 translate_weather: true
@@ -719,38 +719,38 @@ custom card home assistant/
 ├── doc/
 │   └── README.md                      ← this file
 ├── Hub/
-    ├── claude-commander-hub.js        ← flagship central hub
+    ├── wesmart-commander-hub.js        ← flagship central hub
     └── README.md
 ├── Light/
-│   ├── claude-light-card.js
+│   ├── wesmart-light-card.js
 │   └── README.md
 ├── Lights/
-│   ├── claude-lights-card.js          ← list with toggles
-│   ├── claude-lights-expand-card.js   ← list with animated inline sliders
+│   ├── wesmart-lights-card.js          ← list with toggles
+│   ├── wesmart-lights-expand-card.js   ← list with animated inline sliders
 │   └── README.md
 ├── Climate/
-│   ├── claude-climate-card.js
+│   ├── wesmart-climate-card.js
 │   └── README.md
 ├── Sensors/
-│   ├── claude-sensors-card.js
+│   ├── wesmart-sensors-card.js
 │   └── README.md
 ├── Doors/
-│   ├── claude-doors-card.js
+│   ├── wesmart-doors-card.js
 │   └── README.md
 ├── History/
-│   ├── claude-history-card.js
+│   ├── wesmart-history-card.js
 │   └── README.md
 └── Buttons/
-    ├── claude-buttons-bar-card.js     ← compact horizontal button bar
-    ├── claude-buttons-grid-card.js    ← square auto-grid of buttons
+    ├── wesmart-buttons-bar-card.js     ← compact horizontal button bar
+    ├── wesmart-buttons-grid-card.js    ← square auto-grid of buttons
     └── README.md
 └── Battery/
-    ├── claude-battery-status-card.js  ← multi-entity battery monitor
+    ├── wesmart-battery-status-card.js  ← multi-entity battery monitor
     └── README.md
 ├── Switches/
-│   ├── claude-switches-card.js        ← multi-entity toggle card
+│   ├── wesmart-switches-card.js        ← multi-entity toggle card
 │   └── README.md
 └── Clock/
-    ├── claude-clock-card.js           ← ambient clock + bottom/sidebar extras
+    ├── wesmart-clock-card.js           ← ambient clock + bottom/sidebar extras
     └── README.md
 ```

@@ -1,11 +1,11 @@
 # Buttons Cards
 
-Two card variants for triggering actions in Home Assistant, both styled after the **Anthropic Claude AI** aesthetic. Choose the layout that fits your dashboard.
+Two card variants for triggering actions in Home Assistant, both styled after the **Anthropic WeSmart AI** aesthetic. Choose the layout that fits your dashboard.
 
 | Card | Type key | Layout |
 |------|----------|--------|
-| Claude Buttons Bar Card | `custom:claude-buttons-bar-card` | Compact horizontal bar |
-| Claude Buttons Grid Card | `custom:claude-buttons-grid-card` | Auto-fit square grid |
+| WeSmart Buttons Bar Card | `custom:wesmart-buttons-bar-card` | Compact horizontal bar |
+| WeSmart Buttons Grid Card | `custom:wesmart-buttons-grid-card` | Auto-fit square grid |
 
 Both cards support:
 - Toggle entities (lights, switches, input_boolean, …)
@@ -15,7 +15,7 @@ Both cards support:
 
 ---
 
-## Claude Buttons Bar Card
+## WeSmart Buttons Bar Card
 
 Compact horizontal bar, roughly 80 px tall and as wide as a standard card. Ideal for a quick-action strip at the top or bottom of a view.
 
@@ -42,14 +42,14 @@ Active buttons glow orange; inactive buttons are surface-colored and muted.
 
 ### Installation
 
-1. Copy to `config/www/claude-buttons-bar-card.js`
-2. Add resource `/local/claude-buttons-bar-card.js` (JavaScript module)
+1. Copy to `config/www/wesmart-buttons-bar-card.js`
+2. Add resource `/local/wesmart-buttons-bar-card.js` (JavaScript module)
 3. Hard refresh (`Cmd+Shift+R` / `Ctrl+Shift+R`)
 
 ### Configuration
 
 ```yaml
-type: custom:claude-buttons-bar-card
+type: custom:wesmart-buttons-bar-card
 theme: dark
 buttons:
   - name: Luci
@@ -93,7 +93,7 @@ buttons:
 ### Full example
 
 ```yaml
-type: custom:claude-buttons-bar-card
+type: custom:wesmart-buttons-bar-card
 title: Azioni Rapide
 theme: dark
 buttons:
@@ -121,7 +121,7 @@ buttons:
 ### Light theme example
 
 ```yaml
-type: custom:claude-buttons-bar-card
+type: custom:wesmart-buttons-bar-card
 theme: light
 buttons:
   - name: Luci
@@ -137,7 +137,7 @@ buttons:
 
 ---
 
-## Claude Buttons Grid Card
+## WeSmart Buttons Grid Card
 
 Square-ish card with buttons arranged in an automatic grid. The number of columns adapts to the card width, or you can fix it with `columns`. Best for rooms or panels with many shortcuts.
 
@@ -169,14 +169,14 @@ Square-ish card with buttons arranged in an automatic grid. The number of column
 
 ### Installation
 
-1. Copy to `config/www/claude-buttons-grid-card.js`
-2. Add resource `/local/claude-buttons-grid-card.js` (JavaScript module)
+1. Copy to `config/www/wesmart-buttons-grid-card.js`
+2. Add resource `/local/wesmart-buttons-grid-card.js` (JavaScript module)
 3. Hard refresh (`Cmd+Shift+R` / `Ctrl+Shift+R`)
 
 ### Configuration
 
 ```yaml
-type: custom:claude-buttons-grid-card
+type: custom:wesmart-buttons-grid-card
 title: Azioni Casa
 icon: mdi:home
 theme: dark
@@ -204,7 +204,7 @@ buttons:
 ### Full example
 
 ```yaml
-type: custom:claude-buttons-grid-card
+type: custom:wesmart-buttons-grid-card
 title: Soggiorno
 icon: mdi:sofa
 theme: dark

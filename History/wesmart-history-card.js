@@ -7,8 +7,8 @@
   'use strict';
 
   const CARD_VERSION = '1.0.0';
-  const CARD_TAG     = 'claude-history-card';
-  const EDITOR_TAG   = 'claude-history-card-editor';
+  const CARD_TAG     = 'wesmart-history-card';
+  const EDITOR_TAG   = 'wesmart-history-card-editor';
 
   const HOURS_OPTIONS = [1, 6, 24, 168];
   const HOURS_LABELS  = { 1: '1h', 6: '6h', 24: '24h', 168: '7d' };
@@ -319,7 +319,7 @@
 
   // ─── Main card class ────────────────────────────────────────────────────────
 
-  class ClaudeHistoryCard extends HTMLElement {
+  class WeSmartHistoryCard extends HTMLElement {
     constructor() {
       super();
       this.attachShadow({ mode: 'open' });
@@ -338,7 +338,7 @@
 
     setConfig(config) {
       if (!config.entities || !config.entities.length) {
-        throw new Error('claude-history-card: "entities" is required');
+        throw new Error('wesmart-history-card: "entities" is required');
       }
       this._config = {
         title:    config.title   ?? 'History',
@@ -744,15 +744,15 @@
 
   // ─── Editor stub ────────────────────────────────────────────────────────────
 
-  class ClaudeHistoryCardEditor extends HTMLElement {
+  class WeSmartHistoryCardEditor extends HTMLElement {
     setConfig(config) { this._config = config; }
     set hass(hass)    { this._hass   = hass;   }
   }
 
   // ─── Registration ────────────────────────────────────────────────────────────
 
-  customElements.define(CARD_TAG, ClaudeHistoryCard);
-  customElements.define(EDITOR_TAG, ClaudeHistoryCardEditor);
+  customElements.define(CARD_TAG, WeSmartHistoryCard);
+  customElements.define(EDITOR_TAG, WeSmartHistoryCardEditor);
 
   window.customCards = window.customCards || [];
   window.customCards.push({

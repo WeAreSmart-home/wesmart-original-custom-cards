@@ -1,15 +1,15 @@
 # Lights Cards
 
-Two card variants for controlling multiple `light.*` entities, both styled after the **Anthropic Claude AI** aesthetic. Choose the one that fits your use case.
+Two card variants for controlling multiple `light.*` entities, both styled after the **Anthropic WeSmart AI** aesthetic. Choose the one that fits your use case.
 
 | Card | Type key | Interaction |
 |------|----------|-------------|
-| Claude Lights Card | `custom:claude-lights-card` | Tap row → More Info dialog |
-| Claude Lights Expand Card | `custom:claude-lights-expand-card` | Tap row → inline sliders (animated) |
+| WeSmart Lights Card | `custom:wesmart-lights-card` | Tap row → More Info dialog |
+| WeSmart Lights Expand Card | `custom:wesmart-lights-expand-card` | Tap row → inline sliders (animated) |
 
 ---
 
-## Claude Lights Card
+## WeSmart Lights Card
 
 Compact list with individual toggles. Tapping a row opens the HA More Info dialog.
 
@@ -30,14 +30,14 @@ Compact list with individual toggles. Tapping a row opens the HA More Info dialo
 
 ### Installation
 
-1. Copy to `config/www/claude-lights-card.js`
-2. Add resource `/local/claude-lights-card.js` (JavaScript module)
+1. Copy to `config/www/wesmart-lights-card.js`
+2. Add resource `/local/wesmart-lights-card.js` (JavaScript module)
 3. Hard refresh (`Cmd+Shift+R` / `Ctrl+Shift+R`)
 
 ### Configuration
 
 ```yaml
-type: custom:claude-lights-card
+type: custom:wesmart-lights-card
 title: Living Room
 entities:
   - light.ceiling
@@ -65,7 +65,7 @@ entities:
 ### Full example
 
 ```yaml
-type: custom:claude-lights-card
+type: custom:wesmart-lights-card
 title: Bedroom
 icon: mdi:bed
 theme: light
@@ -86,7 +86,7 @@ entities:
 
 ---
 
-## Claude Lights Expand Card
+## WeSmart Lights Expand Card
 
 Same list layout, but tapping a row **expands an inline panel** with brightness and color-temperature sliders — without leaving the dashboard.
 
@@ -126,14 +126,14 @@ Same list layout, but tapping a row **expands an inline panel** with brightness 
 
 ### Installation
 
-1. Copy to `config/www/claude-lights-expand-card.js`
-2. Add resource `/local/claude-lights-expand-card.js` (JavaScript module)
+1. Copy to `config/www/wesmart-lights-expand-card.js`
+2. Add resource `/local/wesmart-lights-expand-card.js` (JavaScript module)
 3. Hard refresh (`Cmd+Shift+R` / `Ctrl+Shift+R`)
 
 ### Configuration
 
 ```yaml
-type: custom:claude-lights-expand-card
+type: custom:wesmart-lights-expand-card
 title: Living Room
 entities:
   - light.ceiling
@@ -161,7 +161,7 @@ entities:
 ### Full example
 
 ```yaml
-type: custom:claude-lights-expand-card
+type: custom:wesmart-lights-expand-card
 title: Soggiorno
 icon: mdi:sofa
 theme: dark

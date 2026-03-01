@@ -1,5 +1,5 @@
 /**
- * Claude Commander Hub - Home Assistant Custom Card
+ * WeSmart Commander Hub - Home Assistant Custom Card
  * Flagship multifunctional central dashboard hub.
  * Features: Smart greeting, Tabbed interface, Automated alerts.
  * Version: 1.0.0
@@ -257,7 +257,7 @@
 
   // ─── Custom Element ────────────────────────────────────────────────────────────
 
-  class ClaudeCommanderHub extends HTMLElement {
+  class WeSmartCommanderHub extends HTMLElement {
     constructor() {
       super();
       this.attachShadow({ mode: 'open' });
@@ -461,12 +461,12 @@
     _q(s) { return this.shadowRoot.querySelector(s); }
   }
 
-  customElements.define('claude-commander-hub', ClaudeCommanderHub);
+  customElements.define('wesmart-commander-hub', WeSmartCommanderHub);
 
   window.customCards = window.customCards || [];
   window.customCards.push({
-    type: 'claude-commander-hub',
-    name: 'Claude Commander Hub',
+    type: 'wesmart-commander-hub',
+    name: 'WeSmart Commander Hub',
     description: 'Smart multifunctional dashboard hub with automated alerts and tabbed controls.',
     preview: true,
   });

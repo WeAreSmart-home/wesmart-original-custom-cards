@@ -1,5 +1,5 @@
 /**
- * Claude Lights Card - Home Assistant Custom Card
+ * WeSmart Lights Card - Home Assistant Custom Card
  * Multi-entity light card with toggles
  * Supports dark and light themes
  * Version: 1.0.0
@@ -333,7 +333,7 @@ const styles = `
 
 // ─── Custom Element ────────────────────────────────────────────────────────────
 
-class ClaudeLightsCard extends HTMLElement {
+class WeSmartLightsCard extends HTMLElement {
 
   constructor() {
     super();
@@ -346,7 +346,7 @@ class ClaudeLightsCard extends HTMLElement {
   // ── HA lifecycle ─────────────────────────────────────────────────────────────
 
   static getConfigElement() {
-    return document.createElement('claude-lights-card-editor');
+    return document.createElement('wesmart-lights-card-editor');
   }
 
   static getStubConfig() {
@@ -593,19 +593,19 @@ class ClaudeLightsCard extends HTMLElement {
 
 // ─── Config Editor (stub) ─────────────────────────────────────────────────────
 
-class ClaudeLightsCardEditor extends HTMLElement {
+class WeSmartLightsCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; }
   set hass(hass)    { this._hass   = hass; }
 }
 
 // ─── Register ─────────────────────────────────────────────────────────────────
 
-customElements.define('claude-lights-card',        ClaudeLightsCard);
-customElements.define('claude-lights-card-editor', ClaudeLightsCardEditor);
+customElements.define('wesmart-lights-card',        WeSmartLightsCard);
+customElements.define('wesmart-lights-card-editor', WeSmartLightsCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type:        'claude-lights-card',
+  type:        'wesmart-lights-card',
   name:        'Claude Lights Card',
   description: 'Multi-entity light card with toggles. Supports dark and light themes.',
   preview:     true,

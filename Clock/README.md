@@ -1,4 +1,4 @@
-# Claude Clock Card
+# WeSmart Clock Card
 
 Sleek ambient clock card with optional extra entity info displayed in a **bottom bar** or a **left sidebar**. Max 3 extra entities. Each shows only icon + state value.
 
@@ -14,8 +14,8 @@ Sleek ambient clock card with optional extra entity info displayed in a **bottom
 
 ## Installation
 
-1. Copy `claude-clock-card.js` → `config/www/`
-2. Add resource in HA: URL `/local/claude-clock-card.js` — type: JavaScript Module
+1. Copy `wesmart-clock-card.js` → `config/www/`
+2. Add resource in HA: URL `/local/wesmart-clock-card.js` — type: JavaScript Module
 3. Hard-refresh browser (`Cmd+Shift+R`)
 
 ## Configuration
@@ -23,7 +23,7 @@ Sleek ambient clock card with optional extra entity info displayed in a **bottom
 ### Basic
 
 ```yaml
-type: custom:claude-clock-card
+type: custom:wesmart-clock-card
 theme: dark
 time_format: 24
 ```
@@ -31,7 +31,7 @@ time_format: 24
 ### Bottom bar (default)
 
 ```yaml
-type: custom:claude-clock-card
+type: custom:wesmart-clock-card
 theme: dark
 extras_layout: bottom
 extra_entities:
@@ -43,7 +43,7 @@ extra_entities:
 ### Left sidebar
 
 ```yaml
-type: custom:claude-clock-card
+type: custom:wesmart-clock-card
 theme: dark
 extras_layout: sidebar
 extra_entities:
@@ -55,7 +55,7 @@ extra_entities:
 ### With custom icons and weather translation
 
 ```yaml
-type: custom:claude-clock-card
+type: custom:wesmart-clock-card
 theme: dark
 extras_layout: bottom
 translate_weather: true

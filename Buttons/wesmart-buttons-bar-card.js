@@ -1,14 +1,12 @@
 /**
- * Claude Buttons Grid Card
- * Square-ish card with multiple action buttons in an auto-fit grid.
+ * WeSmart Buttons Bar Card
+ * Compact horizontal bar of action buttons with dynamic state colors.
  * Supports toggle entities and arbitrary service calls.
  *
  * Config:
- *   type: custom:claude-buttons-grid-card
- *   title: "Quick Actions"   (optional)
- *   icon: mdi:gesture-tap    (optional, shown in header if title is set)
+ *   type: custom:claude-buttons-bar-card
  *   theme: dark | light | auto
- *   columns: 3               (optional, overrides auto-fit)
+ *   title: "Quick Actions"   (optional)
  *   buttons:
  *     - name: Lights
  *       icon: mdi:lightbulb
@@ -66,7 +64,7 @@
       background:    var(--bg);
       border:        1px solid var(--border);
       border-radius: var(--claude-radius);
-      padding:       18px 18px 16px;
+      padding:       14px 16px;
       box-shadow:    var(--shadow);
       box-sizing:    border-box;
     }
@@ -97,59 +95,33 @@
       }
     }
 
-    /* ── Header (optional) ────────────────────────────────── */
-    .header {
-      display:       flex;
-      align-items:   center;
-      gap:           10px;
-      margin-bottom: 14px;
+    /* ── Optional title row ───────────────────────────────── */
+    .title-row {
+      font-size:      11px;
+      font-weight:    600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color:          var(--text-dim);
+      margin-bottom:  10px;
     }
 
-    .icon-wrap {
-      width:           36px;
-      height:          36px;
-      border-radius:   var(--claude-radius-xs);
-      background:      var(--surface);
-      border:          1px solid var(--border);
+    /* ── Button row ───────────────────────────────────────── */
+    .buttons-row {
       display:         flex;
-      align-items:     center;
-      justify-content: center;
-      flex-shrink:     0;
-      transition:      background 0.3s ease, border-color 0.3s ease;
-    }
-
-    .icon-wrap ha-icon {
-      color:  var(--text-dim);
-      width:  20px;
-      height: 20px;
-    }
-
-    .title {
-      flex:          1;
-      min-width:     0;
-      font-size:     14px;
-      font-weight:   600;
-      color:         var(--text);
-      white-space:   nowrap;
-      overflow:      hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* ── Buttons grid ─────────────────────────────────────── */
-    .buttons-grid {
-      display:               grid;
-      grid-template-columns: repeat(var(--cols, auto-fill), minmax(var(--col-min, 80px), 1fr));
-      gap:                   10px;
+      flex-direction:  row;
+      gap:             8px;
+      align-items:     stretch;
     }
 
     /* ── Individual button ────────────────────────────────── */
     .btn {
+      flex:             1;
       display:          flex;
       flex-direction:   column;
       align-items:      center;
       justify-content:  center;
-      gap:              8px;
-      padding:          16px 8px;
+      gap:              6px;
+      padding:          11px 6px;
       border-radius:    var(--claude-radius-sm);
       background:       var(--surface);
       border:           1px solid transparent;
@@ -170,9 +142,9 @@
     }
 
     .btn.active {
-      background:   var(--claude-orange-soft);
+      background:  var(--claude-orange-soft);
       border-color: var(--claude-orange-border);
-      box-shadow:   0 0 14px var(--claude-orange-glow);
+      box-shadow:  0 0 14px var(--claude-orange-glow);
     }
 
     .btn.unavailable {
@@ -187,13 +159,13 @@
 
     /* ── Icon ─────────────────────────────────────────────── */
     .btn-icon {
-      width:           28px;
-      height:          28px;
-      color:           var(--text-dim);
-      transition:      color 0.2s ease;
-      flex-shrink:     0;
-      display:         flex;
-      align-items:     center;
+      width:      26px;
+      height:     26px;
+      color:      var(--text-dim);
+      transition: color 0.2s ease;
+      flex-shrink: 0;
+      display:    flex;
+      align-items: center;
       justify-content: center;
     }
 
@@ -203,11 +175,11 @@
 
     /* ── Label ────────────────────────────────────────────── */
     .btn-label {
-      font-size:     11px;
+      font-size:     10px;
       font-weight:   500;
       color:         var(--text-muted);
       text-align:    center;
-      line-height:   1.3;
+      line-height:   1.2;
       overflow:      hidden;
       text-overflow: ellipsis;
       white-space:   nowrap;
@@ -220,14 +192,14 @@
     }
   `;
 
-  class ClaudeButtonsGridCard extends HTMLElement {
+  class WeSmartButtonsBarCard extends HTMLElement {
     connectedCallback() {
       if (!this.shadowRoot) this.attachShadow({ mode: 'open' });
     }
 
     setConfig(config) {
-      if (!config.buttons?.length) throw new Error('claude-buttons-grid-card: "buttons" array is required');
-      this._config  = { theme: 'dark', icon: 'mdi:gesture-tap', ...config };
+      if (!config.buttons?.length) throw new Error('wesmart-buttons-bar-card: "buttons" array is required');
+      this._config  = { theme: 'dark', ...config };
       this._buttons = this._config.buttons.map(b => ({ ...b }));
       if (!this.shadowRoot) this.attachShadow({ mode: 'open' });
       this._render();
@@ -253,29 +225,14 @@
       this._card.innerHTML = this._buildHTML();
       shadow.appendChild(this._card);
 
-      // Apply fixed column count if configured
-      if (this._config.columns) {
-        const grid = this._q('.buttons-grid');
-        if (grid) {
-          grid.style.setProperty('--cols', this._config.columns);
-          grid.style.setProperty('--col-min', '60px');
-          grid.style.gridTemplateColumns = `repeat(${this._config.columns}, 1fr)`;
-        }
-      }
-
       this._bindEvents();
       if (this._hass) this._updateState();
     }
 
     _buildHTML() {
-      const header = this._config.title ? `
-        <div class="header">
-          <div class="icon-wrap">
-            <ha-icon icon="${this._escapeHtml(this._config.icon)}"></ha-icon>
-          </div>
-          <div class="title">${this._escapeHtml(this._config.title)}</div>
-        </div>
-      ` : '';
+      const titleRow = this._config.title
+        ? `<div class="title-row">${this._escapeHtml(this._config.title)}</div>`
+        : '';
 
       const buttons = this._buttons.map((b, i) => `
         <button class="btn" id="btn-${i}" aria-label="${this._escapeHtml(b.name || '')}">
@@ -285,8 +242,8 @@
       `).join('');
 
       return `
-        ${header}
-        <div class="buttons-grid" id="buttons-grid">${buttons}</div>
+        ${titleRow}
+        <div class="buttons-row">${buttons}</div>
       `;
     }
 
@@ -356,20 +313,15 @@
         .replace(/"/g, '&quot;');
     }
 
-    getCardSize() {
-      const rows = this._config.columns
-        ? Math.ceil(this._buttons.length / this._config.columns)
-        : Math.ceil(this._buttons.length / 3);
-      return rows + (this._config.title ? 1 : 0);
-    }
+    getCardSize() { return 1; }
   }
 
-  customElements.define('claude-buttons-grid-card', ClaudeButtonsGridCard);
+  customElements.define('wesmart-buttons-bar-card', WeSmartButtonsBarCard);
 
   window.customCards = window.customCards || [];
   window.customCards.push({
-    type:        'claude-buttons-grid-card',
-    name:        'Claude Buttons Grid',
-    description: 'Square grid of action buttons with dynamic state colors.',
+    type:        'wesmart-buttons-bar-card',
+    name:        'Claude Buttons Bar',
+    description: 'Compact horizontal bar of action buttons with dynamic state colors.',
   });
 })();

@@ -1,5 +1,5 @@
 /**
- * Claude Switches Card - Home Assistant Custom Card
+ * WeSmart Switches Card - Home Assistant Custom Card
  * Multi-entity switch card with interactive toggle icons.
  * Styled after Claude aesthetic, based on the sensor card design.
  * Version: 1.0.0
@@ -253,7 +253,7 @@
 
     // ─── Custom Element ────────────────────────────────────────────────────────────
 
-    class ClaudeSwitchesCard extends HTMLElement {
+    class WeSmartSwitchesCard extends HTMLElement {
         constructor() {
             super();
             this.attachShadow({ mode: 'open' });
@@ -378,12 +378,12 @@
         }
     }
 
-    customElements.define('claude-switches-card', ClaudeSwitchesCard);
+    customElements.define('wesmart-switches-card', WeSmartSwitchesCard);
 
     window.customCards = window.customCards || [];
     window.customCards.push({
-        type: 'claude-switches-card',
-        name: 'Claude Switches Card',
+        type: 'wesmart-switches-card',
+        name: 'WeSmart Switches Card',
         description: 'Multi-entity toggle card with interactive icons.',
         preview: true,
     });

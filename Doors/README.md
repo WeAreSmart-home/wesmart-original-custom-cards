@@ -1,6 +1,6 @@
-# Claude Doors Card
+# WeSmart Doors Card
 
-A custom Home Assistant multi-entity binary sensor card styled after the **Anthropic Claude AI** aesthetic. Designed for doors, windows, locks, motion sensors and contact sensors.
+A custom Home Assistant multi-entity binary sensor card styled after the **Anthropic WeSmart AI** aesthetic. Designed for doors, windows, locks, motion sensors and contact sensors.
 
 ## Preview
 
@@ -25,14 +25,14 @@ Compact list of sensor rows. Each row shows the sensor name, type label, and a s
 
 ### Manual
 
-1. Copy `claude-doors-card.js` to your Home Assistant config folder:
+1. Copy `wesmart-doors-card.js` to your Home Assistant config folder:
    ```
-   config/www/claude-doors-card.js
+   config/www/wesmart-doors-card.js
    ```
 
 2. In Home Assistant → **Settings → Dashboards → Resources**, add:
    ```
-   /local/claude-doors-card.js   (JavaScript module)
+   /local/wesmart-doors-card.js   (JavaScript module)
    ```
 
 3. Reload the browser (hard refresh: Cmd+Shift+R / Ctrl+Shift+R).
@@ -40,7 +40,7 @@ Compact list of sensor rows. Each row shows the sensor name, type label, and a s
 ## Configuration
 
 ```yaml
-type: custom:claude-doors-card
+type: custom:wesmart-doors-card
 title: Doors & Windows
 entities:
   - binary_sensor.front_door
@@ -70,7 +70,7 @@ Each entry in `entities` can be a plain string (entity ID) or an object:
 ### Example with all options
 
 ```yaml
-type: custom:claude-doors-card
+type: custom:wesmart-doors-card
 title: Porte & Finestre
 icon: mdi:home-lock
 theme: dark

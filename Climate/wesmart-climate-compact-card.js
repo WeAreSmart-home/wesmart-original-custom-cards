@@ -1,5 +1,5 @@
 /**
- * Claude Climate Compact Card - Home Assistant Custom Card
+ * WeSmart Climate Compact Card - Home Assistant Custom Card
  * Space-efficient multi-entity climate card.
  * Styled after Claude aesthetic.
  * Version: 1.0.0
@@ -272,7 +272,7 @@
 
     // ─── Custom Element ────────────────────────────────────────────────────────────
 
-    class ClaudeClimateCompactCard extends HTMLElement {
+    class WeSmartClimateCompactCard extends HTMLElement {
         constructor() {
             super();
             this.attachShadow({ mode: 'open' });
@@ -439,12 +439,12 @@
         _q(s) { return this.shadowRoot.querySelector(s); }
     }
 
-    customElements.define('claude-climate-compact-card', ClaudeClimateCompactCard);
+    customElements.define('wesmart-climate-compact-card', WeSmartClimateCompactCard);
 
     window.customCards = window.customCards || [];
     window.customCards.push({
-        type: 'claude-climate-compact-card',
-        name: 'Claude Climate Compact Card',
+        type: 'wesmart-climate-compact-card',
+        name: 'WeSmart Climate Compact Card',
         description: 'Space-efficient multi-zone climate control.',
         preview: true,
     });

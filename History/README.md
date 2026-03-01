@@ -1,6 +1,6 @@
-# Claude History Card
+# WeSmart History Card
 
-A custom Home Assistant history graph card styled after the **Anthropic Claude AI** aesthetic.
+A custom Home Assistant history graph card styled after the **Anthropic WeSmart AI** aesthetic.
 Replaces the default HA History Graph card with an improved, interactive version.
 Supports **dark**, **light**, and **auto** themes.
 
@@ -30,14 +30,14 @@ Warm cream/white background (`#FFFEFA`), same orange accent `#D97757`, clean min
 
 ## Installation
 
-1. Copy `claude-history-card.js` to:
+1. Copy `wesmart-history-card.js` to:
    ```
-   config/www/claude-history-card.js
+   config/www/wesmart-history-card.js
    ```
 
 2. In Home Assistant → **Settings → Dashboards → Resources**, add:
    ```
-   /local/claude-history-card.js   (JavaScript module)
+   /local/wesmart-history-card.js   (JavaScript module)
    ```
 
 3. Hard refresh the browser (`Cmd+Shift+R` / `Ctrl+Shift+R`).
@@ -45,7 +45,7 @@ Warm cream/white background (`#FFFEFA`), same orange accent `#D97757`, clean min
 ## Configuration
 
 ```yaml
-type: custom:claude-history-card
+type: custom:wesmart-history-card
 title: Storico Casa
 entities:
   - light.soggiorno
@@ -133,7 +133,7 @@ theme: auto
 ## Full example
 
 ```yaml
-type: custom:claude-history-card
+type: custom:wesmart-history-card
 title: Storico Casa
 icon: mdi:chart-line
 theme: dark

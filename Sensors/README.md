@@ -1,6 +1,6 @@
-# Claude Sensors Card
+# WeSmart Sensors Card
 
-A custom Home Assistant multi-entity sensor card styled after the **Anthropic Claude AI** aesthetic.
+A custom Home Assistant multi-entity sensor card styled after the **Anthropic WeSmart AI** aesthetic.
 
 ## Preview
 
@@ -26,14 +26,14 @@ Compact list of sensor rows, each showing a colored value badge with unit. Out-o
 
 ### Manual
 
-1. Copy `claude-sensors-card.js` to your Home Assistant config folder:
+1. Copy `wesmart-sensors-card.js` to your Home Assistant config folder:
    ```
-   config/www/claude-sensors-card.js
+   config/www/wesmart-sensors-card.js
    ```
 
 2. In Home Assistant → **Settings → Dashboards → Resources**, add:
    ```
-   /local/claude-sensors-card.js   (JavaScript module)
+   /local/wesmart-sensors-card.js   (JavaScript module)
    ```
 
 3. Reload the browser (hard refresh: Cmd+Shift+R / Ctrl+Shift+R).
@@ -41,7 +41,7 @@ Compact list of sensor rows, each showing a colored value badge with unit. Out-o
 ## Configuration
 
 ```yaml
-type: custom:claude-sensors-card
+type: custom:wesmart-sensors-card
 title: Sensors
 entities:
   - sensor.temperature_indoor
@@ -76,7 +76,7 @@ Each entry in `entities` can be a plain string (entity ID) or an object:
 ### Example with all options
 
 ```yaml
-type: custom:claude-sensors-card
+type: custom:wesmart-sensors-card
 title: Casa
 icon: mdi:home-thermometer
 theme: dark

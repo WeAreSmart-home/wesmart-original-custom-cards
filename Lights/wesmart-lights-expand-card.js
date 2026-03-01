@@ -1,5 +1,5 @@
 /**
- * Claude Lights Expand Card - Home Assistant Custom Card
+ * WeSmart Lights Expand Card - Home Assistant Custom Card
  * Multi-entity light card with per-row animated inline controls
  * Click a row to expand brightness + color-temp sliders
  * Supports dark / light / auto themes
@@ -503,7 +503,7 @@ const expandStyles = `
 
 // ─── Custom Element ────────────────────────────────────────────────────────────
 
-class ClaudeLightsExpandCard extends HTMLElement {
+class WeSmartLightsExpandCard extends HTMLElement {
 
   constructor() {
     super();
@@ -518,7 +518,7 @@ class ClaudeLightsExpandCard extends HTMLElement {
   // ── HA lifecycle ─────────────────────────────────────────────────────────────
 
   static getConfigElement() {
-    return document.createElement('claude-lights-expand-card-editor');
+    return document.createElement('wesmart-lights-expand-card-editor');
   }
 
   static getStubConfig() {
@@ -951,19 +951,19 @@ class ClaudeLightsExpandCard extends HTMLElement {
 
 // ─── Config Editor (stub) ─────────────────────────────────────────────────────
 
-class ClaudeLightsExpandCardEditor extends HTMLElement {
+class WeSmartLightsExpandCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; }
   set hass(hass)    { this._hass   = hass;   }
 }
 
 // ─── Register ─────────────────────────────────────────────────────────────────
 
-customElements.define('claude-lights-expand-card',        ClaudeLightsExpandCard);
-customElements.define('claude-lights-expand-card-editor', ClaudeLightsExpandCardEditor);
+customElements.define('wesmart-lights-expand-card',        WeSmartLightsExpandCard);
+customElements.define('wesmart-lights-expand-card-editor', WeSmartLightsExpandCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type:        'claude-lights-expand-card',
+  type:        'wesmart-lights-expand-card',
   name:        'Claude Lights Expand Card',
   description: 'Multi-entity light card with animated per-row inline controls (brightness + color temp).',
   preview:     true,

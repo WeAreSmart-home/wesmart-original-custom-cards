@@ -1,4 +1,4 @@
-# Claude Commander Hub
+# WeSmart Commander Hub
 
 The "Flagship" card of the Claude custom card collection. A central control center for your Home Assistant dashboard.
 
@@ -13,16 +13,16 @@ The "Flagship" card of the Claude custom card collection. A central control cent
 
 ## Installation
 
-1. Copy `claude-commander-hub.js` to your `config/www/` directory.
+1. Copy `wesmart-commander-hub.js` to your `config/www/` directory.
 2. Add the resource in Home Assistant:
-   - **URL**: `/local/claude-commander-hub.js`
+   - **URL**: `/local/wesmart-commander-hub.js`
    - **Type**: JavaScript module
 3. Refresh your dashboard.
 
 ## Configuration
 
 ```yaml
-type: custom:claude-commander-hub
+type: custom:wesmart-commander-hub
 title: Command Center
 entities:
   - light.living_room

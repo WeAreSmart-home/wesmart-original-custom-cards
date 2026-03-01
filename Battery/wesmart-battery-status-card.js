@@ -1,5 +1,5 @@
 /**
- * Claude Battery Status Card - Home Assistant Custom Card
+ * WeSmart Battery Status Card - Home Assistant Custom Card
  * Multi-entity battery monitoring card with dynamic icons and coloring.
  * Supports dark / light / auto themes.
  * Version: 1.0.0
@@ -283,7 +283,7 @@
 
     // ─── Custom Element ────────────────────────────────────────────────────────────
 
-    class ClaudeBatteryStatusCard extends HTMLElement {
+    class WeSmartBatteryStatusCard extends HTMLElement {
         constructor() {
             super();
             this.attachShadow({ mode: 'open' });
@@ -474,12 +474,12 @@
         }
     }
 
-    customElements.define('claude-battery-status-card', ClaudeBatteryStatusCard);
+    customElements.define('wesmart-battery-status-card', WeSmartBatteryStatusCard);
 
     window.customCards = window.customCards || [];
     window.customCards.push({
-        type: 'claude-battery-status-card',
-        name: 'Claude Battery Status Card',
+        type: 'wesmart-battery-status-card',
+        name: 'WeSmart Battery Status Card',
         description: 'Monitor battery levels with Claude aesthetic.',
         preview: true,
     });

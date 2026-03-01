@@ -1,6 +1,6 @@
-# Claude Light Card
+# WeSmart Light Card
 
-A custom Home Assistant light entity card styled after the **Anthropic Claude AI** aesthetic.
+A custom Home Assistant light entity card styled after the **Anthropic WeSmart AI** aesthetic.
 
 ## Preview
 
@@ -25,27 +25,27 @@ Dark card with warm orange accents, smooth animations, and a minimal Claude-insp
 
 ### Manual
 
-1. Copy `claude-light-card.js` to your Home Assistant config folder:
+1. Copy `wesmart-light-card.js` to your Home Assistant config folder:
    ```
-   config/www/claude-light-card.js
+   config/www/wesmart-light-card.js
    ```
 
 2. In Home Assistant → **Settings → Dashboards → Resources**, add:
    ```
-   /local/claude-light-card.js   (JavaScript module)
+   /local/wesmart-light-card.js   (JavaScript module)
    ```
 
 3. Reload the browser (hard refresh: Cmd+Shift+R / Ctrl+Shift+R).
 
 ### HACS (if published)
 
-1. HACS → Frontend → "+ Explore & Download" → search **Claude Light Card**
+1. HACS → Frontend → "+ Explore & Download" → search **WeSmart Light Card**
 2. Download and add to Resources.
 
 ## Configuration
 
 ```yaml
-type: custom:claude-light-card
+type: custom:wesmart-light-card
 entity: light.living_room
 ```
 
@@ -63,7 +63,7 @@ entity: light.living_room
 ### Example with all options
 
 ```yaml
-type: custom:claude-light-card
+type: custom:wesmart-light-card
 entity: light.bedroom_lamp
 name: Bedroom Lamp
 icon: mdi:floor-lamp

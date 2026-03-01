@@ -1,6 +1,6 @@
-# Claude Climate Card
+# WeSmart Climate Card
 
-A custom Home Assistant climate entity card styled after the **Anthropic Claude AI** aesthetic.
+A custom Home Assistant climate entity card styled after the **Anthropic WeSmart AI** aesthetic.
 
 ## Preview
 
@@ -27,14 +27,14 @@ Dark card with warm orange (heating) or cool blue (cooling) accents, smooth anim
 
 ### Manual
 
-1. Copy `claude-climate-card.js` to your Home Assistant config folder:
+1. Copy `wesmart-climate-card.js` to your Home Assistant config folder:
    ```
-   config/www/claude-climate-card.js
+   config/www/wesmart-climate-card.js
    ```
 
 2. In Home Assistant → **Settings → Dashboards → Resources**, add:
    ```
-   /local/claude-climate-card.js   (JavaScript module)
+   /local/wesmart-climate-card.js   (JavaScript module)
    ```
 
 3. Reload the browser (hard refresh: Cmd+Shift+R / Ctrl+Shift+R).
@@ -42,7 +42,7 @@ Dark card with warm orange (heating) or cool blue (cooling) accents, smooth anim
 ## Configuration
 
 ```yaml
-type: custom:claude-climate-card
+type: custom:wesmart-climate-card
 entity: climate.living_room
 ```
 
@@ -59,7 +59,7 @@ entity: climate.living_room
 ### Example with all options
 
 ```yaml
-type: custom:claude-climate-card
+type: custom:wesmart-climate-card
 entity: climate.bedroom_ac
 name: Bedroom AC
 icon: mdi:air-conditioner

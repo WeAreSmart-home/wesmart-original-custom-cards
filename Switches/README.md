@@ -1,4 +1,4 @@
-# Claude Switches Card
+# WeSmart Switches Card
 
 A Home Assistant custom card to control and monitor multiple switches, styled after the Anthropic Claude aesthetic.
 
@@ -11,16 +11,16 @@ A Home Assistant custom card to control and monitor multiple switches, styled af
 
 ## Installation
 
-1. Copy `claude-switches-card.js` to your `config/www/` directory.
+1. Copy `wesmart-switches-card.js` to your `config/www/` directory.
 2. Add the resource in Home Assistant:
-   - **URL**: `/local/claude-switches-card.js`
+   - **URL**: `/local/wesmart-switches-card.js`
    - **Type**: JavaScript module
 3. Refresh your dashboard.
 
 ## Configuration
 
 ```yaml
-type: custom:claude-switches-card
+type: custom:wesmart-switches-card
 title: Living Room Switches
 icon: mdi:power-settings
 theme: auto

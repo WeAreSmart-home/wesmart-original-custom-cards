@@ -1,5 +1,5 @@
 /**
- * Claude Climate Card - Home Assistant Custom Card
+ * WeSmart Climate Card - Home Assistant Custom Card
  * Styled after Anthropic Claude AI aesthetic
  * Version: 1.0.0
  */
@@ -535,7 +535,7 @@ const styles = `
 
 // ─── Custom Element ────────────────────────────────────────────────────────────
 
-class ClaudeClimateCard extends HTMLElement {
+class WeSmartClimateCard extends HTMLElement {
 
   constructor() {
     super();
@@ -552,7 +552,7 @@ class ClaudeClimateCard extends HTMLElement {
   // ── HA lifecycle ─────────────────────────────────────────────────────────────
 
   static getConfigElement() {
-    return document.createElement('claude-climate-card-editor');
+    return document.createElement('wesmart-climate-card-editor');
   }
 
   static getStubConfig() {
@@ -888,19 +888,19 @@ class ClaudeClimateCard extends HTMLElement {
 
 // ─── Config Editor (stub) ─────────────────────────────────────────────────────
 
-class ClaudeClimateCardEditor extends HTMLElement {
+class WeSmartClimateCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; }
   set hass(hass)    { this._hass   = hass; }
 }
 
 // ─── Register ─────────────────────────────────────────────────────────────────
 
-customElements.define('claude-climate-card',        ClaudeClimateCard);
-customElements.define('claude-climate-card-editor', ClaudeClimateCardEditor);
+customElements.define('wesmart-climate-card',        WeSmartClimateCard);
+customElements.define('wesmart-climate-card-editor', WeSmartClimateCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type:        'claude-climate-card',
+  type:        'wesmart-climate-card',
   name:        'Claude Climate Card',
   description: 'A sleek climate entity card styled after the Anthropic Claude AI aesthetic.',
   preview:     true,

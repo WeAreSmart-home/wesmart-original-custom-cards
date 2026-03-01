@@ -1,4 +1,4 @@
-# Claude Battery Status Card
+# WeSmart Battery Status Card
 
 A Home Assistant custom card to monitor battery levels across multiple devices, styled after the Anthropic Claude aesthetic.
 
@@ -6,7 +6,7 @@ A Home Assistant custom card to monitor battery levels across multiple devices, 
 - **Dynamic Icons**: Icons change based on battery percentage (10% increments).
 - **Charging State**: Automatically detects charging status.
 - **Color Coding**: 
-  - < 15%: Claude Orange (Critical)
+  - < 15%: WeSmart Orange (Critical)
   - 15% - 30%: Muted Orange/Yellow (Warning)
   - > 30%: Muted Green (Good)
 - **Status Header**: Shows a summary of low battery devices.
@@ -14,16 +14,16 @@ A Home Assistant custom card to monitor battery levels across multiple devices, 
 
 ## Installation
 
-1. Copy `claude-battery-status-card.js` to your `config/www/` directory.
+1. Copy `wesmart-battery-status-card.js` to your `config/www/` directory.
 2. Add the resource in Home Assistant:
-   - **URL**: `/local/claude-battery-status-card.js`
+   - **URL**: `/local/wesmart-battery-status-card.js`
    - **Type**: JavaScript module
 3. Refresh your dashboard.
 
 ## Configuration
 
 ```yaml
-type: custom:claude-battery-status-card
+type: custom:wesmart-battery-status-card
 title: Battery Status
 icon: mdi:battery-check
 theme: auto

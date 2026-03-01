@@ -1,5 +1,5 @@
 /**
- * Claude Clock Card - Home Assistant Custom Card
+ * WeSmart Clock Card - Home Assistant Custom Card
  * Sleek ambient clock with optional bottom bar or left sidebar for extra entities.
  * Max 3 extra entities. Shows only icon + state value (no name/label).
  * Weather entities: automatic icon, optional Italian state translation.
@@ -280,7 +280,7 @@
 
   // ─── Custom Element ────────────────────────────────────────────────────────────
 
-  class ClaudeClockCard extends HTMLElement {
+  class WeSmartClockCard extends HTMLElement {
     constructor() {
       super();
       this.attachShadow({ mode: 'open' });
@@ -443,12 +443,12 @@
     }
   }
 
-  customElements.define('claude-clock-card', ClaudeClockCard);
+  customElements.define('wesmart-clock-card', WeSmartClockCard);
 
   window.customCards = window.customCards || [];
   window.customCards.push({
-    type: 'claude-clock-card',
-    name: 'Claude Clock Card',
+    type: 'wesmart-clock-card',
+    name: 'WeSmart Clock Card',
     description: 'Sleek ambient clock with optional bottom bar or left sidebar for extra entities (max 3).',
     preview: true,
   });

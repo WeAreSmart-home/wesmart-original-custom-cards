@@ -1,5 +1,5 @@
 /**
- * Claude Sensors Card - Home Assistant Custom Card
+ * WeSmart Sensors Card - Home Assistant Custom Card
  * Multi-entity sensor card (temperature, humidity, pressure, CO2, etc.)
  * Supports dark / light / auto themes
  * Version: 1.0.0
@@ -286,7 +286,7 @@ const styles = `
 
 // ─── Custom Element ────────────────────────────────────────────────────────────
 
-class ClaudeSensorsCard extends HTMLElement {
+class WeSmartSensorsCard extends HTMLElement {
 
   constructor() {
     super();
@@ -299,7 +299,7 @@ class ClaudeSensorsCard extends HTMLElement {
   // ── HA lifecycle ─────────────────────────────────────────────────────────────
 
   static getConfigElement() {
-    return document.createElement('claude-sensors-card-editor');
+    return document.createElement('wesmart-sensors-card-editor');
   }
 
   static getStubConfig() {
@@ -547,19 +547,19 @@ class ClaudeSensorsCard extends HTMLElement {
 
 // ─── Config Editor (stub) ─────────────────────────────────────────────────────
 
-class ClaudeSensorsCardEditor extends HTMLElement {
+class WeSmartSensorsCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; }
   set hass(hass)    { this._hass   = hass; }
 }
 
 // ─── Register ─────────────────────────────────────────────────────────────────
 
-customElements.define('claude-sensors-card',        ClaudeSensorsCard);
-customElements.define('claude-sensors-card-editor', ClaudeSensorsCardEditor);
+customElements.define('wesmart-sensors-card',        WeSmartSensorsCard);
+customElements.define('wesmart-sensors-card-editor', WeSmartSensorsCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type:        'claude-sensors-card',
+  type:        'wesmart-sensors-card',
   name:        'Claude Sensors Card',
   description: 'Multi-entity sensor card (temperature, humidity, CO2, etc.) with alert thresholds. Supports dark and light themes.',
   preview:     true,

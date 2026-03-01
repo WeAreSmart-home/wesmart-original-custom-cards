@@ -1,5 +1,5 @@
 /**
- * Claude Doors Card - Home Assistant Custom Card
+ * WeSmart Doors Card - Home Assistant Custom Card
  * Multi-entity door / window / contact sensor card
  * Supports dark / light / auto themes
  * Version: 1.0.0
@@ -319,7 +319,7 @@ const styles = `
 
 // ─── Custom Element ────────────────────────────────────────────────────────────
 
-class ClaudeDoorsCard extends HTMLElement {
+class WeSmartDoorsCard extends HTMLElement {
 
   constructor() {
     super();
@@ -332,7 +332,7 @@ class ClaudeDoorsCard extends HTMLElement {
   // ── HA lifecycle ─────────────────────────────────────────────────────────────
 
   static getConfigElement() {
-    return document.createElement('claude-doors-card-editor');
+    return document.createElement('wesmart-doors-card-editor');
   }
 
   static getStubConfig() {
@@ -546,19 +546,19 @@ class ClaudeDoorsCard extends HTMLElement {
 
 // ─── Config Editor (stub) ─────────────────────────────────────────────────────
 
-class ClaudeDoorsCardEditor extends HTMLElement {
+class WeSmartDoorsCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; }
   set hass(hass)    { this._hass   = hass; }
 }
 
 // ─── Register ─────────────────────────────────────────────────────────────────
 
-customElements.define('claude-doors-card',        ClaudeDoorsCard);
-customElements.define('claude-doors-card-editor', ClaudeDoorsCardEditor);
+customElements.define('wesmart-doors-card',        WeSmartDoorsCard);
+customElements.define('wesmart-doors-card-editor', WeSmartDoorsCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type:        'claude-doors-card',
+  type:        'wesmart-doors-card',
   name:        'Claude Doors Card',
   description: 'Multi-entity door/window sensor card with open/closed state and alert highlight. Supports dark and light themes.',
   preview:     true,
