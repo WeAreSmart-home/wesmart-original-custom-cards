@@ -55,7 +55,7 @@
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: var(--claude-radius);
-    padding: 18px 18px 16px;
+    padding: 18px 18px 0;
     box-shadow: var(--shadow);
     transition: var(--transition);
   }
@@ -208,7 +208,48 @@
     background: var(--claude-orange);
     color: white;
   }
+
+  /* ── Footer ── */
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding: 10px 0 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .footer-info ha-icon { --mdc-icon-size: 13px; }
+
+  .brand-mark {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    opacity: 0.35;
+  }
+
+  .brand-mark svg  { width: 13px; height: 13px; }
+  .brand-mark span {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.8px;
+  }
 `;
+
+    // ─── Brand mark ───────────────────────────────────────────────────────────────
+
+    const BRAND_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.3 2.45a.74.74 0 0 0-1.38 0l-1.18 3.27H11.3L10.1 2.45a.74.74 0 0 0-1.38 0L7.3 6.37 4.1 7.56a.74.74 0 0 0 0 1.38l3.2 1.19.82 2.28-3.26 1.18a.74.74 0 0 0 0 1.38l3.26 1.18L9.3 19.2l-2.1.76a.74.74 0 0 0 0 1.38l3.26 1.18.45 1.24a.74.74 0 0 0 1.38 0l.45-1.24 3.26-1.18a.74.74 0 0 0 0-1.38l-2.1-.76 1.18-3.27 3.26-1.18a.74.74 0 0 0 0-1.38l-3.26-1.18.82-2.28 3.2-1.19a.74.74 0 0 0 0-1.38l-3.2-1.19-1.37-3.92z" fill="#D97757"/>
+    </svg>`;
 
     // ─── Custom Element ────────────────────────────────────────────────────────────
 
@@ -262,6 +303,7 @@
       </div>
     `).join('');
 
+            const n = this._entities.length;
             this._card.innerHTML = `
       <div class="header">
         <div class="header-icon-wrap"><ha-icon icon="${this._config.icon}"></ha-icon></div>
@@ -269,6 +311,13 @@
       </div>
       <div class="separator"></div>
       <div class="list">${rowsHTML}</div>
+      <div class="footer">
+        <div class="footer-info">
+          <ha-icon icon="mdi:toggle-switch"></ha-icon>
+          <span>${n} switch${n !== 1 ? 'es' : ''}</span>
+        </div>
+        <div class="brand-mark">${BRAND_SVG}<span>WeSmart</span></div>
+      </div>
     `;
 
             shadow.appendChild(this._card);

@@ -8,11 +8,11 @@ A collection of custom cards for Home Assistant Dashboard, styled after the **An
 
 | Card | File | Entity type | Theme |
 |------|------|-------------|-------|
-| [**Claude Commander Hub**](#claude-commander-hub) | `Hub/claude-commander-hub.js` | **Hub / multi** | Dark only |
-| [Claude Light Card](#claude-light-card) | `Light/claude-light-card.js` | `light.*` | Dark only |
+| [**Claude Commander Hub**](#claude-commander-hub) | `Hub/claude-commander-hub.js` | **Hub / multi** | Dark / Light / Auto |
+| [Claude Light Card](#claude-light-card) | `Light/claude-light-card.js` | `light.*` | Dark / Light / Auto |
 | [Claude Lights Card](#claude-lights-card) | `Lights/claude-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
 | [Claude Lights Expand Card](#claude-lights-expand-card) | `Lights/claude-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
-| [Claude Climate Card](#claude-climate-card) | `Climate/claude-climate-card.js` | `climate.*` | Dark only |
+| [Claude Climate Card](#claude-climate-card) | `Climate/claude-climate-card.js` | `climate.*` | Dark / Light / Auto |
 | [Claude Climate Compact Card](#claude-climate-compact-card) | `Climate/claude-climate-compact-card.js` | `climate.*` (multi) | Dark / Light / Auto |
 | [Claude Sensors Card](#claude-sensors-card) | `Sensors/claude-sensors-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
 | [Claude Doors Card](#claude-doors-card) | `Doors/claude-doors-card.js` | `binary_sensor.*` (multi) | Dark / Light / Auto |
@@ -21,6 +21,7 @@ A collection of custom cards for Home Assistant Dashboard, styled after the **An
 | [Claude Buttons Grid Card](#claude-buttons-grid-card) | `Buttons/claude-buttons-grid-card.js` | any / service | Dark / Light / Auto |
 | [Claude Battery Status Card](#claude-battery-status-card) | `Battery/claude-battery-status-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
 | [Claude Switches Card](#claude-switches-card) | `Switches/claude-switches-card.js` | `switch.*` (multi) | Dark / Light / Auto |
+| [Claude Clock Card](#claude-clock-card) | `Clock/claude-clock-card.js` | any (max 3 extras) | Dark / Light / Auto |
 
 ---
 
@@ -44,6 +45,7 @@ config/www/claude-buttons-bar-card.js
 config/www/claude-buttons-grid-card.js
 config/www/claude-battery-status-card.js
 config/www/claude-switches-card.js
+config/www/claude-clock-card.js
 ```
 
 ### 2. Add resources
@@ -65,6 +67,7 @@ In Home Assistant → **Settings → Dashboards → Resources**, add one entry p
 | `/local/claude-buttons-grid-card.js` | JavaScript module |
 | `/local/claude-battery-status-card.js` | JavaScript module |
 | `/local/claude-switches-card.js` | JavaScript module |
+| `/local/claude-clock-card.js` | JavaScript module |
 
 ### 3. Reload
 
@@ -167,6 +170,7 @@ entity: light.living_room
 | `entity` | string | — | **Required.** `light.*` entity |
 | `name` | string | auto | Override display name |
 | `icon` | string | auto | Override icon (mdi:*) |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
 | `show_brightness` | boolean | `true` | Brightness slider |
 | `show_color_temp` | boolean | `true` | Color temperature slider |
 | `show_color` | boolean | `true` | Color preset palette (8 presets) |
@@ -174,6 +178,8 @@ entity: light.living_room
 **Features:** toggle · brightness slider · color temp slider · 8 color presets · pulse glow when on · unavailable overlay
 
 **Auto-detects** capabilities from `supported_color_modes` — sliders only appear if the light supports them.
+
+**Themes:** `dark` · `light` · `auto`
 
 ---
 
@@ -280,10 +286,13 @@ entity: climate.living_room
 | `entity` | string | — | **Required.** `climate.*` entity |
 | `name` | string | auto | Override display name |
 | `icon` | string | auto | Override icon |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
 | `show_fan_mode` | boolean | `true` | Fan mode pills |
 | `temp_step` | number | auto | Temperature step (e.g. `0.5`) |
 
 **Features:** large current temp display · humidity badge · target temp with +/- buttons · HVAC mode pills · fan mode pills · heat/cool dual glow · unavailable overlay
+
+**Themes:** `dark` · `light` · `auto`
 
 **HVAC modes:** `off` · `heat` (orange glow) · `cool` (blue glow) · `heat_cool` (range display) · `auto` · `dry` · `fan_only`
 
@@ -663,6 +672,46 @@ entities:
 
 ---
 
+## Claude Clock Card
+
+Sleek ambient clock with optional extra entity info in a bottom bar or left sidebar.
+
+```yaml
+type: custom:claude-clock-card
+theme: dark
+extras_layout: sidebar
+translate_weather: true
+extra_entities:
+  - weather.home
+  - entity: sensor.outdoor_temperature
+    icon: mdi:thermometer-high
+  - entity: sensor.humidity
+    icon: mdi:water-percent
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `time_format` | number | `24` | `12` or `24` |
+| `extras_layout` | string | `'bottom'` | `bottom` \| `sidebar` — position of extra info |
+| `translate_weather` | boolean | `false` | Translate `weather.*` states to Italian |
+| `extra_entities` | list | `[]` | Up to **3** entities to display |
+
+**Entity item fields:** `entity` (req) · `icon` (custom MDI, ignored for `weather.*`)
+
+**Features:**
+- Bottom bar: up to 3 items share the full width equally, no scrolling
+- Sidebar: narrow left column (78px), items stacked vertically
+- Each item shows **icon + state value only** — no name or label
+- Weather entities: icon is automatic (maps from state); optional Italian translation
+- Responsive: items always stay inside the card bounds
+
+**Themes:** `dark` · `light` · `auto`
+
+---
+
 ## Project Structure
 
 ```
@@ -699,6 +748,9 @@ custom card home assistant/
     ├── claude-battery-status-card.js  ← multi-entity battery monitor
     └── README.md
 ├── Switches/
-    ├── claude-switches-card.js        ← multi-entity toggle card
+│   ├── claude-switches-card.js        ← multi-entity toggle card
+│   └── README.md
+└── Clock/
+    ├── claude-clock-card.js           ← ambient clock + bottom/sidebar extras
     └── README.md
 ```

@@ -441,7 +441,7 @@
           </div>
           <div class="brand-mark">
             ${BRAND_SVG}
-            <span>CLAUDE</span>
+            <span>WeSmart</span>
           </div>
         </div>
       `;

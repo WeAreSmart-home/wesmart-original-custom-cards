@@ -10,16 +10,9 @@ const CARD_VERSION = '1.0.0';
 
 const styles = `
   :host {
-    --claude-bg: #1C1917;
-    --claude-surface: #292524;
-    --claude-surface-2: #332E2A;
-    --claude-border: rgba(255, 255, 255, 0.08);
     --claude-orange: #D97757;
     --claude-orange-glow: rgba(217, 119, 87, 0.25);
     --claude-orange-soft: rgba(217, 119, 87, 0.15);
-    --claude-text: #F5F0EB;
-    --claude-text-muted: #A09080;
-    --claude-text-dim: #6B5F56;
     --claude-success: #7CB87A;
     --claude-radius: 20px;
     --claude-radius-sm: 12px;
@@ -35,7 +28,16 @@ const styles = `
     padding: 0;
   }
 
+  /* ── Themes ── */
   .card {
+    --claude-surface: #292524;
+    --claude-surface-2: #332E2A;
+    --claude-border: rgba(255, 255, 255, 0.08);
+    --claude-text: #F5F0EB;
+    --claude-text-muted: #A09080;
+    --claude-text-dim: #6B5F56;
+    --overlay-bg: rgba(28, 25, 23, 0.7);
+
     background: var(--claude-surface);
     border: 1px solid var(--claude-border);
     border-radius: var(--claude-radius);
@@ -43,6 +45,28 @@ const styles = `
     position: relative;
     overflow: hidden;
     transition: var(--transition);
+  }
+
+  .card.theme-light {
+    --claude-surface: #FFFEFA;
+    --claude-surface-2: #F5F0EB;
+    --claude-border: rgba(28, 25, 23, 0.09);
+    --claude-text: #1C1917;
+    --claude-text-muted: #6B5F56;
+    --claude-text-dim: #A09080;
+    --overlay-bg: rgba(245, 240, 235, 0.8);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .card.theme-auto {
+      --claude-surface: #FFFEFA;
+      --claude-surface-2: #F5F0EB;
+      --claude-border: rgba(28, 25, 23, 0.09);
+      --claude-text: #1C1917;
+      --claude-text-muted: #6B5F56;
+      --claude-text-dim: #A09080;
+      --overlay-bg: rgba(245, 240, 235, 0.8);
+    }
   }
 
   .card::before {
@@ -369,7 +393,7 @@ const styles = `
   .unavailable-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(28, 25, 23, 0.7);
+    background: var(--overlay-bg, rgba(28, 25, 23, 0.7));
     backdrop-filter: blur(2px);
     border-radius: var(--claude-radius);
     display: flex;
@@ -503,6 +527,7 @@ class ClaudeLightCard extends HTMLElement {
       show_brightness: true,
       show_color_temp: true,
       show_color: true,
+      theme: 'dark',
       ...config,
     };
     this._render();
@@ -526,7 +551,7 @@ class ClaudeLightCard extends HTMLElement {
     shadow.appendChild(style);
 
     this._card = document.createElement('div');
-    this._card.className = 'card';
+    this._card.className = 'card theme-' + (this._config.theme || 'dark');
     this._card.innerHTML = this._getHTML();
     shadow.appendChild(this._card);
 
@@ -616,7 +641,7 @@ class ClaudeLightCard extends HTMLElement {
             <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="#D97757"/>
             <circle cx="12" cy="12" r="4" fill="#D97757" opacity="0.6"/>
           </svg>
-          <span>Claude</span>
+          <span>WeSmart</span>
         </div>
       </div>
 
