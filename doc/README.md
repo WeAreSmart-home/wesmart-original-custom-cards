@@ -712,45 +712,98 @@ extra_entities:
 
 ---
 
+## WeSmart Infinite Color Card
+
+History card identica alla `wesmart-history-card` ma con un motore HSL che genera l'intera palette da un singolo colore di input.
+
+```yaml
+type: custom:wesmart-infinite-color-card
+title: Storico Casa
+color: '#f73747'          # colore base — qualsiasi hex
+theme: dark               # dark | light | auto
+hours: 24
+entities:
+  - light.soggiorno
+  - sensor.temperatura
+  - binary_sensor.porta_ingresso
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `color` | string | `'#D97757'` | Colore base hex — genera l'intera palette |
+| `title` | string | `'History'` | Intestazione card |
+| `icon` | string | `mdi:chart-line` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `hours` | number | `24` | Range temporale default (`1` · `6` · `24` · `168`) |
+| `entities` | list | — | **Required.** Qualsiasi tipo di entità |
+
+**Algoritmo palette (HSL):**
+
+A partire dal colore base vengono generati automaticamente tutti i token:
+
+| Token | Dark theme | Light theme |
+|-------|-----------|-------------|
+| `--accent` | hue pieno, L normalizzata 50–65% | hue pieno, L 40–55% |
+| `--bg` | hue, S 25–45%, L 11% | hue, S 3–8%, L 98% |
+| `--surface` | hue, S 20–38%, L 16% | hue, S 5–12%, L 93% |
+| `--text` | hue tenue, L 93% | hue tenue, L 10% |
+| `--text-muted` | hue tenue, L 65% | hue tenue, L 38% |
+| `--text-dim` | hue tenue, L 42% | hue tenue, L 58% |
+
+**Features:** identiche alla History card originale — timeline bar (binary) · line chart SVG (numeric) · time pills 1h/6h/24h/7d · stat summary · More Info on tap
+
+**Themes:** `dark` · `light` · `auto` (auto segue `prefers-color-scheme` e reagisce ai cambi live)
+
+---
+
 ## Project Structure
 
 ```
 custom card home assistant/
 ├── doc/
-│   └── README.md                      ← this file
-├── Hub/
-    ├── wesmart-commander-hub.js        ← flagship central hub
-    └── README.md
-├── Light/
-│   ├── wesmart-light-card.js
-│   └── README.md
-├── Lights/
-│   ├── wesmart-lights-card.js          ← list with toggles
-│   ├── wesmart-lights-expand-card.js   ← list with animated inline sliders
-│   └── README.md
-├── Climate/
-│   ├── wesmart-climate-card.js
-│   └── README.md
-├── Sensors/
-│   ├── wesmart-sensors-card.js
-│   └── README.md
-├── Doors/
-│   ├── wesmart-doors-card.js
-│   └── README.md
-├── History/
-│   ├── wesmart-history-card.js
-│   └── README.md
-└── Buttons/
-    ├── wesmart-buttons-bar-card.js     ← compact horizontal button bar
-    ├── wesmart-buttons-grid-card.js    ← square auto-grid of buttons
-    └── README.md
-└── Battery/
-    ├── wesmart-battery-status-card.js  ← multi-entity battery monitor
-    └── README.md
-├── Switches/
-│   ├── wesmart-switches-card.js        ← multi-entity toggle card
-│   └── README.md
-└── Clock/
-    ├── wesmart-clock-card.js           ← ambient clock + bottom/sidebar extras
-    └── README.md
+│   └── README.md                              ← this file
+│
+├── WeSmart-Original/                          ← standard cards (fixed palette)
+│   ├── Hub/
+│   │   ├── wesmart-commander-hub.js           ← flagship central hub
+│   │   └── README.md
+│   ├── Light/
+│   │   ├── wesmart-light-card.js
+│   │   └── README.md
+│   ├── Lights/
+│   │   ├── wesmart-lights-card.js             ← list with toggles
+│   │   ├── wesmart-lights-expand-card.js      ← list with animated inline sliders
+│   │   └── README.md
+│   ├── Climate/
+│   │   ├── wesmart-climate-card.js
+│   │   ├── wesmart-climate-compact-card.js
+│   │   └── README.md
+│   ├── Sensors/
+│   │   ├── wesmart-sensors-card.js
+│   │   └── README.md
+│   ├── Doors/
+│   │   ├── wesmart-doors-card.js
+│   │   └── README.md
+│   ├── History/
+│   │   ├── wesmart-history-card.js
+│   │   └── README.md
+│   ├── Buttons/
+│   │   ├── wesmart-buttons-bar-card.js        ← compact horizontal button bar
+│   │   ├── wesmart-buttons-grid-card.js       ← square auto-grid of buttons
+│   │   └── README.md
+│   ├── Battery/
+│   │   ├── wesmart-battery-status-card.js     ← multi-entity battery monitor
+│   │   └── README.md
+│   ├── Switches/
+│   │   ├── wesmart-switches-card.js           ← multi-entity toggle card
+│   │   └── README.md
+│   └── Clock/
+│       ├── wesmart-clock-card.js              ← ambient clock + bottom/sidebar extras
+│       └── README.md
+│
+└── WeSmart-InfiniteColor/                     ← dynamic color palette cards
+    └── History/
+        └── wesmart-infinite-color-card.js     ← history card with HSL color engine
 ```
