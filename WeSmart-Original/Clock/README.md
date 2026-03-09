@@ -1,5 +1,117 @@
 # WeSmart Clock Card
 
+Card orologio ambient elegante con informazioni entità extra opzionali visualizzate in una **barra inferiore** o una **sidebar sinistra**. Max 3 entità extra. Ognuna mostra solo icona + valore stato.
+
+## Funzionalità
+
+- Ora locale + data grandi e facili da leggere
+- Design glassmorphic — temi `dark` / `light` / `auto`
+- Due layout per info extra: **barra inferiore** o **sidebar sinistra**
+- Max 3 entità extra (quelle oltre 3 vengono ignorate)
+- Ogni entità mostra **solo icona + valore stato** (nessun nome/etichetta)
+- Sovrascrittura icona personalizzata per entità (eccetto weather, che usa icone automatiche)
+- Entità weather: icona automatica mappata dallo stato; **traduzione italiana** opzionale dello stato
+
+## Installazione
+
+1. Copia `wesmart-clock-card.js` → `config/www/`
+2. Aggiungi risorsa in HA: URL `/local/wesmart-clock-card.js` — tipo: Modulo JavaScript
+3. Hard-refresh browser (`Cmd+Shift+R`)
+
+## Configurazione
+
+### Base
+
+```yaml
+type: custom:wesmart-clock-card
+theme: dark
+time_format: 24
+```
+
+### Barra inferiore (default)
+
+```yaml
+type: custom:wesmart-clock-card
+theme: dark
+extras_layout: bottom
+extra_entities:
+  - weather.home
+  - sensor.outdoor_temperature
+  - sensor.humidity
+```
+
+### Sidebar sinistra
+
+```yaml
+type: custom:wesmart-clock-card
+theme: dark
+extras_layout: sidebar
+extra_entities:
+  - weather.home
+  - sensor.outdoor_temperature
+  - sensor.humidity
+```
+
+### Con icone personalizzate e traduzione meteo
+
+```yaml
+type: custom:wesmart-clock-card
+theme: dark
+extras_layout: bottom
+translate_weather: true
+extra_entities:
+  - weather.home                          # icona auto, stato in italiano
+  - entity: sensor.outdoor_temperature
+    icon: mdi:thermometer-high            # icona personalizzata
+  - entity: sensor.power_consumption
+    icon: mdi:lightning-bolt              # icona personalizzata
+```
+
+## Opzioni
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `theme` | string | `dark` | `dark` \| `light` \| `auto` |
+| `time_format` | number | `24` | `12` o `24` |
+| `extras_layout` | string | `bottom` | `bottom` \| `sidebar` — dove posizionare le info extra |
+| `translate_weather` | boolean | `false` | Traduci stati weather in italiano |
+| `extra_entities` | list | `[]` | Fino a 3 entità da visualizzare |
+
+## Campi elemento entità
+
+Ogni voce in `extra_entities` può essere una stringa semplice (ID entità) o un oggetto:
+
+| Campo | Tipo | Descrizione |
+|-------|------|-------------|
+| `entity` | string | **Obbligatorio.** ID entità |
+| `icon` | string | Icona MDI personalizzata (es. `mdi:thermometer`). Ignorata per entità `weather.*` (icona automatica) |
+
+## Traduzioni stato meteo (italiano)
+
+Con `translate_weather: true`, gli stati meteo vengono tradotti automaticamente:
+
+| Stato | Italiano |
+|-------|---------|
+| `sunny` | Soleggiato |
+| `partlycloudy` | P. nuvoloso |
+| `cloudy` | Nuvoloso |
+| `rainy` | Pioggia |
+| `pouring` | Pioggia forte |
+| `snowy` | Neve |
+| `snowy-rainy` | Neve/pioggia |
+| `fog` | Nebbia |
+| `windy` | Ventoso |
+| `lightning` | Temporale |
+| `lightning-rainy` | Tmp./Pioggia |
+| `clear-night` | Sereno |
+| `hail` | Grandine |
+| `exceptional` | Eccezionale |
+
+---
+---
+
+# WeSmart Clock Card
+
 Sleek ambient clock card with optional extra entity info displayed in a **bottom bar** or a **left sidebar**. Max 3 extra entities. Each shows only icon + state value.
 
 ## Features

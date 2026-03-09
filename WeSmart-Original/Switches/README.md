@@ -1,5 +1,58 @@
 # WeSmart Switches Card
 
+Una card personalizzata per Home Assistant per controllare e monitorare più interruttori, ispirata all'estetica Anthropic Claude.
+
+## Funzionalità
+- **Toggle Interattivi**: Clicca direttamente sull'icona per attivare/disattivare l'entità (ON/OFF).
+- **Feedback Stato**: Le icone brillano arancione quando l'entità è ON.
+- **Informazioni Dettagliate**: Clicca sulla riga (fuori dall'icona) per aprire il dialogo "More Info" standard.
+- **Supporto**: Funziona con `switch.*`, `light.*`, `input_boolean.*`, `fan.*` e altri.
+- **Temi Dark/Light/Auto**: Si abbina al design system del progetto.
+
+## Installazione
+
+1. Copia `wesmart-switches-card.js` nella tua directory `config/www/`.
+2. Aggiungi la risorsa in Home Assistant:
+   - **URL**: `/local/wesmart-switches-card.js`
+   - **Tipo**: Modulo JavaScript
+3. Ricarica il tuo dashboard.
+
+## Configurazione
+
+```yaml
+type: custom:wesmart-switches-card
+title: Interruttori Soggiorno
+icon: mdi:power-settings
+theme: auto
+entities:
+  - switch.living_room_light
+  - entity: switch.coffee_maker
+    name: Macchina del Caffè
+    icon: mdi:coffee
+  - input_boolean.guest_mode
+```
+
+## Opzioni
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `Switches` | Intestazione card |
+| `icon` | string | `mdi:toggle-switch` | Icona header |
+| `theme` | string | `dark` | `dark` \| `light` \| `auto` |
+| `entities` | list | — | **Obbligatorio.** Lista entità switch/toggle |
+
+### Opzioni entità
+| Opzione | Tipo | Descrizione |
+|---------|------|-------------|
+| `entity` | string | **Obbligatorio.** ID entità |
+| `name` | string | Sovrascrittura nome visualizzato opzionale |
+| `icon` | string | Sovrascrittura icona opzionale |
+
+---
+---
+
+# WeSmart Switches Card
+
 A Home Assistant custom card to control and monitor multiple switches, styled after the Anthropic Claude aesthetic.
 
 ## Features

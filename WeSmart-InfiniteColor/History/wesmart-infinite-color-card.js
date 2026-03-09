@@ -335,8 +335,8 @@
         return {
           accent:     this._hsl(h, s, accentL),
           accentSoft: this._hsla(h, s, accentL, 0.12),
-          bg:         this._hsl(h, c(Math.round(s * 0.18), 12, 20), 11),
-          surface:    this._hsl(h, c(Math.round(s * 0.15), 10, 18), 16),
+          bg:         this._hsl(h, c(Math.round(s * 0.35), 25, 45), 11),
+          surface:    this._hsl(h, c(Math.round(s * 0.28), 20, 38), 16),
           border:     `hsla(0, 0%, 100%, 0.08)`,
           text:       this._hsl(h, c(Math.round(s * 0.08), 5, 10), 93),
           textMuted:  this._hsl(h, c(Math.round(s * 0.12), 8, 15), 65),

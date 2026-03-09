@@ -1,5 +1,181 @@
 # WeSmart History Card
 
+Una card grafico storico personalizzata per Home Assistant, ispirata all'estetica **Anthropic WeSmart AI**.
+Sostituisce la HA History Graph predefinita con una versione migliorata e interattiva.
+Supporta i temi **dark**, **light** e **auto**.
+
+## Anteprima
+
+### Tema dark
+Sfondo carbone caldo scuro, accento arancione. Barra timeline per sensori binari, grafico a linee fluido con riempimento gradiente per sensori numerici.
+
+### Tema light
+Sfondo crema/bianco caldo (`#FFFEFA`), stesso accento arancione `#D97757`, look minimale e pulito.
+
+## Funzionalità
+
+- **Rilevamento automatico tipo grafico:**
+  - Entità binarie (luce, switch, binary_sensor…) → **barra timeline arancione** con periodi on/off
+  - Entità numeriche (sensor…) → **grafico a linee SVG** con riempimento gradiente sotto la curva
+- **Pill intervallo temporale interattivi** nella card: `1h` · `6h` · `24h` · `7d`
+- **Badge stato corrente** accanto al nome di ogni entità (arancione quando on/attivo)
+- **Stat riepilogativa** per entità:
+  - Binario: `Attivo 45%` — percentuale di tempo in stato attivo nell'intervallo selezionato
+  - Numerico: `18.2 – 23.5 °C` — min/max nell'intervallo selezionato
+- **Etichette asse temporale** sotto ogni grafico (HH:MM per ≤ 48h, giorno+data per 7d)
+- Barra loader animata durante il recupero storico
+- Tap su una riga → apre dialogo **More Info**
+- Entità non disponibili mostrate oscurate e non interattive
+- Tre modalità tema: `dark`, `light`, `auto`
+
+## Installazione
+
+1. Copia `wesmart-history-card.js` in:
+   ```
+   config/www/wesmart-history-card.js
+   ```
+
+2. In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi:
+   ```
+   /local/wesmart-history-card.js   (modulo JavaScript)
+   ```
+
+3. Hard refresh del browser (`Cmd+Shift+R` / `Ctrl+Shift+R`).
+
+## Configurazione
+
+```yaml
+type: custom:wesmart-history-card
+title: Storico Casa
+entities:
+  - light.soggiorno
+  - sensor.temperatura_cucina
+  - binary_sensor.porta_ingresso
+```
+
+### Tutte le opzioni
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'History'` | Intestazione card |
+| `icon` | string | `mdi:chart-line` | Icona header (mdi:*) |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `hours` | number | `24` | Range temporale default (1 · 6 · 24 · 168) |
+| `entities` | list | — | **Obbligatorio.** Lista entità da visualizzare |
+
+### Formato entità
+
+Ogni voce in `entities` può essere una stringa semplice o un oggetto:
+
+```yaml
+entities:
+  - light.soggiorno                        # stringa semplice
+  - entity: sensor.temperatura_cucina      # oggetto con sovrascritture
+    name: Temperatura Cucina
+    icon: mdi:thermometer
+  - entity: binary_sensor.porta_ingresso
+    name: Porta Ingresso
+    icon: mdi:door
+```
+
+| Campo entità | Tipo | Default | Descrizione |
+|---|---|---|---|
+| `entity` | string | — | ID entità (qualsiasi dominio) |
+| `name` | string | auto | Sovrascrittura nome visualizzato |
+| `icon` | string | auto | Sovrascrittura icona (mdi:*) |
+
+### Domini entità supportati (icona automatica)
+
+| Dominio | Icona automatica |
+|---------|-----------------|
+| `light` | `mdi:lightbulb` |
+| `switch` | `mdi:toggle-switch` |
+| `sensor` | `mdi:chart-line` |
+| `binary_sensor` | `mdi:motion-sensor` |
+| `climate` | `mdi:thermometer` |
+| `cover` | `mdi:garage` |
+| `fan` | `mdi:fan` |
+| `media_player` | `mdi:cast` |
+| `input_boolean` | `mdi:toggle-switch` |
+
+## Tipi di grafico
+
+### Barra timeline (binario)
+
+Renderizzata per entità il cui storico contiene stati non numerici (`on`/`off`, `open`/`closed`, `detected`/`clear`, ecc.).
+
+- Segmento **arancione** = stato attivo/on (`on`, `open`, `detected`, `unlocked`, `wet`, `active`, `home`, `playing`)
+- Segmento **scuro** = stato inattivo/off
+- Stat: `Attivo X%` — percentuale dell'intervallo selezionato in stato attivo
+
+### Grafico a linee (numerico)
+
+Renderizzato per entità il cui storico contiene solo stati numerici.
+
+- Percorso SVG con tratto arancione (`#D97757`, 1.5px)
+- Riempimento gradiente da arancione (38% opacità) a trasparente
+- Asse Y ridimensionato automaticamente a min/max dei valori nell'intervallo
+- Stat: `min – max unità` (es. `18.2 – 23.5 °C`)
+
+## Esempi tema
+
+```yaml
+# Dark (default)
+theme: dark
+
+# Light (crema calda)
+theme: light
+
+# Segue prefers-color-scheme di sistema
+theme: auto
+```
+
+## Esempio completo
+
+```yaml
+type: custom:wesmart-history-card
+title: Storico Casa
+icon: mdi:chart-line
+theme: dark
+hours: 24
+entities:
+  - entity: light.soggiorno
+    name: Soggiorno
+  - entity: light.cucina
+    name: Cucina
+  - entity: sensor.temperatura_soggiorno
+    name: Temperatura
+    icon: mdi:thermometer
+  - entity: sensor.humidity_bagno
+    name: Umidità Bagno
+    icon: mdi:water-percent
+  - entity: binary_sensor.porta_ingresso
+    name: Porta Ingresso
+    icon: mdi:door
+  - entity: binary_sensor.finestra_cucina
+    name: Finestra Cucina
+    icon: mdi:window-closed
+```
+
+## Come funziona
+
+La card usa la **history REST API** di Home Assistant:
+
+```
+GET /api/history/period/{start}
+  ?filter_entity_id={entity_ids}
+  &end_time={end}
+  &minimal_response=true
+  &significant_changes_only=false
+```
+
+Lo storico viene recuperato una volta al caricamento della card, e di nuovo ogni volta che cambia il pill intervallo temporale. La card **non si aggiorna automaticamente** — usa gli aggiornamenti di stato integrati di HA per i badge stato corrente.
+
+---
+---
+
+# WeSmart History Card
+
 A custom Home Assistant history graph card styled after the **Anthropic WeSmart AI** aesthetic.
 Replaces the default HA History Graph card with an improved, interactive version.
 Supports **dark**, **light**, and **auto** themes.

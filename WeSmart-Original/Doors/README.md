@@ -1,5 +1,138 @@
 # WeSmart Doors Card
 
+Una card personalizzata per Home Assistant per più sensori binari, ispirata all'estetica **Anthropic WeSmart AI**. Progettata per porte, finestre, serrature, sensori di movimento e sensori a contatto.
+
+## Anteprima
+
+Lista compatta di righe sensore. Ogni riga mostra nome, etichetta tipo e una pill di stato: **Chiusa** verde o **Aperta** arancione. I sensori aperti evidenziano l'intera riga con una tinta arancione, e il sottotitolo header conta quanti sensori sono aperti.
+
+- Sfondo: carbone caldo scuro `#292524`
+- Accento aperto / avviso: arancione Claude `#D97757`
+- Accento chiuso / sicuro: verde morbido `#7EC8A0`
+- Supporta temi dark, light e auto
+
+## Funzionalità
+
+- Riga compatta per sensore: icona · nome · etichetta tipo · **pill stato**
+- Coppia icone per classe: icona diversa quando aperto vs. chiuso
+- Righe aperte evidenziate con tinta arancione
+- Header mostra **"N aperte"** o **"Tutte chiuse"**
+- Tap su qualsiasi riga → dialogo More Info
+- Oscuramento stato non disponibile / sconosciuto
+- Responsive e touch-friendly
+
+## Installazione
+
+### Manuale
+
+1. Copia `wesmart-doors-card.js` nella cartella config di Home Assistant:
+   ```
+   config/www/wesmart-doors-card.js
+   ```
+
+2. In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi:
+   ```
+   /local/wesmart-doors-card.js   (modulo JavaScript)
+   ```
+
+3. Ricarica il browser (hard refresh: Cmd+Shift+R / Ctrl+Shift+R).
+
+## Configurazione
+
+```yaml
+type: custom:wesmart-doors-card
+title: Porte & Finestre
+entities:
+  - binary_sensor.front_door
+  - binary_sensor.kitchen_window
+```
+
+### Tutte le opzioni
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'Doors & Windows'` | Intestazione card |
+| `icon` | string | `mdi:door` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `entities` | list | — | **Obbligatorio.** Lista entità binary sensor |
+
+### Campi elemento entità
+
+Ogni voce in `entities` può essere una stringa semplice (ID entità) o un oggetto:
+
+| Campo | Tipo | Descrizione |
+|-------|------|-------------|
+| `entity` | string | **Obbligatorio.** ID entità `binary_sensor.*` |
+| `name` | string | Sovrascrittura nome visualizzato |
+| `icon` | string | Sovrascrittura icona per entrambi gli stati (`mdi:*`) |
+| `device_class` | string | Forza device class (rilevata automaticamente se omessa) |
+
+### Esempio con tutte le opzioni
+
+```yaml
+type: custom:wesmart-doors-card
+title: Porte & Finestre
+icon: mdi:home-lock
+theme: dark
+entities:
+  - binary_sensor.porta_ingresso
+  - binary_sensor.porta_retro
+  - entity: binary_sensor.finestra_cucina
+    name: Finestra Cucina
+  - entity: binary_sensor.finestra_camera
+    name: Finestra Camera
+  - entity: binary_sensor.garage
+    name: Garage
+    device_class: garage_door
+  - entity: binary_sensor.serratura_principale
+    name: Serratura
+    device_class: lock
+  - entity: binary_sensor.motion_corridoio
+    name: Movimento corridoio
+    device_class: motion
+```
+
+## Device class supportate
+
+La card rileva automaticamente la `device_class` dagli attributi dell'entità. Puoi sovrascriverla per entità.
+
+| `device_class` | Etichetta aperto | Etichetta chiuso | Icona aperto | Icona chiuso |
+|---|---|---|---|---|
+| `door` | Aperta | Chiusa | mdi:door-open | mdi:door-closed |
+| `window` | Aperta | Chiusa | mdi:window-open | mdi:window-closed |
+| `garage_door` | Aperto | Chiuso | mdi:garage-open | mdi:garage |
+| `opening` | Aperta | Chiusa | mdi:lock-open | mdi:lock |
+| `lock` | Sbloccata | Bloccata | mdi:lock-open | mdi:lock |
+| `motion` | Rilevato | Assente | mdi:motion-sensor | mdi:motion-sensor-off |
+| `vibration` | Rilevata | Assente | mdi:vibrate | mdi:vibrate-off |
+| `moisture` | Bagnato | Asciutto | mdi:water | mdi:water-off |
+| `smoke` | Rilevato | Assente | mdi:smoke-detector-alert | mdi:smoke-detector |
+| `gas` | Rilevato | Assente | mdi:gas-cylinder | mdi:gas-burner |
+| _(altro)_ | Attivo | Inattivo | mdi:alert-circle-outline | mdi:checkbox-blank-circle-outline |
+
+> Stato `binary_sensor` `on` = aperto / attivo · `off` = chiuso / assente
+
+## Stati visivi
+
+| Stato | Aspetto riga | Sottotitolo header |
+|---|---|---|
+| Tutte chiuse | Righe normali, pill verdi | "Tutte chiuse" |
+| Alcune aperte | Righe aperte evidenziate arancione, pill arancioni | "N aperte" (arancione) |
+| Non disponibile | Riga oscurata al 38% opacità | Non conteggiata |
+
+## Temi
+
+| Valore | Descrizione |
+|--------|-------------|
+| `dark` | Carbone caldo `#292524` (default) |
+| `light` | Crema calda `#FFFEFA` con testo scuro |
+| `auto` | Segue `prefers-color-scheme` di sistema |
+
+---
+---
+
+# WeSmart Doors Card
+
 A custom Home Assistant multi-entity binary sensor card styled after the **Anthropic WeSmart AI** aesthetic. Designed for doors, windows, locks, motion sensors and contact sensors.
 
 ## Preview

@@ -1,0 +1,13 @@
+# System Files
+.DS_Store
+Thumbs.db
+
+# Project Management / AI
+CLAUDE.md
+.claude/
+
+# Temporary / OS
+.AppleDouble
+.LSOverride
+*.swp
+*.bak

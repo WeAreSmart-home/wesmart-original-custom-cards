@@ -1,5 +1,101 @@
 # WeSmart Climate Card
 
+Una card personalizzata per Home Assistant per entità clima, ispirata all'estetica **Anthropic WeSmart AI**.
+
+## Anteprima
+
+Card scura con accenti arancioni caldi (riscaldamento) o blu freddi (raffreddamento), animazioni fluide e design minimale.
+
+- Sfondo: carbone caldo scuro `#292524`
+- Accento riscaldamento: arancione Claude `#D97757`
+- Accento raffreddamento: blu Claude `#60B4D8`
+- Animazione pulse glow durante riscaldamento/raffreddamento attivo
+
+## Funzionalità
+
+- Accendi/spegni (toggle nell'header)
+- Display temperatura corrente grande
+- Temperatura target con pulsanti **+** / **−**
+- Display umidità (se riportato dall'entità)
+- Selettore modalità HVAC (Caldo, Freddo, Auto, Asciutto, Ventilatore…)
+- Selettore modalità ventilatore (opzionale)
+- Display range per modalità `heat_cool` (min–max)
+- Overlay stato non disponibile
+- Responsive e touch-friendly
+
+## Installazione
+
+### Manuale
+
+1. Copia `wesmart-climate-card.js` nella cartella config di Home Assistant:
+   ```
+   config/www/wesmart-climate-card.js
+   ```
+
+2. In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi:
+   ```
+   /local/wesmart-climate-card.js   (modulo JavaScript)
+   ```
+
+3. Ricarica il browser (hard refresh: Cmd+Shift+R / Ctrl+Shift+R).
+
+## Configurazione
+
+```yaml
+type: custom:wesmart-climate-card
+entity: climate.living_room
+```
+
+### Tutte le opzioni
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `entity` | string | — | **Obbligatorio.** Entità `climate.*` |
+| `name` | string | auto | Sovrascrittura nome visualizzato |
+| `icon` | string | auto | Sovrascrittura icona (mdi:*) |
+| `show_fan_mode` | boolean | `true` | Mostra selettore modalità ventilatore |
+| `temp_step` | number | auto | Sovrascrittura passo temperatura (es. `0.5`) |
+
+### Esempio con tutte le opzioni
+
+```yaml
+type: custom:wesmart-climate-card
+entity: climate.bedroom_ac
+name: Clima Camera
+icon: mdi:air-conditioner
+show_fan_mode: true
+temp_step: 0.5
+```
+
+## Modalità HVAC
+
+La card visualizza solo le modalità riportate dall'entità tramite `hvac_modes`.
+
+| Modalità | Icona | Etichetta |
+|----------|-------|-----------|
+| `off` | mdi:power-off | Off |
+| `heat` | mdi:fire | Caldo |
+| `cool` | mdi:snowflake | Freddo |
+| `heat_cool` | mdi:sun-snowflake | Range |
+| `auto` | mdi:thermostat-auto | Auto |
+| `dry` | mdi:water-off-outline | Asciutto |
+| `fan_only` | mdi:fan | Ventilatore |
+
+## Stati visivi
+
+| Azione HVAC | Effetto card |
+|-------------|-------------|
+| `heating` | Glow arancione + animazione pulse |
+| `cooling` | Glow blu + animazione pulse |
+| `idle` | Nessun glow, colori neutri |
+| `off` | Controlli attenuati, toggle off |
+| `unavailable` | Overlay con icona disconnessione |
+
+---
+---
+
+# WeSmart Climate Card
+
 A custom Home Assistant climate entity card styled after the **Anthropic WeSmart AI** aesthetic.
 
 ## Preview
