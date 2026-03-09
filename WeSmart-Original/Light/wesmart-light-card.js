@@ -1,10 +1,10 @@
 /**
  * WeSmart Light Card - Home Assistant Custom Card
- * Styled after Anthropic Claude AI aesthetic
- * Version: 1.0.0
+ * Styled after Anthropic WeSmart AI aesthetic
+ * Version: 1.2.0
  */
 
-const CARD_VERSION = '1.0.0';
+const CARD_VERSION = '1.3.0';
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
@@ -22,21 +22,17 @@ const styles = `
     font-family: -apple-system, 'Söhne', 'Inter', BlinkMacSystemFont, sans-serif;
   }
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
   /* ── Themes ── */
   .card {
-    --claude-surface: #292524;
-    --claude-surface-2: #332E2A;
-    --claude-border: rgba(255, 255, 255, 0.08);
-    --claude-text: #F5F0EB;
+    --claude-surface:    #292524;
+    --claude-surface-2:  #332E2A;
+    --claude-border:     rgba(255, 255, 255, 0.08);
+    --claude-text:       #F5F0EB;
     --claude-text-muted: #A09080;
-    --claude-text-dim: #6B5F56;
-    --overlay-bg: rgba(28, 25, 23, 0.7);
+    --claude-text-dim:   #6B5F56;
+    --overlay-bg:        rgba(28, 25, 23, 0.7);
 
     background: var(--claude-surface);
     border: 1px solid var(--claude-border);
@@ -48,24 +44,24 @@ const styles = `
   }
 
   .card.theme-light {
-    --claude-surface: #FFFEFA;
-    --claude-surface-2: #F5F0EB;
-    --claude-border: rgba(28, 25, 23, 0.09);
-    --claude-text: #1C1917;
+    --claude-surface:    #FFFEFA;
+    --claude-surface-2:  #F5F0EB;
+    --claude-border:     rgba(28, 25, 23, 0.09);
+    --claude-text:       #1C1917;
     --claude-text-muted: #6B5F56;
-    --claude-text-dim: #A09080;
-    --overlay-bg: rgba(245, 240, 235, 0.8);
+    --claude-text-dim:   #A09080;
+    --overlay-bg:        rgba(245, 240, 235, 0.8);
   }
 
   @media (prefers-color-scheme: light) {
     .card.theme-auto {
-      --claude-surface: #FFFEFA;
-      --claude-surface-2: #F5F0EB;
-      --claude-border: rgba(28, 25, 23, 0.09);
-      --claude-text: #1C1917;
+      --claude-surface:    #FFFEFA;
+      --claude-surface-2:  #F5F0EB;
+      --claude-border:     rgba(28, 25, 23, 0.09);
+      --claude-text:       #1C1917;
       --claude-text-muted: #6B5F56;
-      --claude-text-dim: #A09080;
-      --overlay-bg: rgba(245, 240, 235, 0.8);
+      --claude-text-dim:   #A09080;
+      --overlay-bg:        rgba(245, 240, 235, 0.8);
     }
   }
 
@@ -73,25 +69,22 @@ const styles = `
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(
-      ellipse 60% 50% at 50% -10%,
-      var(--claude-orange-soft),
-      transparent
-    );
+    background: radial-gradient(ellipse 60% 50% at 50% -10%, var(--claude-orange-soft), transparent);
     opacity: 0;
     transition: opacity 0.5s ease;
     pointer-events: none;
   }
 
-  .card.light-on::before {
-    opacity: 1;
+  .card.light-on::before { opacity: 1; }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(217,119,87,0.1), 0 8px 32px rgba(0,0,0,0.4), 0 0 60px var(--claude-orange-glow); }
+    50%       { box-shadow: 0 0 0 1px rgba(217,119,87,0.2), 0 8px 32px rgba(0,0,0,0.4), 0 0 80px rgba(217,119,87,0.35); }
   }
 
   .card.light-on {
     border-color: rgba(217, 119, 87, 0.2);
-    box-shadow: 0 0 0 1px rgba(217, 119, 87, 0.1),
-                0 8px 32px rgba(0, 0, 0, 0.4),
-                0 0 60px var(--claude-orange-glow);
+    animation: pulse-glow 3s ease-in-out infinite;
   }
 
   /* ── Header ── */
@@ -99,7 +92,6 @@ const styles = `
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 18px;
     position: relative;
     z-index: 1;
   }
@@ -142,9 +134,7 @@ const styles = `
     background: rgba(217, 119, 87, 0.1);
   }
 
-  .card.light-on .icon-wrapper::after {
-    opacity: 1;
-  }
+  .card.light-on .icon-wrapper::after { opacity: 1; }
 
   .icon-wrapper ha-icon {
     color: var(--claude-text-muted);
@@ -154,14 +144,9 @@ const styles = `
     --mdc-icon-size: 22px;
   }
 
-  .card.light-on .icon-wrapper ha-icon {
-    color: var(--claude-orange);
-  }
+  .card.light-on .icon-wrapper ha-icon { color: var(--claude-orange); }
 
-  .entity-details {
-    flex: 1;
-    min-width: 0;
-  }
+  .entity-details { flex: 1; min-width: 0; }
 
   .entity-name {
     font-size: 15px;
@@ -244,19 +229,62 @@ const styles = `
     box-shadow: 0 0 10px rgba(217, 119, 87, 0.6);
   }
 
-  /* ── Brightness ── */
+  /* ── Collapsible controls wrapper ─────────────────────────────────────────── */
+  /*
+   * overflow: visible so slider thumbs (which extend outside the 6px track)
+   * are never clipped. The collapse is achieved via max-height + translateY.
+   */
+  .controls-wrapper {
+    overflow: visible;
+    max-height: 600px;
+    opacity: 1;
+    margin-top: 18px;
+    margin-bottom: 4px;
+    transition:
+      max-height  0.42s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity     0.32s ease,
+      margin-top  0.38s cubic-bezier(0.4, 0, 0.2, 1),
+      margin-bottom 0.38s ease;
+  }
+
+  .controls-wrapper.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    /* We can't use overflow:hidden here because that clips thumbs — instead
+       the content naturally hides as max-height → 0 with overflow:visible.
+       On some browsers the content peeks through at intermediate frames;
+       a clip-path keeps it clean without affecting children overflow. */
+    clip-path: inset(0);
+    pointer-events: none;
+  }
+
+  .controls-wrapper:not(.collapsed) {
+    clip-path: none;
+  }
+
+  /* Slide-in animation for the inner content */
   .controls {
     position: relative;
     z-index: 1;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
+    padding: 2px 0 12px;  /* vertical breathing room so slider thumbs aren't flush */
+    transition: transform 0.42s cubic-bezier(0.34, 1.18, 0.64, 1);
+    transform: translateY(0);
   }
 
+  .controls-wrapper.collapsed .controls {
+    transform: translateY(-14px);
+  }
+
+  /* ── Control rows ── */
   .control-row {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
 
   .control-label {
@@ -280,24 +308,25 @@ const styles = `
     font-variant-numeric: tabular-nums;
   }
 
-  /* ── Slider ── */
+  /* ── Brightness slider ── */
   .slider-wrapper {
     position: relative;
-    height: 6px;
-    border-radius: 3px;
+    height: 8px;
+    border-radius: 4px;
     background: var(--claude-surface-2);
     border: 1px solid var(--claude-border);
     cursor: pointer;
+    overflow: visible;   /* thumbs always visible */
   }
 
   .slider-fill {
     position: absolute;
     left: 0;
-    top: -1px;
-    bottom: -1px;
-    border-radius: 3px;
-    background: linear-gradient(90deg, rgba(217,119,87,0.4), var(--claude-orange));
-    transition: width 0.15s ease;
+    top: 0;
+    bottom: 0;
+    border-radius: 4px;
+    background: linear-gradient(90deg, rgba(217,119,87,0.35), var(--claude-orange));
+    transition: width 0.1s ease;
     pointer-events: none;
   }
 
@@ -305,69 +334,56 @@ const styles = `
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: var(--claude-text);
-    border: 2px solid var(--claude-orange);
-    box-shadow: 0 0 0 0 var(--claude-orange-glow);
+    border: 2.5px solid var(--claude-orange);
+    box-shadow: 0 0 0 0 var(--claude-orange-glow), 0 2px 6px rgba(0,0,0,0.35);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
     pointer-events: none;
+    z-index: 2;
   }
 
   .slider-wrapper:hover .slider-thumb,
   .slider-wrapper.dragging .slider-thumb {
-    box-shadow: 0 0 0 6px var(--claude-orange-glow);
-    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 0 7px var(--claude-orange-glow), 0 2px 6px rgba(0,0,0,0.35);
+    transform: translate(-50%, -50%) scale(1.15);
   }
 
-  /* ── Color Temperature ── */
+  /* ── Color Temperature slider ── */
   .ct-slider .slider-fill {
-    background: linear-gradient(90deg, #4A90D9, #FFD580);
+    /* warm (low K, high mireds) on left → cool (high K, low mireds) on right
+       Slider moves left=warm, right=cool */
+    background: linear-gradient(90deg, #FFB347, #FFDC80, #FFF5CC, #E8F4FF, #B8DAFF);
   }
 
   .ct-slider .slider-thumb {
-    border-color: var(--claude-text-muted);
+    border-color: #c8b080;
+    background: #fff;
   }
 
-  /* ── Color Picker ── */
-  .color-section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  /* ── Hue picker — same geometry as brightness slider, rainbow track ── */
+  .hue-slider {
+    background: linear-gradient(to right,
+      hsl(0,80%,45%), hsl(45,80%,45%), hsl(90,80%,40%), hsl(135,80%,40%),
+      hsl(180,80%,40%), hsl(225,80%,45%), hsl(270,80%,45%), hsl(315,80%,45%),
+      hsl(360,80%,45%));
+    border-color: rgba(255,255,255,0.05);
   }
 
-  .color-grid {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+  .hue-slider .slider-fill { display: none; }
+
+  .hue-slider .slider-thumb {
+    border-color: rgba(255,255,255,0.85);
+    background: hsl(0, 100%, 50%);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.3), 0 2px 5px rgba(0,0,0,0.4);
   }
 
-  .color-dot {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: var(--transition);
-    border: 2px solid transparent;
-    position: relative;
-  }
-
-  .color-dot::after {
-    content: '';
-    position: absolute;
-    inset: -3px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    transition: var(--transition);
-  }
-
-  .color-dot:hover {
-    transform: scale(1.15);
-  }
-
-  .color-dot.selected::after {
-    border-color: var(--claude-orange);
+  .hue-slider:hover .slider-thumb,
+  .hue-slider.dragging .slider-thumb {
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.3), 0 0 0 5px rgba(255,255,255,0.18), 0 2px 5px rgba(0,0,0,0.4);
+    transform: translate(-50%, -50%) scale(1.15);
   }
 
   /* ── Footer ── */
@@ -375,7 +391,7 @@ const styles = `
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 16px;
+    margin-top: 14px;
     padding-top: 14px;
     border-top: 1px solid var(--claude-border);
     position: relative;
@@ -390,6 +406,7 @@ const styles = `
     gap: 4px;
   }
 
+  /* ── Unavailable overlay ── */
   .unavailable-overlay {
     position: absolute;
     inset: 0;
@@ -415,53 +432,6 @@ const styles = `
     --mdc-icon-size: 28px;
   }
 
-  /* ── Pulse animation for on state ── */
-  @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 0 1px rgba(217, 119, 87, 0.1), 0 8px 32px rgba(0,0,0,0.4), 0 0 60px var(--claude-orange-glow); }
-    50%       { box-shadow: 0 0 0 1px rgba(217, 119, 87, 0.2), 0 8px 32px rgba(0,0,0,0.4), 0 0 80px rgba(217, 119, 87, 0.35); }
-  }
-
-  .card.light-on {
-    animation: pulse-glow 3s ease-in-out infinite;
-  }
-
-  /* ── Action buttons ── */
-  .action-buttons {
-    display: flex;
-    gap: 8px;
-  }
-
-  .action-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: var(--claude-radius-xs);
-    background: var(--claude-surface-2);
-    border: 1px solid var(--claude-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-    color: var(--claude-text-muted);
-  }
-
-  .action-btn:hover {
-    background: rgba(217, 119, 87, 0.1);
-    border-color: rgba(217, 119, 87, 0.3);
-    color: var(--claude-orange);
-  }
-
-  .action-btn ha-icon {
-    --mdc-icon-size: 16px;
-  }
-
-  /* ── Divider ── */
-  .divider {
-    height: 1px;
-    background: var(--claude-border);
-    margin: 2px 0;
-  }
-
   /* ── Brand mark ── */
   .brand-mark {
     display: flex;
@@ -470,10 +440,7 @@ const styles = `
     opacity: 0.4;
   }
 
-  .brand-mark svg {
-    width: 14px;
-    height: 14px;
-  }
+  .brand-mark svg { width: 14px; height: 14px; }
 
   .brand-mark span {
     font-size: 10px;
@@ -481,19 +448,6 @@ const styles = `
     letter-spacing: 0.05em;
   }
 `;
-
-// ─── Color Presets ─────────────────────────────────────────────────────────────
-
-const COLOR_PRESETS = [
-  { name: 'Warm White',  rgb: [255, 228, 196], hs: [30,  0.33] },
-  { name: 'Cool White',  rgb: [220, 237, 255], hs: [210, 0.14] },
-  { name: 'Sunset',      rgb: [255, 140,  60], hs: [24,  0.76] },
-  { name: 'Ocean',       rgb: [ 64, 164, 223], hs: [204, 0.71] },
-  { name: 'Forest',      rgb: [106, 190, 120], hs: [128, 0.44] },
-  { name: 'Lavender',    rgb: [160, 140, 220], hs: [255, 0.36] },
-  { name: 'Rose',        rgb: [230, 100, 130], hs: [344, 0.57] },
-  { name: 'Gold',        rgb: [255, 195,  50], hs: [44,  0.80] },
-];
 
 // ─── Custom Element ────────────────────────────────────────────────────────────
 
@@ -506,7 +460,7 @@ class WeSmartLightCard extends HTMLElement {
     this._hass   = null;
     this._isDraggingBrightness = false;
     this._isDraggingCT         = false;
-    this._selectedColor        = null;
+    this._isDraggingHue        = false;
   }
 
   // ── HA lifecycle ─────────────────────────────────────────────────────────────
@@ -522,12 +476,13 @@ class WeSmartLightCard extends HTMLElement {
   setConfig(config) {
     if (!config.entity) throw new Error('entity is required');
     this._config = {
-      name: null,
-      icon: null,
-      show_brightness: true,
-      show_color_temp: true,
-      show_color: true,
-      theme: 'dark',
+      name:             null,
+      icon:             null,
+      show_brightness:  true,
+      show_color_temp:  true,
+      show_color:       true,
+      theme:            'dark',
+      collapse_when_off: false,
       ...config,
     };
     this._render();
@@ -560,16 +515,6 @@ class WeSmartLightCard extends HTMLElement {
   }
 
   _getHTML() {
-    const cfg = this._config;
-
-    const colorDotsHTML = COLOR_PRESETS.map((c, i) => `
-      <div class="color-dot"
-           data-color-index="${i}"
-           style="background: rgb(${c.rgb.join(',')});"
-           title="${c.name}">
-      </div>
-    `).join('');
-
     return `
       <div class="header">
         <div class="entity-info">
@@ -591,44 +536,46 @@ class WeSmartLightCard extends HTMLElement {
         </label>
       </div>
 
-      <div class="controls" id="controls">
+      <div class="controls-wrapper" id="controls-wrapper">
+        <div class="controls" id="controls">
 
-        <!-- Brightness -->
-        <div class="control-row" id="brightness-row">
-          <div class="control-label">
-            <span>Brightness</span>
-            <span class="control-value" id="brightness-value">100%</span>
-          </div>
-          <div class="slider-wrapper" id="brightness-slider">
-            <div class="slider-fill" id="brightness-fill"></div>
-            <div class="slider-thumb" id="brightness-thumb"></div>
-          </div>
-        </div>
-
-        <!-- Color Temperature -->
-        <div class="control-row" id="ct-row" style="display:none">
-          <div class="control-label">
-            <span>Color Temperature</span>
-            <span class="control-value" id="ct-value">—</span>
-          </div>
-          <div class="slider-wrapper ct-slider" id="ct-slider">
-            <div class="slider-fill" id="ct-fill"></div>
-            <div class="slider-thumb" id="ct-thumb"></div>
-          </div>
-        </div>
-
-        <!-- Color Presets -->
-        <div class="control-row" id="color-row" style="display:none">
-          <div class="control-label">
-            <span>Color</span>
-          </div>
-          <div class="color-section">
-            <div class="color-grid" id="color-grid">
-              ${colorDotsHTML}
+          <!-- Brightness -->
+          <div class="control-row" id="brightness-row" style="display:none">
+            <div class="control-label">
+              <span>Brightness</span>
+              <span class="control-value" id="brightness-value">—</span>
+            </div>
+            <div class="slider-wrapper" id="brightness-slider">
+              <div class="slider-fill" id="brightness-fill"></div>
+              <div class="slider-thumb" id="brightness-thumb"></div>
             </div>
           </div>
-        </div>
 
+          <!-- Color Temperature / Kelvin -->
+          <div class="control-row" id="ct-row" style="display:none">
+            <div class="control-label">
+              <span>Color Temperature</span>
+              <span class="control-value" id="ct-value">—</span>
+            </div>
+            <div class="slider-wrapper ct-slider" id="ct-slider">
+              <div class="slider-fill" id="ct-fill"></div>
+              <div class="slider-thumb" id="ct-thumb"></div>
+            </div>
+          </div>
+
+          <!-- Hue / Color picker -->
+          <div class="control-row" id="color-row" style="display:none">
+            <div class="control-label">
+              <span>Color</span>
+              <span class="control-value" id="hue-value">—</span>
+            </div>
+            <div class="slider-wrapper hue-slider" id="hue-track">
+              <div class="slider-fill" style="display:none"></div>
+              <div class="slider-thumb hue-thumb" id="hue-thumb" style="left:0%"></div>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       <div class="footer">
@@ -660,42 +607,52 @@ class WeSmartLightCard extends HTMLElement {
     const stateObj = this._hass.states[this._config.entity];
     if (!stateObj) return;
 
-    const isOn         = stateObj.state === 'on';
-    const isUnavail    = stateObj.state === 'unavailable';
-    const attrs        = stateObj.attributes || {};
-    const friendlyName = this._config.name || attrs.friendly_name || this._config.entity;
-    const icon         = this._config.icon || attrs.icon || 'mdi:lightbulb';
+    const isOn      = stateObj.state === 'on';
+    const isUnavail = stateObj.state === 'unavailable';
+    const attrs     = stateObj.attributes || {};
+    const name      = this._config.name || attrs.friendly_name || this._config.entity;
 
-    // card class
-    this._card.classList.toggle('light-on',  isOn && !isUnavail);
-
-    // unavailable overlay
+    // ── Card state ──────────────────────────────────────────────────────────
+    this._card.classList.toggle('light-on', isOn && !isUnavail);
     this._q('#unavailable-overlay').style.display = isUnavail ? 'flex' : 'none';
 
-    // icon & name
+    // ── Icon & name ─────────────────────────────────────────────────────────
     this._q('#entity-icon').setAttribute('icon', isOn ? 'mdi:lightbulb' : 'mdi:lightbulb-outline');
-    this._q('#entity-name').textContent = friendlyName;
+    this._q('#entity-name').textContent = name;
 
-    // state text
-    const stateLabel = isOn
+    // ── State text ──────────────────────────────────────────────────────────
+    let stateLabel = isOn
       ? (attrs.brightness ? `${Math.round(attrs.brightness / 2.55)}% · On` : 'On')
-      : stateObj.state.charAt(0).toUpperCase() + stateObj.state.slice(1);
+      : (stateObj.state.charAt(0).toUpperCase() + stateObj.state.slice(1));
     this._q('#state-text').textContent = stateLabel;
 
-    // toggle
-    const toggle = this._q('#toggle');
-    toggle.classList.toggle('active', isOn);
+    // ── Toggle ──────────────────────────────────────────────────────────────
+    this._q('#toggle').classList.toggle('active', isOn);
     this._q('#toggle-input').checked = isOn;
 
-    // controls visibility
-    this._q('#controls').style.opacity = isOn ? '1' : '0.4';
-    this._q('#controls').style.pointerEvents = isOn ? 'auto' : 'none';
+    // ── Collapse when off ───────────────────────────────────────────────────
+    const wrapper = this._q('#controls-wrapper');
+    if (wrapper) {
+      const shouldCollapse = this._config.collapse_when_off && !isOn;
+      wrapper.classList.toggle('collapsed', shouldCollapse);
+    }
 
-    // brightness
-    const supportsBrightness = attrs.supported_color_modes?.some(m =>
+    // ── Dim/disable controls when off (non-collapse mode) ──────────────────
+    if (!this._config.collapse_when_off) {
+      this._q('#controls').style.opacity      = isOn ? '1' : '0.4';
+      this._q('#controls').style.pointerEvents = isOn ? 'auto' : 'none';
+    } else {
+      this._q('#controls').style.opacity      = '1';
+      this._q('#controls').style.pointerEvents = 'auto';
+    }
+
+    // ── Brightness ──────────────────────────────────────────────────────────
+    const colorModes = attrs.supported_color_modes ?? [];
+    const supportsBrightness = colorModes.some(m =>
       ['brightness','color_temp','hs','rgb','rgbw','rgbww','xy'].includes(m)
     );
     const brightnessRow = this._q('#brightness-row');
+
     if (this._config.show_brightness && supportsBrightness) {
       brightnessRow.style.display = 'flex';
       if (!this._isDraggingBrightness) {
@@ -707,37 +664,65 @@ class WeSmartLightCard extends HTMLElement {
       brightnessRow.style.display = 'none';
     }
 
-    // color temperature
-    const supportsColorTemp = attrs.supported_color_modes?.includes('color_temp');
+    // ── Color Temperature (Kelvin) ──────────────────────────────────────────
+    // HA 2022.9+ reports color_temp_kelvin, min_color_temp_kelvin, max_color_temp_kelvin
+    // Older HA uses color_temp (mireds), min_mireds, max_mireds
+    // Accept both — kelvin-native takes priority
+    const minK = attrs.min_color_temp_kelvin
+      ?? (attrs.max_mireds ? Math.round(1000000 / attrs.max_mireds) : null);
+    const maxK = attrs.max_color_temp_kelvin
+      ?? (attrs.min_mireds ? Math.round(1000000 / attrs.min_mireds) : null);
+    const hasKRange = minK != null && maxK != null;
+
+    // Also accept lights that just expose color_temp_kelvin without explicit range
+    const supportsColorTemp = colorModes.includes('color_temp')
+      || hasKRange
+      || attrs.color_temp_kelvin != null
+      || attrs.color_temp != null;
+
     const ctRow = this._q('#ct-row');
-    if (this._config.show_color_temp && supportsColorTemp && attrs.min_mireds && attrs.max_mireds) {
+
+    if (this._config.show_color_temp && supportsColorTemp && hasKRange) {
       ctRow.style.display = 'flex';
       if (!this._isDraggingCT) {
-        const mireds   = attrs.color_temp || attrs.min_mireds;
-        const min      = attrs.min_mireds;
-        const max      = attrs.max_mireds;
-        const kelvin   = Math.round(1000000 / mireds);
-        const pct      = Math.round(((mireds - min) / (max - min)) * 100);
-        this._q('#ct-value').textContent = `${kelvin}K`;
-        this._setSliderPct('#ct-fill', '#ct-thumb', pct);
-        this._ctMin    = min;
-        this._ctMax    = max;
+        const curK = attrs.color_temp_kelvin
+          ?? (attrs.color_temp ? Math.round(1000000 / attrs.color_temp) : null)
+          ?? Math.round((minK + maxK) / 2);
+        const pct = Math.round(((curK - minK) / (maxK - minK)) * 100);
+        this._q('#ct-value').textContent = `${curK} K`;
+        this._setSliderPct('#ct-fill', '#ct-thumb', Math.max(0, Math.min(100, pct)));
+        this._ctMinK = minK;
+        this._ctMaxK = maxK;
       }
     } else {
       ctRow.style.display = 'none';
     }
 
-    // color presets
-    const supportsColor = attrs.supported_color_modes?.some(m =>
+    // ── Hue picker ──────────────────────────────────────────────────────────
+    const supportsColor = colorModes.some(m =>
       ['hs','rgb','rgbw','rgbww','xy'].includes(m)
     );
-    this._q('#color-row').style.display =
-      this._config.show_color && supportsColor ? 'flex' : 'none';
+    const colorRow = this._q('#color-row');
 
-    // footer
-    const area  = stateObj.area_id || '';
+    if (this._config.show_color && supportsColor) {
+      colorRow.style.display = 'flex';
+      if (!this._isDraggingHue) {
+        // Read current hue from hs_color, rgb_color or xy_color
+        let hue = 0;
+        if (attrs.hs_color) {
+          hue = attrs.hs_color[0];
+        } else if (attrs.rgb_color) {
+          hue = this._rgbToHue(...attrs.rgb_color);
+        }
+        this._setHueThumb(hue);
+      }
+    } else {
+      colorRow.style.display = 'none';
+    }
+
+    // ── Footer ──────────────────────────────────────────────────────────────
     const parts = this._config.entity.split('.');
-    this._q('#footer-text').textContent = area || parts[1]?.replace(/_/g, ' ') || '—';
+    this._q('#footer-text').textContent = parts[1]?.replace(/_/g, ' ') || '—';
   }
 
   // ── Events ───────────────────────────────────────────────────────────────────
@@ -751,8 +736,8 @@ class WeSmartLightCard extends HTMLElement {
     this._bindSlider(
       '#brightness-slider',
       (pct) => {
-        this._q('#brightness-value').textContent = `${Math.round(pct)}%`;
         this._isDraggingBrightness = true;
+        this._q('#brightness-value').textContent = `${Math.round(pct)}%`;
       },
       (pct) => {
         this._isDraggingBrightness = false;
@@ -762,62 +747,103 @@ class WeSmartLightCard extends HTMLElement {
       }
     );
 
-    // Color temperature slider
+    // CT slider — works in kelvin natively
     this._bindSlider(
       '#ct-slider',
       (pct) => {
-        const min    = this._ctMin || 153;
-        const max    = this._ctMax || 500;
-        const mireds = Math.round(min + (pct / 100) * (max - min));
-        const kelvin = Math.round(1000000 / mireds);
-        this._q('#ct-value').textContent = `${kelvin}K`;
         this._isDraggingCT = true;
-        this._pendingCT    = mireds;
+        const minK   = this._ctMinK || 2700;
+        const maxK   = this._ctMaxK || 6500;
+        const kelvin = Math.round(minK + (pct / 100) * (maxK - minK));
+        this._q('#ct-value').textContent = `${kelvin} K`;
+        this._pendingCTK = kelvin;
       },
       () => {
         this._isDraggingCT = false;
-        if (this._pendingCT) {
-          this._callService('light', 'turn_on', { color_temp: this._pendingCT });
+        if (this._pendingCTK) {
+          // Send kelvin (HA 2022.9+); also send mireds for older HA
+          this._callService('light', 'turn_on', {
+            color_temp_kelvin: this._pendingCTK,
+          });
         }
       }
     );
 
-    // Color presets
-    this._q('#color-grid').addEventListener('click', (e) => {
-      const dot = e.target.closest('.color-dot');
-      if (!dot) return;
-      const idx = parseInt(dot.dataset.colorIndex, 10);
-      if (isNaN(idx)) return;
-
-      this._q('#color-grid').querySelectorAll('.color-dot')
-        .forEach(d => d.classList.remove('selected'));
-      dot.classList.add('selected');
-
-      const color = COLOR_PRESETS[idx];
-      this._callService('light', 'turn_on', {
-        hs_color: color.hs,
-      });
-    });
+    // Hue picker
+    this._bindHuePicker();
   }
+
+  _bindHuePicker() {
+    const track = this._q('#hue-track');
+    if (!track) return;
+
+    const getHue = (clientX) => {
+      const rect = track.getBoundingClientRect();
+      const raw  = (clientX - rect.left) / rect.width;
+      return Math.max(0, Math.min(360, raw * 360));
+    };
+
+    const onMove = (e) => {
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const hue     = getHue(clientX);
+      this._isDraggingHue = true;
+      this._pendingHue    = hue;
+      this._setHueThumb(hue);
+      track.classList.add('dragging');
+    };
+
+    const onEnd = () => {
+      track.classList.remove('dragging');
+      this._isDraggingHue = false;
+      if (this._pendingHue != null) {
+        this._callService('light', 'turn_on', {
+          hs_color: [Math.round(this._pendingHue), 1.0],
+        });
+      }
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup',   onEnd);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend',  onEnd);
+    };
+
+    track.addEventListener('mousedown', (e) => {
+      onMove(e);
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup',   onEnd);
+    });
+
+    track.addEventListener('touchstart', (e) => {
+      onMove(e);
+      document.addEventListener('touchmove', onMove, { passive: true });
+      document.addEventListener('touchend',  onEnd);
+    }, { passive: true });
+  }
+
+  _setHueThumb(hue) {
+    const pct   = (hue / 360) * 100;
+    const thumb = this._q('#hue-thumb');
+    if (!thumb) return;
+    thumb.style.left            = `${pct}%`;
+    thumb.style.background      = `hsl(${Math.round(hue)}, 100%, 50%)`;
+    // Show hue as a warm label (e.g. "Red 0°" is too verbose — just show K-like value)
+    this._q('#hue-value').textContent = `${Math.round(hue)}°`;
+  }
+
+  // ── Slider helper ─────────────────────────────────────────────────────────────
 
   _bindSlider(selector, onMove, onEnd) {
     const wrapper = this._q(selector);
     if (!wrapper) return;
 
-    const getPercent = (clientX) => {
+    const getPct = (clientX) => {
       const rect = wrapper.getBoundingClientRect();
-      const raw  = (clientX - rect.left) / rect.width;
-      return Math.max(0, Math.min(100, raw * 100));
+      return Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
     };
 
     const moveHandler = (e) => {
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const pct     = getPercent(clientX);
-      this._setSliderPct(
-        selector + ' .slider-fill',
-        selector + ' .slider-thumb',
-        pct
-      );
+      const pct     = getPct(clientX);
+      this._setSliderPct(selector + ' .slider-fill', selector + ' .slider-thumb', pct);
       wrapper.classList.add('dragging');
       onMove(pct);
     };
@@ -825,8 +851,7 @@ class WeSmartLightCard extends HTMLElement {
     const endHandler = (e) => {
       wrapper.classList.remove('dragging');
       const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-      const pct     = getPercent(clientX);
-      onEnd(pct);
+      onEnd(getPct(clientX));
       document.removeEventListener('mousemove', moveHandler);
       document.removeEventListener('mouseup',   endHandler);
       document.removeEventListener('touchmove', moveHandler);
@@ -863,8 +888,7 @@ class WeSmartLightCard extends HTMLElement {
     if (!this._hass || !this._config.entity) return;
     const stateObj = this._hass.states[this._config.entity];
     if (!stateObj || stateObj.state === 'unavailable') return;
-    const action = stateObj.state === 'on' ? 'turn_off' : 'turn_on';
-    this._callService('light', action, {});
+    this._callService('light', stateObj.state === 'on' ? 'turn_off' : 'turn_on', {});
   }
 
   _callService(domain, service, data) {
@@ -873,9 +897,25 @@ class WeSmartLightCard extends HTMLElement {
       ...data,
     });
   }
+
+  /** Convert RGB (0–255 each) to hue (0–360) */
+  _rgbToHue(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const d   = max - min;
+    if (d === 0) return 0;
+    let h;
+    switch (max) {
+      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+      case g: h = ((b - r) / d + 2) / 6; break;
+      default: h = ((r - g) / d + 4) / 6;
+    }
+    return Math.round(h * 360);
+  }
 }
 
-// ─── Config Editor (optional) ─────────────────────────────────────────────────
+// ─── Config Editor (stub) ─────────────────────────────────────────────────────
 
 class WeSmartLightCardEditor extends HTMLElement {
   setConfig(config) { this._config = config; }
@@ -890,14 +930,14 @@ customElements.define('wesmart-light-card-editor', WeSmartLightCardEditor);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type:        'wesmart-light-card',
-  name:        'Claude Light Card',
-  description: 'A sleek light entity card styled after the Anthropic Claude AI aesthetic.',
+  name:        'WeSmart Light Card',
+  description: 'Light entity card with brightness, Kelvin/CT, and hue color picker. Supports collapse_when_off.',
   preview:     true,
-  documentationURL: 'https://github.com/your-repo/claude-light-card',
+  documentationURL: 'https://github.com/your-repo/wesmart-light-card',
 });
 
 console.info(
-  `%c CLAUDE LIGHT CARD %c v${CARD_VERSION} `,
+  `%c WESMART LIGHT CARD %c v${CARD_VERSION} `,
   'background:#D97757;color:#fff;font-weight:700;padding:2px 6px;border-radius:4px 0 0 4px',
   'background:#1C1917;color:#D97757;font-weight:600;padding:2px 6px;border-radius:0 4px 4px 0'
 );

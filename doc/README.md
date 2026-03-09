@@ -1,5 +1,773 @@
 # WeSmart Custom Cards — Home Assistant
 
+Una collezione di card personalizzate per il Dashboard di Home Assistant, ispirate all'estetica **Anthropic WeSmart AI**: tema scuro carbone caldo, accento arancione, tipografia minimale.
+
+---
+
+## Card
+
+| Card | File | Tipo entità | Tema |
+|------|------|-------------|-------|
+| [**WeSmart Commander Hub**](#wesmart-commander-hub) | `Hub/wesmart-commander-hub.js` | **Hub / multi** | Dark / Light / Auto |
+| [WeSmart Light Card](#wesmart-light-card) | `Light/wesmart-light-card.js` | `light.*` | Dark / Light / Auto |
+| [WeSmart Lights Card](#wesmart-lights-card) | `Lights/wesmart-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
+| [WeSmart Lights Expand Card](#wesmart-lights-expand-card) | `Lights/wesmart-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
+| [WeSmart Climate Card](#wesmart-climate-card) | `Climate/wesmart-climate-card.js` | `climate.*` | Dark / Light / Auto |
+| [WeSmart Climate Compact Card](#wesmart-climate-compact-card) | `Climate/wesmart-climate-compact-card.js` | `climate.*` (multi) | Dark / Light / Auto |
+| [WeSmart Sensors Card](#wesmart-sensors-card) | `Sensors/wesmart-sensors-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
+| [WeSmart Doors Card](#wesmart-doors-card) | `Doors/wesmart-doors-card.js` | `binary_sensor.*` (multi) | Dark / Light / Auto |
+| [WeSmart History Card](#wesmart-history-card) | `History/wesmart-history-card.js` | qualsiasi (multi) | Dark / Light / Auto |
+| [WeSmart Buttons Bar Card](#wesmart-buttons-bar-card) | `Buttons/wesmart-buttons-bar-card.js` | qualsiasi / service | Dark / Light / Auto |
+| [WeSmart Buttons Grid Card](#wesmart-buttons-grid-card) | `Buttons/wesmart-buttons-grid-card.js` | qualsiasi / service | Dark / Light / Auto |
+| [WeSmart Battery Status Card](#wesmart-battery-status-card) | `Battery/wesmart-battery-status-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
+| [WeSmart Switches Card](#wesmart-switches-card) | `Switches/wesmart-switches-card.js` | `switch.*` (multi) | Dark / Light / Auto |
+| [WeSmart Clock Card](#wesmart-clock-card) | `Clock/wesmart-clock-card.js` | qualsiasi (max 3 extra) | Dark / Light / Auto |
+
+---
+
+## Installazione
+
+### 1. Copia i file
+
+Copia il file `.js` di ogni card che vuoi usare in `config/www/`:
+
+```
+config/www/wesmart-commander-hub.js
+config/www/wesmart-light-card.js
+config/www/wesmart-lights-card.js
+config/www/wesmart-lights-expand-card.js
+config/www/wesmart-climate-card.js
+config/www/wesmart-climate-compact-card.js
+config/www/wesmart-sensors-card.js
+config/www/wesmart-doors-card.js
+config/www/wesmart-history-card.js
+config/www/wesmart-buttons-bar-card.js
+config/www/wesmart-buttons-grid-card.js
+config/www/wesmart-battery-status-card.js
+config/www/wesmart-switches-card.js
+config/www/wesmart-clock-card.js
+```
+
+### 2. Aggiungi le risorse
+
+In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi una voce per card:
+
+| URL | Tipo |
+|-----|------|
+| `/local/wesmart-commander-hub.js` | Modulo JavaScript |
+| `/local/wesmart-light-card.js` | Modulo JavaScript |
+| `/local/wesmart-lights-card.js` | Modulo JavaScript |
+| `/local/wesmart-lights-expand-card.js` | Modulo JavaScript |
+| `/local/wesmart-climate-card.js` | Modulo JavaScript |
+| `/local/wesmart-climate-compact-card.js` | Modulo JavaScript |
+| `/local/wesmart-sensors-card.js` | Modulo JavaScript |
+| `/local/wesmart-doors-card.js` | Modulo JavaScript |
+| `/local/wesmart-history-card.js` | Modulo JavaScript |
+| `/local/wesmart-buttons-bar-card.js` | Modulo JavaScript |
+| `/local/wesmart-buttons-grid-card.js` | Modulo JavaScript |
+| `/local/wesmart-battery-status-card.js` | Modulo JavaScript |
+| `/local/wesmart-switches-card.js` | Modulo JavaScript |
+| `/local/wesmart-clock-card.js` | Modulo JavaScript |
+
+### 3. Ricarica
+
+Hard refresh del browser: `Cmd+Shift+R` (macOS) / `Ctrl+Shift+R` (Windows/Linux).
+
+---
+
+## Token di Design
+
+Tutte le card condividono le stesse proprietà CSS personalizzate:
+
+| Token | Valore | Utilizzo |
+|-------|--------|----------|
+| `--claude-bg` | `#1C1917` | Sfondo pagina |
+| `--claude-surface` | `#292524` | Sfondo card |
+| `--claude-surface-2` | `#332E2A` | Superfici interne, slider |
+| `--claude-border` | `rgba(255,255,255,0.08)` | Bordi |
+| `--claude-orange` | `#D97757` | Accento primario |
+| `--claude-blue` | `#60B4D8` | Accento raffreddamento (clima) |
+| `--claude-text` | `#F5F0EB` | Testo primario |
+| `--claude-text-muted` | `#A09080` | Testo secondario |
+| `--claude-text-dim` | `#6B5F56` | Testo terziario, etichette |
+| `--claude-radius` | `20px` | Border radius card |
+| `--claude-radius-sm` | `12px` | Elementi interni |
+| `--claude-radius-xs` | `8px` | Pulsanti, elementi piccoli |
+
+**Tema light** (claude-lights-card, claude-sensors-card, claude-doors-card, claude-history-card):
+
+| Token | Valore |
+|-------|--------|
+| `--bg` | `#FFFEFA` |
+| `--surface` | `#F5F0EB` |
+| `--border` | `rgba(28,25,23,0.09)` |
+| `--text` | `#1C1917` |
+
+---
+
+## Architettura
+
+Tutte le card seguono lo stesso pattern:
+
+```
+Singolo file JS
+  └─ class extends HTMLElement
+      ├─ attachShadow({ mode: 'open' })    → DOM + stili isolati
+      ├─ setConfig(config)                 → parsing config YAML, chiama _render()
+      ├─ set hass(hass)                    → riceve aggiornamenti di stato, chiama _updateState()
+      ├─ _render()                         → inietta <style> + HTML card nel shadow DOM
+      ├─ _updateState()                    → aggiorna DOM da hass.states
+      └─ _bindEvents()                     → aggiunge listener click/pointer
+
+customElements.define('claude-*-card', ...)
+window.customCards.push({ type, name, description })
+```
+
+Nessun build step. Nessuna dipendenza. Vanilla JS puro.
+
+---
+
+## WeSmart Commander Hub
+
+La card dashboard centrale di punta. Include un saluto intelligente, navigazione a tab e avvisi di sistema automatici.
+
+```yaml
+type: custom:wesmart-commander-hub
+title: Panoramica Sistema
+entities:
+  - light.living_room
+  - switch.kettle
+stats:
+  - sensor.outdoor_temperature
+  - sensor.energy_consumption
+```
+
+**Tab:**
+- **Riepilogo**: Scansione automatica di luci attive, porte aperte e batterie scariche.
+- **Controlli**: Accesso rapido ai tuoi toggle preferiti.
+- **Sensori**: Monitoraggio ambientale e statistiche.
+
+**Funzionalità:**
+- Saluto in tempo reale con orologio.
+- UI glassmorphic premium con effetti radial glow.
+- Sistema di avvisi unificato.
+
+---
+
+## WeSmart Light Card
+
+Entità luce singola con controlli completi. — **v1.3.0**
+
+```yaml
+type: custom:wesmart-light-card
+entity: light.living_room
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `entity` | string | — | **Obbligatorio.** Entità `light.*` |
+| `name` | string | auto | Sovrascrittura nome visualizzato |
+| `icon` | string | auto | Sovrascrittura icona (mdi:*) |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `show_brightness` | boolean | `true` | Slider luminosità |
+| `show_color_temp` | boolean | `true` | Slider Kelvin/CT (solo per luci che la supportano) |
+| `show_color` | boolean | `true` | Slider tonalità (hue) per luci a colori |
+| `collapse_when_off` | boolean | `false` | Nasconde i controlli da spenta; si apre automaticamente all'accensione |
+
+**Funzionalità:** toggle · slider luminosità · slider Kelvin/CT · slider tonalità hue · collasso automatico con animazione · pulse glow quando accesa · overlay non disponibile
+
+**Rileva automaticamente** le capacità da `supported_color_modes`. Supporta attributi Kelvin moderni (`color_temp_kelvin`, `min_color_temp_kelvin`, `max_color_temp_kelvin`) di HA 2022.9+ e legacy mireds. Lo slider hue è minimal, stesso stile degli altri slider.
+
+**Temi:** `dark` · `light` · `auto`
+
+---
+
+## WeSmart Lights Card
+
+Più entità luce in una lista compatta con toggle individuali.
+
+```yaml
+type: custom:wesmart-lights-card
+title: Soggiorno
+theme: dark
+entities:
+  - light.ceiling
+  - entity: light.floor_lamp
+    name: Piantana
+    icon: mdi:floor-lamp
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'Lights'` | Intestazione card |
+| `icon` | string | `mdi:lightbulb-group` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `entities` | list | — | **Obbligatorio.** Lista entità luce |
+
+**Campi elemento entità:** `entity` (req) · `name` · `icon`
+
+**Funzionalità:** toggle master · toggle per riga · testo stato (luminosità + CT) · sottotitolo "N di M accese" · tap riga → More Info · oscuramento non disponibile
+
+**Temi:**
+- `dark` — carbone caldo (default)
+- `light` — crema calda `#FFFEFA`
+- `auto` — segue `prefers-color-scheme` di sistema
+
+---
+
+## WeSmart Lights Expand Card
+
+Stesso layout a lista della WeSmart Lights Card, ma cliccando una riga si **espande un pannello inline** con slider animati di luminosità e temperatura colore — senza lasciare il dashboard.
+
+```yaml
+type: custom:wesmart-lights-expand-card
+title: Soggiorno
+theme: dark
+entities:
+  - light.ceiling
+  - entity: light.floor_lamp
+    name: Piantana
+    icon: mdi:floor-lamp
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'Lights'` | Intestazione card |
+| `icon` | string | `mdi:lightbulb-group` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `entities` | list | — | **Obbligatorio.** Lista entità luce |
+
+**Campi elemento entità:** `entity` (req) · `name` · `icon`
+
+**Funzionalità:**
+- Toggle master (tutte on/off) · toggle per riga
+- Clic su una riga (fuori dal toggle) → **pannello espandibile animato**
+- Un solo pannello aperto alla volta; clic sulla stessa riga lo chiude
+- Il pannello espanso mostra:
+  - **Slider luminosità** — visibile solo quando la luce è accesa e supporta la luminosità
+  - **Slider temperatura colore** — gradiente caldo→freddo, visibile solo quando `color_temp` è disponibile
+  - Suggerimento "Accendi per regolare" quando la luce è spenta
+- Il trascinamento degli slider applica le modifiche a HA al rilascio del puntatore
+- Sottotitolo header: "N di M accese" / "Tutte accese" / "Tutte spente"
+- Entità non disponibili oscurate e non interattive
+
+**Animazioni:**
+
+| Elemento | Effetto |
+|---------|--------|
+| Icona chevron | Ruota 180° all'espansione (`transform` + `cubic-bezier`) |
+| Pannello | Fisarmonica: transizione `max-height` + `opacity` |
+| Contenuto pannello | Scorre verso l'alto (`translateY`) |
+| Cursore slider | Anello glow durante il trascinamento |
+| Bordo pannello | Appare progressivamente all'apertura |
+
+**Temi:** `dark` · `light` · `auto`
+
+---
+
+## WeSmart Climate Card
+
+Entità clima singola con controlli temperatura e selettore modalità.
+
+```yaml
+type: custom:wesmart-climate-card
+entity: climate.living_room
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `entity` | string | — | **Obbligatorio.** Entità `climate.*` |
+| `name` | string | auto | Sovrascrittura nome visualizzato |
+| `icon` | string | auto | Sovrascrittura icona |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `show_fan_mode` | boolean | `true` | Pill modalità ventilatore |
+| `temp_step` | number | auto | Passo temperatura (es. `0.5`) |
+
+**Funzionalità:** display temperatura corrente grande · badge umidità · temperatura target con pulsanti +/- · pill modalità HVAC · pill modalità ventilatore · doppio glow caldo/freddo · overlay non disponibile
+
+**Temi:** `dark` · `light` · `auto`
+
+**Modalità HVAC:** `off` · `heat` (glow arancione) · `cool` (glow blu) · `heat_cool` (display range) · `auto` · `dry` · `fan_only`
+
+**Rileva automaticamente** `hvac_modes` e `fan_modes` dagli attributi dell'entità — vengono mostrate solo le modalità supportate.
+
+---
+
+## WeSmart Sensors Card
+
+Più entità sensore in una lista compatta con badge valori e evidenziazione avvisi.
+
+```yaml
+type: custom:wesmart-sensors-card
+title: Sensori Casa
+theme: dark
+entities:
+  - sensor.temperature_soggiorno
+  - sensor.humidity_soggiorno
+  - entity: sensor.co2_cucina
+    name: CO₂ Cucina
+    alert_above: 800
+  - entity: sensor.battery_door
+    name: Batteria porta
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'Sensors'` | Intestazione card |
+| `icon` | string | `mdi:chart-line` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `entities` | list | — | **Obbligatorio.** Lista entità sensore |
+
+**Campi elemento entità:**
+
+| Campo | Tipo | Descrizione |
+|-------|------|-------------|
+| `entity` | string | **Obbligatorio.** Entità `sensor.*` |
+| `name` | string | Sovrascrittura nome visualizzato |
+| `icon` | string | Sovrascrittura icona (mdi:*) |
+| `device_class` | string | Forza device class (rilevata automaticamente se omessa) |
+| `unit` | string | Sovrascrittura unità di misura |
+| `color` | string | Sovrascrittura colore accento (hex) |
+| `meta` | string | Sovrascrittura etichetta tipo sotto il nome |
+| `alert_above` | number | Avviso se il valore supera questa soglia |
+| `alert_below` | number | Avviso se il valore scende sotto questa soglia |
+
+**Funzionalità:** badge valore con unità · colore per `device_class` · soglie avviso integrate · soglie personalizzate · sottotitolo header "N avvisi" · tap riga → More Info · oscuramento non disponibile
+
+**Soglie avviso integrate** (attivate salvo override):
+
+| device_class | Condizione avviso |
+|---|---|
+| `temperature` | < 10 °C o > 30 °C |
+| `humidity` | < 30 % o > 70 % |
+| `co2` | > 1000 ppm |
+| `battery` | < 20 % |
+
+**Device class supportate** (con icona + colore automatici):
+`temperature` · `humidity` · `pressure` · `co2` · `pm25` · `pm10` · `illuminance` · `battery` · `voltage` · `current` · `power` · `energy` · `gas` · `water` · `signal_strength` · `moisture` · `aqi` · `speed` · `wind_speed`
+
+**Temi:** `dark` · `light` · `auto` (come Lights card)
+
+---
+
+## WeSmart Doors Card
+
+Più sensori binari porta/finestra/contatto in una lista con pill stato aperto/chiuso.
+
+```yaml
+type: custom:wesmart-doors-card
+title: Porte & Finestre
+theme: dark
+entities:
+  - binary_sensor.porta_ingresso
+  - binary_sensor.finestra_cucina
+  - entity: binary_sensor.garage
+    name: Garage
+    device_class: garage_door
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'Doors & Windows'` | Intestazione card |
+| `icon` | string | `mdi:door` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `entities` | list | — | **Obbligatorio.** Lista entità binary sensor |
+
+**Campi elemento entità:**
+
+| Campo | Tipo | Descrizione |
+|-------|------|-------------|
+| `entity` | string | **Obbligatorio.** Entità `binary_sensor.*` |
+| `name` | string | Sovrascrittura nome visualizzato |
+| `icon` | string | Sovrascrittura icona (mdi:*) |
+| `device_class` | string | Forza device class (rilevata automaticamente se omessa) |
+
+**Funzionalità:** pill stato Aperto/Chiuso (arancione / verde) · righe aperte evidenziate · header mostra "N aperte" o "Tutte chiuse" · coppie icone per classe · tap riga → More Info · oscuramento non disponibile
+
+**Device class supportate:**
+
+| device_class | Etichetta aperto | Etichetta chiuso |
+|---|---|---|
+| `door` | Aperta | Chiusa |
+| `window` | Aperta | Chiusa |
+| `garage_door` | Aperto | Chiuso |
+| `opening` | Aperta | Chiusa |
+| `lock` | Sbloccata | Bloccata |
+| `motion` | Rilevato | Assente |
+| `vibration` | Rilevata | Assente |
+| `moisture` | Bagnato | Asciutto |
+| `smoke` | Rilevato | Assente |
+| `gas` | Rilevato | Assente |
+
+> Stato `binary_sensor` `on` = aperto/attivo · `off` = chiuso/assente
+
+**Temi:** `dark` · `light` · `auto`
+
+---
+
+## WeSmart History Card
+
+Card grafico storico multi-entità. Sostituisce la HA History Graph predefinita con una versione migliorata e interattiva.
+
+```yaml
+type: custom:wesmart-history-card
+title: Storico Casa
+theme: dark
+hours: 24
+entities:
+  - light.soggiorno
+  - sensor.temperatura_cucina
+  - entity: binary_sensor.porta_ingresso
+    name: Porta Ingresso
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'History'` | Intestazione card |
+| `icon` | string | `mdi:chart-line` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `hours` | number | `24` | Range temporale default (`1` · `6` · `24` · `168`) |
+| `entities` | list | — | **Obbligatorio.** Qualsiasi tipo di entità |
+
+**Campi elemento entità:** `entity` (req) · `name` · `icon`
+
+**Tipi di grafico (rilevati automaticamente):**
+- Entità **binarie** → **barra timeline** arancione — periodi attivi in arancione, inattivi in scuro
+- Entità **numeriche** → **grafico a linee SVG** con riempimento gradiente
+
+**Funzionalità:**
+- Pill temporali interattivi: `1h` · `6h` · `24h` · `7d`
+- Badge stato corrente per entità (arancione quando attivo)
+- Stat riepilogativa: `Attivo X%` per binario · `min – max unità` per numerico
+- Etichette asse temporale · loader animato · Tap riga → More Info
+
+**Temi:** `dark` · `light` · `auto`
+
+---
+
+## WeSmart Buttons Bar Card
+
+Barra orizzontale compatta di pulsanti azione. Altezza ridotta, larghezza intera — ideale per righe di accesso rapido.
+
+```yaml
+type: custom:wesmart-buttons-bar-card
+theme: dark
+title: Azioni Rapide
+buttons:
+  - name: Luci
+    icon: mdi:lightbulb
+    entity: light.soggiorno
+  - name: Film
+    icon: mdi:movie-open
+    service: scene.turn_on
+    service_data:
+      entity_id: scene.serata_film
+  - name: TV
+    icon: mdi:television
+    entity: switch.tv
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `title` | string | — | Etichetta opzionale sopra i pulsanti |
+| `buttons` | list | — | **Obbligatorio.** Lista pulsanti |
+
+**Campi elemento pulsante:**
+
+| Campo | Tipo | Descrizione |
+|-------|------|-------------|
+| `name` | string | Etichetta pulsante |
+| `icon` | string | Icona MDI (es. `mdi:lightbulb`) |
+| `entity` | string | Entità opzionale per tracciamento stato + toggle default |
+| `service` | string | Service opzionale da chiamare (`dominio.service`) |
+| `service_data` | object | Dati opzionali passati al service |
+
+**Logica azione (dedotta):**
+- Solo `entity` → chiama `homeassistant.toggle` al clic
+- Solo `service` → chiama il service; nessuno stato attivo (animazione pressione al clic)
+- Entrambi → chiama il service; l'entità traccia il colore attivo/inattivo
+- Nessuno → pulsante decorativo
+
+**Colori stato:**
+- **Attivo** (`on`, `open`, `unlocked`, `detected`, `playing`, `armed_*`, …): sfondo arancione + glow
+- **Inattivo**: sfondo surface, icona/etichetta attenuata
+- **Non disponibile**: oscurato (opacity 0.35), non interattivo
+
+**Temi:** `dark` · `light` · `auto`
+
+---
+
+## WeSmart Buttons Grid Card
+
+Card quadrata con più pulsanti disposti in una griglia automatica. Ideale per stanze con molte azioni.
+
+```yaml
+type: custom:wesmart-buttons-grid-card
+title: Casa
+icon: mdi:home
+theme: dark
+columns: 3
+buttons:
+  - name: Luci Soggiorno
+    icon: mdi:lightbulb
+    entity: light.soggiorno
+  - name: Luci Cucina
+    icon: mdi:ceiling-light
+    entity: light.cucina
+  - name: TV
+    icon: mdi:television
+    entity: switch.tv
+  - name: Film
+    icon: mdi:movie-open
+    service: scene.turn_on
+    service_data:
+      entity_id: scene.serata_film
+  - name: Allarme
+    icon: mdi:shield-home
+    service: alarm_control_panel.alarm_arm_away
+    service_data:
+      entity_id: alarm_control_panel.casa
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | — | Intestazione card opzionale |
+| `icon` | string | `mdi:gesture-tap` | Icona header (usata quando `title` è impostato) |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `columns` | number | auto | Forza numero fisso di colonne; ometti per `auto-fill` |
+| `buttons` | list | — | **Obbligatorio.** Lista pulsanti |
+
+**Campi elemento pulsante:** come Bar card (`name`, `icon`, `entity`, `service`, `service_data`)
+
+**Funzionalità:**
+- Griglia auto-fit o numero fisso di colonne
+- Header opzionale con icona + titolo
+- Stessa logica stati e colori della Bar card
+- Animazione pressione per pulsanti service senza stato
+
+**Temi:** `dark` · `light` · `auto`
+
+---
+
+## WeSmart Switches Card
+
+Card toggle multi-entità con controllo icona interattivo.
+
+```yaml
+type: custom:wesmart-switches-card
+title: Interruttori Cucina
+entities:
+  - switch.kettle
+  - entity: light.counter_light
+    name: Sottopensile
+    icon: mdi:led-strip-variant
+  - input_boolean.coffee_timer
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'Switches'` | Intestazione card |
+| `icon` | string | `mdi:toggle-switch` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `entities` | list | — | **Obbligatorio.** Entità switch |
+
+**Campi elemento entità:** `entity` (req) · `name` · `icon`
+
+**Funzionalità:**
+- **Icone interattive:** Clic sull'icona per cambiare stato; glow arancione quando ON.
+- **Etichette stato:** Pill ON/OFF chiari per stato immediato.
+- **More Info:** Clic sul testo della riga per aprire il dialogo service HA.
+
+---
+
+## WeSmart Climate Compact Card
+
+Alternativa a righe alla card clima completa, ottimizzata per la gestione multi-zona.
+
+```yaml
+type: custom:wesmart-climate-compact-card
+title: Riscaldamento Piano Superiore
+entities:
+  - climate.master_bedroom
+  - entity: climate.guest_room
+    name: Ospiti
+  - climate.bathroom
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'Climate Control'` | Intestazione card |
+| `icon` | string | `mdi:thermostat` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `entities` | list | — | **Obbligatorio.** Entità clima |
+
+**Funzionalità:**
+- **Controlli in riga:** Regola la temperatura target con i pulsanti +/- integrati.
+- **Temperatura corrente:** Badge piccolo con temperatura in tempo reale.
+- **Colore stato:** Le icone brillano arancione (riscaldamento), blu (raffreddamento) o attenuate.
+
+---
+
+## WeSmart Battery Status Card
+
+Card monitoraggio batterie multi-entità con icone dinamiche e opzioni di visualizzazione.
+
+```yaml
+type: custom:wesmart-battery-status-card
+title: Stato Batterie
+display_type: circular
+entities:
+  - sensor.phone_battery
+  - entity: sensor.tablet_battery
+    name: Tablet
+    display_type: linear
+  - entity: sensor.watch_battery
+    name: Orologio
+    display_type: icon
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'Batteries'` | Intestazione card |
+| `icon` | string | `mdi:battery-check` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `display_type` | string | `'icon'` | `icon` \| `linear` \| `circular` |
+| `entities` | list | — | **Obbligatorio.** Entità sensore batteria |
+
+**Campi elemento entità:** `entity` (req) · `name` · `display_type` (override)
+
+**Funzionalità:**
+- **Visualizzazioni:** `icon` (icona MDI dinamica) · `linear` (barra progresso) · `circular` (anello SVG animato)
+- **Codice colore:** <15% arancione critico · <30% giallo warning · >30% verde attenuato
+- **Header riepilogativo:** "N scariche" in arancione se una batteria è ≤ 20%
+
+---
+
+## WeSmart Clock Card
+
+Orologio ambient elegante con informazioni entità extra opzionali in una barra inferiore o sidebar sinistra.
+
+```yaml
+type: custom:wesmart-clock-card
+theme: dark
+extras_layout: sidebar
+translate_weather: true
+extra_entities:
+  - weather.home
+  - entity: sensor.outdoor_temperature
+    icon: mdi:thermometer-high
+  - entity: sensor.humidity
+    icon: mdi:water-percent
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `time_format` | number | `24` | `12` o `24` |
+| `extras_layout` | string | `'bottom'` | `bottom` \| `sidebar` — posizione info extra |
+| `translate_weather` | boolean | `false` | Traduci stati `weather.*` in italiano |
+| `extra_entities` | list | `[]` | Fino a **3** entità da visualizzare |
+
+**Campi elemento entità:** `entity` (req) · `icon` (MDI personalizzato, ignorato per `weather.*`)
+
+**Funzionalità:**
+- Barra inferiore: fino a 3 elementi, larghezza intera equamente divisa, senza scorrimento
+- Sidebar: colonna sinistra stretta (78px), elementi impilati verticalmente
+- Ogni elemento mostra solo **icona + valore stato** — nessun nome o etichetta
+- Entità weather: icona automatica; traduzione italiana opzionale
+- Responsive: gli elementi restano sempre nei limiti della card
+
+**Temi:** `dark` · `light` · `auto`
+
+---
+
+## WeSmart Infinite Color Card
+
+Card storico con motore HSL che genera l'intera palette da un singolo colore di input.
+
+```yaml
+type: custom:wesmart-infinite-color-card
+title: Storico Casa
+color: '#f73747'
+theme: dark
+hours: 24
+entities:
+  - light.soggiorno
+  - sensor.temperatura
+  - binary_sensor.porta_ingresso
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `color` | string | `'#D97757'` | Colore base hex — genera l'intera palette |
+| `title` | string | `'History'` | Intestazione card |
+| `icon` | string | `mdi:chart-line` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `hours` | number | `24` | Range temporale default |
+| `entities` | list | — | **Obbligatorio.** Qualsiasi tipo di entità |
+
+**Temi:** `dark` · `light` · `auto`
+
+---
+
+## Struttura Progetto
+
+```
+custom card home assistant/
+├── doc/
+│   └── README.md                              ← questo file
+│
+├── WeSmart-Original/                          ← card standard (palette fissa)
+│   ├── Hub/wesmart-commander-hub.js
+│   ├── Light/wesmart-light-card.js
+│   ├── Lights/wesmart-lights-card.js + wesmart-lights-expand-card.js
+│   ├── Climate/wesmart-climate-card.js + wesmart-climate-compact-card.js
+│   ├── Sensors/wesmart-sensors-card.js
+│   ├── Doors/wesmart-doors-card.js
+│   ├── History/wesmart-history-card.js
+│   ├── Buttons/wesmart-buttons-bar-card.js + wesmart-buttons-grid-card.js
+│   ├── Battery/wesmart-battery-status-card.js
+│   ├── Switches/wesmart-switches-card.js
+│   └── Clock/wesmart-clock-card.js
+│
+└── WeSmart-InfiniteColor/
+    └── History/wesmart-infinite-color-card.js
+```
+
+---
+---
+
+# WeSmart Custom Cards — Home Assistant
+
 A collection of custom cards for Home Assistant Dashboard, styled after the **Anthropic WeSmart AI** aesthetic: warm charcoal dark theme, orange accent, minimal typography.
 
 ---
@@ -156,7 +924,7 @@ stats:
 
 ## WeSmart Light Card
 
-Single light entity with full controls.
+Single light entity with full controls. — **v1.3.0**
 
 ```yaml
 type: custom:wesmart-light-card
@@ -172,12 +940,13 @@ entity: light.living_room
 | `icon` | string | auto | Override icon (mdi:*) |
 | `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
 | `show_brightness` | boolean | `true` | Brightness slider |
-| `show_color_temp` | boolean | `true` | Color temperature slider |
-| `show_color` | boolean | `true` | Color preset palette (8 presets) |
+| `show_color_temp` | boolean | `true` | Kelvin/CT slider (only for lights that support it) |
+| `show_color` | boolean | `true` | Hue slider for color lights |
+| `collapse_when_off` | boolean | `false` | Hide controls when off; auto-expands when turned on |
 
-**Features:** toggle · brightness slider · color temp slider · 8 color presets · pulse glow when on · unavailable overlay
+**Features:** toggle · brightness slider · Kelvin/CT slider · hue slider · auto-collapse with animation · pulse glow when on · unavailable overlay
 
-**Auto-detects** capabilities from `supported_color_modes` — sliders only appear if the light supports them.
+**Auto-detects** capabilities from `supported_color_modes`. Supports modern HA 2022.9+ Kelvin attributes (`color_temp_kelvin`, `min_color_temp_kelvin`, `max_color_temp_kelvin`) with legacy mireds fallback. The hue slider is minimal, matching the style of all other sliders.
 
 **Themes:** `dark` · `light` · `auto`
 
