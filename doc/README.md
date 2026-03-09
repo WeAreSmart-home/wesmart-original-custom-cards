@@ -608,6 +608,8 @@ Alternativa a righe alla card clima completa, ottimizzata per la gestione multi-
 ```yaml
 type: custom:wesmart-climate-compact-card
 title: Riscaldamento Piano Superiore
+icon: mdi:thermostat
+theme: dark
 entities:
   - climate.master_bedroom
   - entity: climate.guest_room
@@ -622,12 +624,20 @@ entities:
 | `title` | string | `'Climate Control'` | Intestazione card |
 | `icon` | string | `mdi:thermostat` | Icona header |
 | `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
-| `entities` | list | — | **Obbligatorio.** Entità clima |
+| `entities` | list | — | **Obbligatorio.** Lista entità `climate.*` |
+
+**Campi elemento entità:** `entity` (req) · `name`
 
 **Funzionalità:**
-- **Controlli in riga:** Regola la temperatura target con i pulsanti +/- integrati.
-- **Temperatura corrente:** Badge piccolo con temperatura in tempo reale.
-- **Colore stato:** Le icone brillano arancione (riscaldamento), blu (raffreddamento) o attenuate.
+- **Controlli in riga:** Pulsanti +/- regolano la temperatura target; il passo segue `target_temp_step` dell'entità (default 0.5)
+- **Badge temperatura corrente:** Mostra la temperatura ambientale in tempo reale
+- **Icona dinamica:** Cambia in base a `hvac_action` — fiamma arancione (riscaldamento), fiocco blu (raffreddamento), grigio (idle/off)
+- **Modalità `heat_cool`:** Mostra il range `min°–max°`; pulsanti +/- disabilitati
+- **Entità `off`:** Pulsanti +/- disabilitati (opacity ridotta)
+- **Clic sulla riga** (fuori dai pulsanti) → More Info di HA
+- **Entità non disponibili:** Oscurate e non interattive
+
+**Temi:** `dark` · `light` · `auto`
 
 ---
 
@@ -1378,6 +1388,8 @@ A row-based alternative to the full climate card, optimized for multi-zone manag
 ```yaml
 type: custom:wesmart-climate-compact-card
 title: Upstairs Heating
+icon: mdi:thermostat
+theme: dark
 entities:
   - climate.master_bedroom
   - entity: climate.guest_room
@@ -1392,12 +1404,20 @@ entities:
 | `title` | string | `'Climate Control'` | Card heading |
 | `icon` | string | `mdi:thermostat` | Header icon |
 | `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
-| `entities` | list | — | **Required.** Climate entities |
+| `entities` | list | — | **Required.** `climate.*` entity list |
+
+**Entity item fields:** `entity` (req) · `name`
 
 **Features:**
-- **In-row Controls:** Adjust target temperature using integrated +/- buttons.
-- **Current Temperature:** Small badge showing real-time temperature.
-- **State Coloring:** Icons glow orange (heating), blue (cooling), or muted.
+- **In-row Controls:** +/- buttons adjust target temperature; step follows entity's `target_temp_step` (default 0.5)
+- **Current temperature badge:** Shows real-time ambient temperature
+- **Dynamic icon:** Changes based on `hvac_action` — orange flame (heating), blue snowflake (cooling), muted (idle/off)
+- **`heat_cool` mode:** Displays `min°–max°` range; +/- buttons disabled
+- **`off` state:** +/- buttons disabled (reduced opacity)
+- **Click on row** (outside buttons) → HA More Info dialog
+- **Unavailable entities:** Dimmed and non-interactive
+
+**Themes:** `dark` · `light` · `auto`
 
 ---
 
