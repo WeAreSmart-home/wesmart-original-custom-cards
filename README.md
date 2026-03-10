@@ -1,17 +1,57 @@
 # WeSmart Custom Cards — Home Assistant
 
-A premium collection of custom cards for Home Assistant Dashboard, inspired by the **Anthropic WeSmart AI** aesthetic: warm charcoal dark theme, orange accent, and minimal typography.
+A premium collection of custom cards for Home Assistant Dashboard, inspired by the **WeSmart AI** aesthetic: warm charcoal dark theme, orange accent, and minimal typography.
+
+Two collections are available: **WeSmart Original** (fixed palette) and **WeSmart InfiniteColor** (dynamic HSL color engine).
 
 ---
 
-## 📸 Preview
+## Preview
 
 ![Lights Preview](asset/images/lights-cards.webp)
 ![Sensors Preview](asset/images/sensor.webp)
 
 ---
 
-## 🚀 Installation
+## WeSmart InfiniteColor
+
+The **InfiniteColor** collection features a chromatic engine that generates a complete visual palette from a single hex color you define in YAML. Every background, surface, text shade, accent, and shadow is automatically derived — no hardcoded values, no fixed themes.
+
+```yaml
+color: '#D97757'  ──→  accent, accent-soft, accent-glow, accent-border
+                  ──→  bg, surface, border
+                  ──→  text, text-muted, text-dim
+```
+
+![Clock and Light InfiniteColor](asset/images/clock-e-light-cards-infinite.png)
+
+![History Card — Blue Theme](asset/images/history-cards-blue.png)
+
+<details>
+<summary>More InfiniteColor previews</summary>
+
+![History Card — Yellow Dark](asset/images/history-cards-yellow-dark.png)
+![History Card — Yellow Light](asset/images/history-cards-yellow-light.png)
+
+</details>
+
+Pick any hex color and all 14 InfiniteColor cards instantly adapt their entire palette:
+
+| Input color | Palette |
+|---|---|
+| `'#D97757'` | Orange/charcoal — WeSmart default |
+| `'#60B4D8'` | Cool blue — ideal for climate |
+| `'#7CB87A'` | Green — ideal for doors/security |
+| `'#A78BFA'` | Purple — ideal for scenes/automations |
+| `'#F59E0B'` | Amber/gold — ideal for sensors/battery |
+
+Themes `dark`, `light`, and `auto` (follows OS `prefers-color-scheme`) are supported by every card.
+
+**→ [Full InfiniteColor documentation](WeSmart-InfiniteColor/README.md)**
+
+---
+
+## Installation
 
 ### 1. Copy Files
 Copy the `.js` file of each card you want to use into your Home Assistant `config/www/` directory.
@@ -26,9 +66,11 @@ Perform a hard refresh of your browser (`Cmd+Shift+R` or `Ctrl+Shift+R`).
 
 ---
 
-## 🎨 Design System
+## Design System
 
-All cards share a unified design language based on premium "Claude-like" tokens:
+### WeSmart Original — Fixed palette
+
+All Original cards share a unified design language:
 
 | Token | Dark Value | Light Value |
 |-------|------------|-------------|
@@ -36,49 +78,74 @@ All cards share a unified design language based on premium "Claude-like" tokens:
 | `--surface` | `#292524` | `#F5F0EB` |
 | `--accent` | `#D97757` | — |
 
+### WeSmart InfiniteColor — Dynamic palette
+
+Every token is computed from a single `color` property. See the [InfiniteColor documentation](WeSmart-InfiniteColor/README.md) for the full algorithm.
+
 ---
 
-## 🎴 Available Cards
+## Available Cards
 
-### WeSmart Commander Hub
+### WeSmart InfiniteColor Collection
+
+14 cards with a dynamic HSL color engine. Full documentation → [WeSmart-InfiniteColor/README.md](WeSmart-InfiniteColor/README.md)
+
+| Card | YAML Tag |
+|------|----------|
+| History | `wesmart-infinite-history-card` |
+| Lights | `wesmart-infinite-lights-card` |
+| Lights Expand | `wesmart-infinite-lights-expand-card` |
+| Light (single) | `wesmart-infinite-light-card` |
+| Climate | `wesmart-infinite-climate-card` |
+| Climate Compact | `wesmart-infinite-climate-compact-card` |
+| Sensors | `wesmart-infinite-sensors-card` |
+| Doors | `wesmart-infinite-doors-card` |
+| Switches | `wesmart-infinite-switches-card` |
+| Buttons Bar | `wesmart-infinite-buttons-bar-card` |
+| Buttons Grid | `wesmart-infinite-buttons-grid-card` |
+| Clock | `wesmart-infinite-clock-card` |
+| Commander Hub | `wesmart-infinite-commander-hub` |
+| Super Dashboard | `wesmart-infinite-super-dashboard` |
+
+### WeSmart Original Collection
+
+Cards with a fixed warm charcoal palette.
+
+#### WeSmart Commander Hub
 The flagship central dashboard card. Features a smart greeting, tabbed navigation, and automated system alerts.
 
-### WeSmart Light Card
+#### WeSmart Light Card
 Single light entity with full controls: toggle, brightness, color temperature, and color (hue).
-![Light Card Video](asset/video/light-card.mp4)
 
-### WeSmart Lights & Expand Card
+#### WeSmart Lights & Expand Card
 Multiple light entities in a compact list. The "Expand" version features animated inline sliders.
-![Lights Expand Video](asset/video/lights-expand-cards.mp4)
 
-### WeSmart Climate & Compact Card
+#### WeSmart Climate & Compact Card
 Advanced climate control with target temperature, HVAC modes, and fan speed.
 ![Climate Preview](asset/images/climate-e-compact-cards.webp)
 
-### WeSmart Sensors & Doors
+#### WeSmart Sensors & Doors
 Compact lists for environmental sensors and binary sensors (doors, windows, motion) with status pills.
 ![Doors Preview](asset/images/doors.webp)
 
-### WeSmart History & Infinite Color Card
-Interactive history graphs. The "Infinite Color" version generates its entire palette from a single base color.
-![History Video](asset/video/history-card.mp4)
-![Infinite Color Video](asset/video/Infinite-color-card.mp4)
+#### WeSmart History Card
+Interactive history graphs.
 
-### WeSmart Buttons (Bar & Grid)
+#### WeSmart Buttons (Bar & Grid)
 Quick-access buttons for lights, scenes, and switches, arranged in horizontal bars or automatic grids.
 ![Buttons Preview](asset/images/bar-e-grid-button-cards.webp)
 
-### WeSmart Battery Status
+#### WeSmart Battery Status
 Monitor all your devices with circular or linear battery indicators.
 ![Battery Preview](asset/images/battery-cards.webp)
 
-### WeSmart Clock Card
+#### WeSmart Clock Card
 Sleek ambient clock with entity sidebar or bottom bar info.
 ![Clock Preview](asset/images/clock-card.webp)
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 .
@@ -90,4 +157,4 @@ Sleek ambient clock with entity sidebar or bottom bar info.
 
 ---
 
-*Ispirate all'estetica Anthropic WeSmart AI.*
+*Inspired by the WeSmart AI aesthetic.*
