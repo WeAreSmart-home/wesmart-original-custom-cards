@@ -118,12 +118,18 @@ Every token is computed from a single `color` property. See the [InfiniteColor d
 
 Cards with a fixed warm charcoal palette.
 
-#### WeSmart Weather Card *(new)*
+#### WeSmart Weather Card *(new — work in progress)*
+
+> ⚠️ **Experimental.** This card is under active development and may contain bugs or incomplete features. Use with caution and expect breaking changes.
+
 Full weather card with current conditions, forecast strip (daily or hourly), and stats bar.
 Fetches forecasts via WebSocket API (HA 2023.9+).
 ![Weather Preview](asset/images/meteo-card.png)
 
-#### WeSmart Energy Flow Card *(new)*
+#### WeSmart Energy Flow Card *(new — work in progress)*
+
+> ⚠️ **Experimental.** This card is under active development and may contain bugs or incomplete features. Use with caution and expect breaking changes.
+
 Real-time energy flow visualization: grid, solar, battery, home consumption.
 All source nodes (solar, grid, battery) are optional — only `home_power` is required.
 ![Energy Preview](asset/images/energy-card.png)
