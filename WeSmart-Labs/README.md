@@ -18,6 +18,8 @@ Experimental cards under active development. These cards are not production-read
 
 ## wesmart-labs-home-panel
 
+![Home Panel](../asset/images/labs/labs-home-panel.png)
+
 Tablet dashboard panel in a single card. Displays five rows:
 
 - **Row 1** — Weather (MET.NO) + Presence
@@ -326,6 +328,8 @@ doors:
 ---
 
 ## wesmart-labs-surface
+
+![Surface](../asset/images/labs/labs-surface.png)
 
 **The cardless dashboard.** No containers, no borders, no shadows. Content lives directly on the background — hierarchy expressed only through scale, weight, color, and space.
 
