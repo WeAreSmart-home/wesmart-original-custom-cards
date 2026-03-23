@@ -1,5 +1,7 @@
 # WeSmart Weather Card
 
+> **v1.0.1** — Fix forecast: corretta la chiamata WebSocket HA per open-meteo, met.no e tutte le integrazioni moderne.
+
 Card personalizzata per Home Assistant che mostra le condizioni meteo correnti e il forecast giornaliero o orario, in stile WeSmart dark carbone con icona colorata per condizione.
 
 ---
@@ -112,9 +114,9 @@ Pills compatte con le statistiche disponibili:
 - UV Index (mostrato automaticamente se disponibile nell'entità)
 
 ### Forecast
-- Fetch via **WebSocket API** `weather/get_forecasts` (HA 2023.9+)
-- **Fallback automatico** all'attributo `forecast` per integrazioni più vecchie
-- Refresh ogni **30 minuti**
+- Subscription via **WebSocket API** `weather/subscribe_forecast` (HA 2023.9+)
+- **Aggiornamenti automatici** push: nessun polling, HA notifica la card quando i dati cambiano
+- **Fallback automatico** all'attributo `forecast` per integrazioni precedenti al 2023.9
 - Ogni slot mostra:
   - Giorno abbreviato (Mon, Tue…) o orario (hourly)
   - **"Today"** evidenziato in arancione per il giorno corrente
@@ -219,8 +221,8 @@ forecast_days: 5
 
 Funziona con qualsiasi integrazione `weather.*` in Home Assistant.
 
-**Forecast WebSocket API** (HA 2023.9+): `weather/get_forecasts`
-**Fallback automatico** all'attributo `forecast` per integrazioni precedenti.
+**Forecast WebSocket API** (HA 2023.9+): `weather/subscribe_forecast` (subscription push)
+**Fallback automatico** all'attributo `forecast` per integrazioni precedenti al 2023.9.
 
 Integrazioni testate: Met.no, OpenWeatherMap, AccuWeather, Météo-France, SMHI, Yr, Bureau of Meteorology, Tomorrow.io, Pirate Weather.
 
@@ -233,8 +235,8 @@ wesmart-weather-card.js
   └─ class WeSmartWeatherCard extends HTMLElement
       ├─ attachShadow({ mode: 'open' })     → styling isolato
       ├─ setConfig(config)                  → parsing YAML, build HTML
-      ├─ set hass(hass)                     → _update() + fetch forecast se scaduto
-      ├─ _fetchForecast()                   → async WS API + fallback attributo
+      ├─ set hass(hass)                     → _update() + subscribe forecast se non attivo
+      ├─ _fetchForecast()                   → subscribeMessage WS API + fallback attributo
       ├─ _render()                          → CSS + DOM iniziale
       ├─ _update()                          → aggiorna condizioni correnti + stats
       ├─ _renderStats(attrs, unit)          → pills dinamiche per ogni stat
@@ -244,3 +246,18 @@ customElements.define('wesmart-weather-card', ...)
 ```
 
 Nessun build step. Nessuna dipendenza. Vanilla JS puro.
+
+---
+
+## Changelog
+
+### v1.0.1
+- **Fix forecast non visualizzato** con open-meteo, met.no e integrazioni moderne:
+  - Corretto tipo WebSocket: `weather/get_forecasts` → `weather/subscribe_forecast`
+  - Corretto metodo: `callWS` → `connection.subscribeMessage` (subscription push)
+  - Corretto parametro: `entity_ids` (array) → `entity_id` (singolare)
+  - La subscription riceve aggiornamenti automatici da HA senza polling ogni 30 min
+  - Fix temperatura massima nel forecast (non mostrava più la minima al posto della massima)
+
+### v1.0.0
+- Release iniziale

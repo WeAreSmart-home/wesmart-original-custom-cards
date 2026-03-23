@@ -21,13 +21,13 @@
  *   show_pressure   boolean  false
  *   show_visibility boolean  false
  *
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 
 (() => {
   'use strict';
 
-  const CARD_VERSION = '1.0.0';
+  const CARD_VERSION = '1.0.1';
 
   // ─── Condition map ───────────────────────────────────────────────────────────
 
@@ -302,11 +302,11 @@
     constructor() {
       super();
       this.attachShadow({ mode: 'open' });
-      this._config     = {};
-      this._hass       = null;
-      this._card       = null;
-      this._forecast   = null;
-      this._lastFetch  = 0;
+      this._config        = {};
+      this._hass          = null;
+      this._card          = null;
+      this._forecast      = null;
+      this._unsubForecast = null;
     }
 
     // ── HA lifecycle ────────────────────────────────────────────────────────────
@@ -333,8 +333,12 @@
         show_visibility:  false,
         ...config,
       };
-      this._forecast  = null;
-      this._lastFetch = 0;
+      // Unsubscribe previous forecast subscription when config changes
+      if (this._unsubForecast) {
+        this._unsubForecast();
+        this._unsubForecast = null;
+      }
+      this._forecast = null;
       this._render();
     }
 
@@ -342,10 +346,8 @@
       this._hass = hass;
       this._update();
 
-      // Refetch forecast every 30 min or on first load
-      const now = Date.now();
-      if (now - this._lastFetch > 30 * 60 * 1000) {
-        this._lastFetch = now;
+      // Subscribe once; the subscription pushes updates automatically
+      if (!this._unsubForecast) {
         this._fetchForecast();
       }
     }
@@ -358,18 +360,23 @@
       if (!this._hass) return;
       const entityId = this._config.entity;
       try {
-        // HA 2023.9+ WebSocket API
-        const result = await this._hass.callWS({
-          type:          'weather/get_forecasts',
-          entity_ids:    [entityId],
-          forecast_type: this._config.forecast_type,
-        });
-        this._forecast = result?.[entityId]?.forecast ?? [];
+        // HA 2023.9+ subscription-based WebSocket API
+        this._unsubForecast = await this._hass.connection.subscribeMessage(
+          (event) => {
+            this._forecast = event.forecast ?? [];
+            this._renderForecast();
+          },
+          {
+            type:          'weather/subscribe_forecast',
+            entity_id:     entityId,
+            forecast_type: this._config.forecast_type,
+          }
+        );
       } catch {
         // Fallback: legacy forecast attribute
         this._forecast = this._hass.states[entityId]?.attributes?.forecast ?? [];
+        this._renderForecast();
       }
-      this._renderForecast();
     }
 
     // ── Render ──────────────────────────────────────────────────────────────────
@@ -563,7 +570,7 @@
         const def    = condDef(fc.condition);
         const today  = isToday(fc.datetime);
         const dayLbl = today ? 'Today' : fmtDay(fc.datetime, type);
-        const hi     = fmtTemp(fc.temperature ?? fc.templow, tempUnit);
+        const hi     = fmtTemp(fc.temperature, tempUnit);
         const lo     = fc.templow != null ? fmtTemp(fc.templow, tempUnit) : null;
 
         // precipitation probability
