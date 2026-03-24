@@ -25,6 +25,8 @@ Una collezione di card personalizzate per il Dashboard di Home Assistant, ispira
 | [**WeSmart Energy Flow Card**](#wesmart-energy-flow-card) | `Energy/wesmart-energy-flow-card.js` | `sensor.*` (power/energy) | Dark / Light / Auto |
 | [**WeSmart Media Player Card**](#wesmart-media-player-card) | `MediaPlayer/wesmart-media-player-card.js` | `media_player.*` | Dark / Light / Auto |
 | [**WeSmart Weather Card**](#wesmart-weather-card) | `Weather/wesmart-weather-card.js` | `weather.*` | Dark / Light / Auto |
+| [**WeSmart Chart Card**](#wesmart-chart-card) | `Chart/wesmart-chart-card.js` | qualsiasi / multi | Dark / Light / Auto |
+| [**WeSmart Infinite Chart Card**](#wesmart-infinite-chart-card) | `Chart/wesmart-infinite-chart-card.js` | qualsiasi / multi | Palette dinamica |
 
 ---
 
@@ -49,6 +51,8 @@ config/www/wesmart-buttons-grid-card.js
 config/www/wesmart-battery-status-card.js
 config/www/wesmart-switches-card.js
 config/www/wesmart-clock-card.js
+config/www/wesmart-chart-card.js
+config/www/wesmart-infinite-chart-card.js
 ```
 
 ### 2. Aggiungi le risorse
@@ -71,6 +75,8 @@ In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi una v
 | `/local/wesmart-battery-status-card.js` | Modulo JavaScript |
 | `/local/wesmart-switches-card.js` | Modulo JavaScript |
 | `/local/wesmart-clock-card.js` | Modulo JavaScript |
+| `/local/wesmart-chart-card.js` | Modulo JavaScript |
+| `/local/wesmart-infinite-chart-card.js` | Modulo JavaScript |
 
 ### 3. Ricarica
 
@@ -752,6 +758,97 @@ entities:
 
 ---
 
+## WeSmart Chart Card
+
+Card grafico singola o multi-entità con drag-to-zoom, tooltip hover e pill filtro temporale.
+Accento fisso `#D97757` — stile WeSmart Original.
+
+```yaml
+type: custom:wesmart-chart-card
+title: Temperatura
+icon: mdi:thermometer
+theme: dark
+entity: sensor.temperatura_soggiorno
+```
+
+```yaml
+type: custom:wesmart-chart-card
+title: Sensori Casa
+theme: dark
+hours: 24
+entities:
+  - entity: sensor.temperatura_soggiorno
+    name: Temperatura
+  - entity: sensor.humidity_bagno
+    name: Umidità
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'Grafico'` | Titolo card |
+| `icon` | string | `mdi:chart-line` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `hours` | number | `24` | Range temporale default (1 · 6 · 24 · 168) |
+| `height` | number | `100` | Altezza area grafico in px |
+| `show_grid` | boolean | `false` | Grid lines orizzontali |
+| `zoom` | boolean | `true` | Abilita drag-to-zoom |
+| `entity` | string | — | Entità singola (alternativa a `entities`) |
+| `entities` | list | — | Lista entità multi |
+
+**Funzionalità:**
+- Grafico a linee SVG per entità numeriche · barre timeline per entità binarie
+- Multi-entità sovrapposto — 6 colori fissi (arancione · blu · verde · viola · ambra · rosa)
+- Drag-to-zoom in memoria (nessun re-fetch) · doppio click per reset
+- Tooltip hover con ora + valori per ogni entità
+- Etichette asse Y min/max · asse temporale allineato
+- Legenda: dot colorato · stato corrente · range min–max
+
+---
+
+## WeSmart Infinite Chart Card
+
+Stessa card grafico della versione Original ma con **Infinite Color Engine**: l'intera palette
+viene generata da un singolo colore hex. I colori multi-entità usano la rotazione dell'hue
+con angolo aureo per una distribuzione percettivamente ottimale.
+
+```yaml
+type: custom:wesmart-infinite-chart-card
+title: Temperature
+color: '#60B4D8'
+theme: dark
+hours: 24
+entities:
+  - entity: sensor.temperatura_soggiorno
+    name: Soggiorno
+  - entity: sensor.temperatura_cucina
+    name: Cucina
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `color` | string | `'#D97757'` | Colore base hex — genera tutta la palette |
+| `title` | string | `'Grafico'` | Titolo card |
+| `icon` | string | `mdi:chart-line` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `hours` | number | `24` | Range temporale default (1 · 6 · 24 · 168) |
+| `height` | number | `100` | Altezza area grafico in px |
+| `show_grid` | boolean | `false` | Grid lines orizzontali |
+| `zoom` | boolean | `true` | Abilita drag-to-zoom |
+| `entity` | string | — | Entità singola (alternativa a `entities`) |
+| `entities` | list | — | Lista entità multi |
+
+**Differenze rispetto alla versione Original:**
+- `color:` guida tutta la palette (sfondo, superfici, testi, tooltip)
+- Colori multi-entità calcolati con angolo aureo (`hue + i × 137.5°`) — sempre in armonia con il tema
+- `theme: auto` ricalcola la palette in tempo reale al cambio `prefers-color-scheme`
+- `disconnectedCallback()` rimuove i listener per evitare memory leak
+
+---
+
 ## Struttura Progetto
 
 ```
@@ -770,10 +867,12 @@ custom card home assistant/
 │   ├── Buttons/wesmart-buttons-bar-card.js + wesmart-buttons-grid-card.js
 │   ├── Battery/wesmart-battery-status-card.js
 │   ├── Switches/wesmart-switches-card.js
-│   └── Clock/wesmart-clock-card.js
+│   ├── Clock/wesmart-clock-card.js
+│   └── Chart/wesmart-chart-card.js            ← NEW
 │
 └── WeSmart-InfiniteColor/
-    └── History/wesmart-infinite-color-card.js
+    ├── History/wesmart-infinite-color-card.js
+    └── Chart/wesmart-infinite-chart-card.js   ← NEW
 ```
 
 ---
