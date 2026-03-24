@@ -1,11 +1,16 @@
 # WeSmart Custom Cards — Home Assistant
 
-A collection of custom cards for Home Assistant Dashboard, inspired by the **WeSmart AI** aesthetic: warm charcoal dark theme, orange accent, and minimal typography. No build step. No dependencies. Pure vanilla JS.
+A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSmart AI** aesthetic: warm charcoal dark theme, orange accent, minimal typography. No build step. No dependencies. Pure vanilla JS.
 
-Three collections:
-- **WeSmart Original** — fixed warm charcoal palette, production-ready
-- **WeSmart InfiniteColor** — dynamic HSL color engine, palette from a single hex color, production-ready
-- **WeSmart Labs** — experimental concepts, unstable, may change without notice
+---
+
+## Collections
+
+| | Collection | Cards | Status |
+|---|---|---|---|
+| ◆ | **WeSmart InfiniteColor** | 16 | Production-ready |
+| ■ | **WeSmart Original** | 19 | Production-ready |
+| ⚗️ | **WeSmart Labs** | 4 | Experimental |
 
 ---
 
@@ -17,9 +22,26 @@ Three collections:
 
 ---
 
-## WeSmart InfiniteColor
+## Installation
 
-The **InfiniteColor** collection features a chromatic engine that generates a complete visual palette from a single hex color defined in YAML. Every background, surface, text shade, accent, shadow, and multi-entity line color is automatically derived — no hardcoded values anywhere.
+### 1. Copy files
+Copy the `.js` file of each card you want into `config/www/`.
+
+### 2. Add resources
+In Home Assistant → **Settings → Dashboards → Resources**, add one entry per file:
+- **URL**: `/local/wesmart-light-card.js` (adjust filename)
+- **Type**: `JavaScript module`
+
+### 3. Reload
+Hard refresh: `Cmd+Shift+R` (macOS) · `Ctrl+Shift+R` (Windows/Linux)
+
+---
+
+---
+
+## ◆ WeSmart InfiniteColor
+
+A chromatic engine that generates a complete visual palette from a single hex color defined in YAML. Every background, surface, text shade, accent, shadow, and multi-entity line color is automatically derived — no hardcoded values anywhere.
 
 ```yaml
 color: '#60B4D8'  ──→  accent, accent-soft
@@ -27,6 +49,8 @@ color: '#60B4D8'  ──→  accent, accent-soft
                   ──→  text, text-muted, text-dim
                   ──→  shadow, row-hover, pill-bg
 ```
+
+Themes `dark`, `light`, and `auto` (follows OS `prefers-color-scheme` in real time) are supported by every card.
 
 ![Clock and Light InfiniteColor](asset/images/clock-e-light-cards-infinite.png)
 ![History Card — Blue Theme](asset/images/history-cards-blue.png)
@@ -39,7 +63,7 @@ color: '#60B4D8'  ──→  accent, accent-soft
 
 </details>
 
-Pick any hex color and all InfiniteColor cards instantly adapt their entire visual palette:
+Pick any hex color and all InfiniteColor cards instantly adapt:
 
 | Input color | Palette |
 |---|---|
@@ -51,49 +75,7 @@ Pick any hex color and all InfiniteColor cards instantly adapt their entire visu
 | `'#EC4899'` | Pink |
 | `'#14B8A6'` | Teal/seafoam |
 
-Themes `dark`, `light`, and `auto` (follows OS `prefers-color-scheme` in real time) are supported by every card.
-
-**→ [Full InfiniteColor documentation](WeSmart-InfiniteColor/README.md)**
-
----
-
-## Installation
-
-### 1. Copy Files
-Copy the `.js` file of each card you want to use into `config/www/`.
-
-### 2. Add Resources
-In Home Assistant → **Settings → Dashboards → Resources**, add one entry per file:
-- **URL**: `/local/wesmart-light-card.js` (adjust filename)
-- **Type**: `JavaScript module`
-
-### 3. Reload
-Hard refresh: `Cmd+Shift+R` (macOS) · `Ctrl+Shift+R` (Windows/Linux)
-
----
-
-## Design System
-
-### WeSmart Original — Fixed palette
-
-| Token | Dark | Light |
-|-------|------|-------|
-| Background | `#292524` | `#FFFEFA` |
-| Surface | `#332E2A` | `#F5F0EB` |
-| Accent | `#D97757` | `#D97757` |
-| Border | `rgba(255,255,255,0.08)` | `rgba(28,25,23,0.09)` |
-
-### WeSmart InfiniteColor — Dynamic palette
-
-Every token computed from a single `color` property via HEX → HSL conversion and perceptual manipulation. See the [InfiniteColor documentation](WeSmart-InfiniteColor/README.md) for the full algorithm.
-
----
-
-## Available Cards
-
-### ◆ WeSmart InfiniteColor Collection
-
-15 cards with a dynamic HSL color engine. **→ [Full documentation](WeSmart-InfiniteColor/README.md)**
+### Cards
 
 | Card | YAML Tag | Entities |
 |------|----------|---------|
@@ -107,25 +89,57 @@ Every token computed from a single `color` property via HEX → HSL conversion a
 | Sensors | `wesmart-infinite-sensors-card` | `sensor.*` (multi) |
 | Doors | `wesmart-infinite-doors-card` | `binary_sensor.*` (multi) |
 | Switches | `wesmart-infinite-switches-card` | `switch.*` (multi) |
+| Battery | `wesmart-infinite-battery-card` | `sensor.*` battery (multi) |
 | Buttons Bar | `wesmart-infinite-buttons-bar-card` | any / service |
 | Buttons Grid | `wesmart-infinite-buttons-grid-card` | any / service |
 | Clock | `wesmart-infinite-clock-card` | any (max 3 extras) |
 | Commander Hub | `wesmart-infinite-commander-hub` | Hub / multi |
 | Super Dashboard | `wesmart-infinite-super-dashboard` | Auto-discovery |
 
----
-
-### ■ WeSmart Original Collection
-
-Cards with a fixed warm charcoal palette (`#D97757` accent).
+**→ [Full InfiniteColor documentation](WeSmart-InfiniteColor/README.md)**
 
 ---
 
-#### WeSmart Chart Card *(new)*
+---
 
-Single or multi-entity chart with drag-to-zoom, tooltip hover, and time range pills.
-Automatic detection: line/area chart for numeric sensors, timeline bars for binary sensors.
-Multi-entity lines use 6 fixed accent colors.
+## ■ WeSmart Original
+
+Fixed warm charcoal palette (`#D97757` accent). 19 production-ready cards.
+
+| Token | Dark | Light |
+|-------|------|-------|
+| Background | `#292524` | `#FFFEFA` |
+| Surface | `#332E2A` | `#F5F0EB` |
+| Accent | `#D97757` | `#D97757` |
+| Border | `rgba(255,255,255,0.08)` | `rgba(28,25,23,0.09)` |
+
+### Cards
+
+| Card | YAML Tag | Entities |
+|------|----------|---------|
+| Commander Hub | `wesmart-commander-hub` | Hub / multi |
+| Super Dashboard | `wesmart-super-dashboard` | Auto-discovery |
+| Chart | `wesmart-chart-card` | any (single or multi) |
+| History | `wesmart-history-card` | any (multi) |
+| Light | `wesmart-light-card` | `light.*` (single) |
+| Lights | `wesmart-lights-card` | `light.*` (multi) |
+| Lights Expand | `wesmart-lights-expand-card` | `light.*` (multi, expandable) |
+| Climate | `wesmart-climate-card` | `climate.*` (single) |
+| Climate Compact | `wesmart-climate-compact-card` | `climate.*` (multi) |
+| Sensors | `wesmart-sensors-card` | `sensor.*` (multi) |
+| Doors | `wesmart-doors-card` | `binary_sensor.*` (multi) |
+| Switches | `wesmart-switches-card` | `switch.*` (multi) |
+| Battery Status | `wesmart-battery-status-card` | `sensor.*` battery (multi) |
+| Buttons Bar | `wesmart-buttons-bar-card` | any / service |
+| Buttons Grid | `wesmart-buttons-grid-card` | any / service |
+| Clock | `wesmart-clock-card` | any (max 3 extras) |
+| Weather | `wesmart-weather-card` | `weather.*` |
+| Energy Flow | `wesmart-energy-flow-card` | `sensor.*` power/energy |
+| Media Player | `wesmart-media-player-card` | `media_player.*` |
+
+### Highlights
+
+**Chart Card** — Single or multi-entity chart with drag-to-zoom, tooltip hover, and time range pills. Auto-detects line/area for numeric sensors, timeline bars for binary sensors.
 
 ![Chart Preview](asset/images/graph.png)
 
@@ -142,160 +156,81 @@ entities:
     name: Kitchen
 ```
 
-**Features:** drag-to-zoom (in-memory, no re-fetch) · double-click reset · hover tooltip with time + values · Y-axis min/max labels · optional grid lines · legend with current state + min–max range
-
----
-
-#### WeSmart Weather Card
-
-Full weather card: current conditions, hourly or daily forecast strip, and stats bar.
-Fetches forecasts via WebSocket API (HA 2023.9+).
+**Weather Card** — Current conditions, hourly or daily forecast strip, stats bar. Fetches forecasts via WebSocket API (HA 2023.9+).
 
 ![Weather Card](asset/images/meteo-card.png)
 ![Weather Forecast](asset/images/meteo-forecast.png)
 
----
-
-#### WeSmart Energy Flow Card
-
-Real-time energy flow visualization: grid, solar, battery, home consumption. All source nodes are optional — only `home_power` is required.
+**Energy Flow Card** — Real-time energy flow: grid, solar, battery, home consumption. All source nodes optional except `home_power`.
 
 ![Energy Flow](asset/images/energy-card.png)
 
----
-
-#### WeSmart Media Player Card
-
-Blurred album art background, animated progress bar, full transport controls (shuffle, previous, play/pause, next, repeat), volume slider, source selector. Respects HA `supported_features` bitmask.
+**Media Player Card** — Blurred album art background, animated progress bar, full transport controls, volume slider, source selector.
 
 ![Media Player](asset/images/media-player-cards.png)
-![Media Player Detail](asset/images/media-player.png)
 
----
-
-#### WeSmart Commander Hub
-
-The flagship central dashboard card. Smart greeting, tabbed navigation, and automated system alerts (lights on, open locks, low batteries).
-
----
-
-#### WeSmart Light Card
-
-Single light entity with full controls: toggle, brightness, color temperature (Kelvin), and hue slider. Auto-detects supported capabilities from `supported_color_modes`.
-
----
-
-#### WeSmart Lights & Lights Expand
-
-Multiple light entities in a compact list. The Expand variant shows animated inline sliders per row (brightness + CT) without leaving the dashboard.
+**Lights / Lights Expand** — Compact light list; the Expand variant shows inline brightness + CT sliders per row.
 
 ![Lights](asset/images/lights-cards.webp)
 
----
-
-#### WeSmart Climate & Climate Compact
-
-Advanced climate control with target temperature, HVAC modes, and fan speed. Compact version shows multiple thermostats in a list.
+**Climate / Climate Compact** — Target temperature, HVAC modes, fan speed. Compact version lists multiple thermostats.
 
 ![Climate](asset/images/climate-e-compact-cards.webp)
 
----
-
-#### WeSmart Sensors & Doors
-
-Compact lists for environmental sensors (with configurable alert thresholds) and binary sensors (doors, windows, motion) with colored status pills.
+**Sensors & Doors** — Environmental sensors with alert thresholds; binary sensors with colored status pills.
 
 ![Sensors](asset/images/sensor.webp)
 ![Doors](asset/images/doors.webp)
 
----
-
-#### WeSmart Switches
-
-Toggle list for `switch.*` entities with icon + ON/OFF pill. Icon click toggles, row click opens More Info.
-
-![Switches](asset/images/switches-cards.webp)
-
----
-
-#### WeSmart History Card
-
-Interactive history graphs: timeline bars for binary sensors, SVG line charts for numeric sensors. Time range pills `1h · 6h · 24h · 7d`.
-
----
-
-#### WeSmart Buttons (Bar & Grid)
-
-Quick-access buttons for lights, scenes, switches, and service calls — arranged in a horizontal bar or an auto-columns grid.
-
-![Buttons](asset/images/bar-e-grid-button-cards.webp)
-
----
-
-#### WeSmart Battery Status
-
-Monitor all your devices with circular SVG rings or linear progress bar indicators. Color-coded: green · amber warning · orange critical.
+**Battery Status** — Circular SVG rings or linear bars, color-coded: green · amber warning · orange critical.
 
 ![Battery](asset/images/battery-cards.webp)
 
----
+**Buttons Bar & Grid** — Quick-access buttons for lights, scenes, switches, service calls.
 
-#### WeSmart Clock Card
+![Buttons](asset/images/bar-e-grid-button-cards.webp)
 
-Sleek ambient clock with entity info in a bottom bar or sidebar column (up to 3 extra entities).
+**Switches** — Toggle list with icon + ON/OFF pill. Icon click toggles, row click opens More Info.
+
+![Switches](asset/images/switches-cards.webp)
+
+**Clock Card** — Ambient clock with entity info in bottom bar or sidebar (up to 3 extra entities).
 
 ![Clock](asset/images/clock-card.webp)
 
 ---
 
-### ⚗️ WeSmart Labs Collection
+---
 
-> **⚠️ EXPERIMENTAL — Do not use in production.**
->
-> These cards are proofs of concept and active design experiments.
-> They **may contain bugs**, incomplete features, and breaking YAML changes without notice.
-> No backwards compatibility is guaranteed.
+## ⚗️ WeSmart Labs
 
-The Labs collection explores new layout concepts and interaction patterns beyond the standard card metaphor.
+> **EXPERIMENTAL — Do not use in production.**
+> May contain bugs, incomplete features, and breaking YAML changes without notice. No backwards compatibility guaranteed.
+
+Proofs of concept exploring new layout patterns beyond the standard card metaphor.
 
 **→ [Full Labs documentation](WeSmart-Labs/README.md)**
 
----
+### Cards
 
-#### Home Panel (`wesmart-labs-home-panel`)
-
-A dense tablet dashboard in a single card covering five rows: weather + presence, KPI tiles, light controls, climate + security, system updates + AI tasks. All sections are YAML-configured.
-
-![Home Panel](asset/images/labs/labs-home-panel.png)
-
----
-
-#### Clean Panel (`wesmart-labs-clean-panel`)
-
-A refined overview card inspired by the Anthropic / Claude AI light aesthetic. Weather and climate side by side, interactive light rows with brightness bar and color-temperature badge, door chip grid.
-
----
-
-#### Surface (`wesmart-labs-surface`)
-
-**The cardless dashboard.** Eliminates the card container entirely — content floats directly on the background. Hierarchy expressed only through scale, weight, color, and whitespace. A single thin accent gradient rule is the only decoration. Light rows bleed to the panel edges on hover.
-
-![Surface](asset/images/labs/labs-surface.png)
-
----
-
-#### Cross Pad (`wesmart-labs-cross-pad`)
-
-**The transparent button pad.** No card shell, no border. A single thin cross — one vertical line, one horizontal line — divides the space into four pressable quadrants. Each quadrant: icon, label, entity toggle or service call or navigation.
-
----
-
-| Labs Card | YAML Tag | Status |
-|-----------|----------|--------|
+| Card | YAML Tag | Status |
+|------|----------|--------|
 | Home Panel | `wesmart-labs-home-panel` | ⚗️ Experimental |
 | Clean Panel | `wesmart-labs-clean-panel` | ⚗️ Experimental |
 | Surface | `wesmart-labs-surface` | ⚗️ Experimental |
 | Cross Pad | `wesmart-labs-cross-pad` | ⚗️ Experimental |
+
+**Home Panel** — Dense tablet dashboard: weather + presence, KPI tiles, light controls, climate + security, system updates + AI tasks.
+
+![Home Panel](asset/images/labs/labs-home-panel.png)
+
+**Clean Panel** — Refined overview inspired by Claude AI light aesthetic. Weather and climate side by side, interactive light rows with brightness bar.
+
+**Surface** — The cardless dashboard. Content floats directly on the background. No card container, no border.
+
+![Surface](asset/images/labs/labs-surface.png)
+
+**Cross Pad** — Transparent button pad. A single cross divides space into four pressable quadrants. No card shell.
 
 ---
 
@@ -303,7 +238,7 @@ A refined overview card inspired by the Anthropic / Claude AI light aesthetic. W
 
 ```
 .
-├── WeSmart-Original/        # Fixed palette cards
+├── WeSmart-Original/        # Fixed palette — 19 cards
 │   ├── Hub/                 # Commander Hub, Super Dashboard
 │   ├── Light/               # Single light card
 │   ├── Lights/              # Lights list + Lights Expand
@@ -318,14 +253,19 @@ A refined overview card inspired by the Anthropic / Claude AI light aesthetic. W
 │   ├── Weather/             # Weather card
 │   ├── Energy/              # Energy flow card
 │   ├── MediaPlayer/         # Media player card
-│   └── Chart/               # Chart card (new)
+│   └── Chart/               # Chart card
 │
-├── WeSmart-InfiniteColor/   # Dynamic HSL color engine cards
-│   ├── History/
-│   ├── Light/ Lights/ Climate/ ...
-│   └── Chart/               # Infinite Chart card (new)
+├── WeSmart-InfiniteColor/   # Dynamic HSL color engine — 16 cards
+│   ├── Hub/                 # Commander Hub, Super Dashboard
+│   ├── Light/ Lights/       # Light cards
+│   ├── Climate/             # Climate cards
+│   ├── Sensors/ Doors/      # Sensor cards
+│   ├── Switches/ Battery/   # Switch + battery cards
+│   ├── Buttons/             # Bar + Grid button cards
+│   ├── Clock/ History/      # Clock + history cards
+│   └── Chart/               # Infinite Chart card
 │
-├── WeSmart-Labs/            # ⚗️ Experimental
+├── WeSmart-Labs/            # ⚗️ Experimental — 4 cards
 │   ├── wesmart-labs-home-panel.js
 │   ├── wesmart-labs-clean-panel.js
 │   ├── wesmart-labs-surface.js
@@ -343,7 +283,7 @@ A refined overview card inspired by the Anthropic / Claude AI light aesthetic. W
 
 ## Architecture
 
-All cards follow the same pattern:
+All cards follow the same pattern — no build step, no dependencies:
 
 ```
 Single JS file (IIFE)
@@ -358,8 +298,6 @@ Single JS file (IIFE)
 customElements.define('wesmart-*-card', ...)
 window.customCards.push({ type, name, description })
 ```
-
-No build step. No dependencies. Pure vanilla JS.
 
 ---
 
