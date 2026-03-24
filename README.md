@@ -8,8 +8,8 @@ A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSm
 
 | | Collection | Cards | Status |
 |---|---|---|---|
-| ◆ | **WeSmart InfiniteColor** | 16 | Production-ready |
-| ■ | **WeSmart Original** | 19 | Production-ready |
+| ◆ | **WeSmart InfiniteColor** | 14 | Production-ready |
+| ■ | **WeSmart Original** | 17 | Production-ready |
 | ⚗️ | **WeSmart Labs** | 4 | Experimental |
 
 ---
@@ -93,8 +93,6 @@ Pick any hex color and all InfiniteColor cards instantly adapt:
 | Buttons Bar | `wesmart-infinite-buttons-bar-card` | any / service |
 | Buttons Grid | `wesmart-infinite-buttons-grid-card` | any / service |
 | Clock | `wesmart-infinite-clock-card` | any (max 3 extras) |
-| Commander Hub | `wesmart-infinite-commander-hub` | Hub / multi |
-| Super Dashboard | `wesmart-infinite-super-dashboard` | Auto-discovery |
 
 **→ [Full InfiniteColor documentation](WeSmart-InfiniteColor/README.md)**
 
@@ -104,7 +102,7 @@ Pick any hex color and all InfiniteColor cards instantly adapt:
 
 ## ■ WeSmart Original
 
-Fixed warm charcoal palette (`#D97757` accent). 19 production-ready cards.
+Fixed warm charcoal palette (`#D97757` accent). 17 production-ready cards.
 
 | Token | Dark | Light |
 |-------|------|-------|
@@ -117,8 +115,6 @@ Fixed warm charcoal palette (`#D97757` accent). 19 production-ready cards.
 
 | Card | YAML Tag | Entities |
 |------|----------|---------|
-| Commander Hub | `wesmart-commander-hub` | Hub / multi |
-| Super Dashboard | `wesmart-super-dashboard` | Auto-discovery |
 | Chart | `wesmart-chart-card` | any (single or multi) |
 | History | `wesmart-history-card` | any (multi) |
 | Light | `wesmart-light-card` | `light.*` (single) |
@@ -238,8 +234,7 @@ Proofs of concept exploring new layout patterns beyond the standard card metapho
 
 ```
 .
-├── WeSmart-Original/        # Fixed palette — 19 cards
-│   ├── Hub/                 # Commander Hub, Super Dashboard
+├── WeSmart-Original/        # Fixed palette — 17 cards
 │   ├── Light/               # Single light card
 │   ├── Lights/              # Lights list + Lights Expand
 │   ├── Climate/             # Climate + Climate Compact
@@ -255,8 +250,7 @@ Proofs of concept exploring new layout patterns beyond the standard card metapho
 │   ├── MediaPlayer/         # Media player card
 │   └── Chart/               # Chart card
 │
-├── WeSmart-InfiniteColor/   # Dynamic HSL color engine — 16 cards
-│   ├── Hub/                 # Commander Hub, Super Dashboard
+├── WeSmart-InfiniteColor/   # Dynamic HSL color engine — 14 cards
 │   ├── Light/ Lights/       # Light cards
 │   ├── Climate/             # Climate cards
 │   ├── Sensors/ Doors/      # Sensor cards

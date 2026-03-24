@@ -8,7 +8,6 @@ Una collezione di card personalizzate per il Dashboard di Home Assistant, ispira
 
 | Card | File | Tipo entità | Tema |
 |------|------|-------------|-------|
-| [**WeSmart Commander Hub**](#wesmart-commander-hub) | `Hub/wesmart-commander-hub.js` | **Hub / multi** | Dark / Light / Auto |
 | [WeSmart Light Card](#wesmart-light-card) | `Light/wesmart-light-card.js` | `light.*` | Dark / Light / Auto |
 | [WeSmart Lights Card](#wesmart-lights-card) | `Lights/wesmart-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
 | [WeSmart Lights Expand Card](#wesmart-lights-expand-card) | `Lights/wesmart-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
@@ -37,7 +36,6 @@ Una collezione di card personalizzate per il Dashboard di Home Assistant, ispira
 Copia il file `.js` di ogni card che vuoi usare in `config/www/`:
 
 ```
-config/www/wesmart-commander-hub.js
 config/www/wesmart-light-card.js
 config/www/wesmart-lights-card.js
 config/www/wesmart-lights-expand-card.js
@@ -53,6 +51,9 @@ config/www/wesmart-switches-card.js
 config/www/wesmart-clock-card.js
 config/www/wesmart-chart-card.js
 config/www/wesmart-infinite-chart-card.js
+config/www/wesmart-energy-flow-card.js
+config/www/wesmart-media-player-card.js
+config/www/wesmart-weather-card.js
 ```
 
 ### 2. Aggiungi le risorse
@@ -61,7 +62,6 @@ In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi una v
 
 | URL | Tipo |
 |-----|------|
-| `/local/wesmart-commander-hub.js` | Modulo JavaScript |
 | `/local/wesmart-light-card.js` | Modulo JavaScript |
 | `/local/wesmart-lights-card.js` | Modulo JavaScript |
 | `/local/wesmart-lights-expand-card.js` | Modulo JavaScript |
@@ -77,6 +77,9 @@ In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi una v
 | `/local/wesmart-clock-card.js` | Modulo JavaScript |
 | `/local/wesmart-chart-card.js` | Modulo JavaScript |
 | `/local/wesmart-infinite-chart-card.js` | Modulo JavaScript |
+| `/local/wesmart-energy-flow-card.js` | Modulo JavaScript |
+| `/local/wesmart-media-player-card.js` | Modulo JavaScript |
+| `/local/wesmart-weather-card.js` | Modulo JavaScript |
 
 ### 3. Ricarica
 
@@ -133,33 +136,6 @@ window.customCards.push({ type, name, description })
 ```
 
 Nessun build step. Nessuna dipendenza. Vanilla JS puro.
-
----
-
-## WeSmart Commander Hub
-
-La card dashboard centrale di punta. Include un saluto intelligente, navigazione a tab e avvisi di sistema automatici.
-
-```yaml
-type: custom:wesmart-commander-hub
-title: Panoramica Sistema
-entities:
-  - light.living_room
-  - switch.kettle
-stats:
-  - sensor.outdoor_temperature
-  - sensor.energy_consumption
-```
-
-**Tab:**
-- **Riepilogo**: Scansione automatica di luci attive, porte aperte e batterie scariche.
-- **Controlli**: Accesso rapido ai tuoi toggle preferiti.
-- **Sensori**: Monitoraggio ambientale e statistiche.
-
-**Funzionalità:**
-- Saluto in tempo reale con orologio.
-- UI glassmorphic premium con effetti radial glow.
-- Sistema di avvisi unificato.
 
 ---
 
@@ -849,6 +825,160 @@ entities:
 
 ---
 
+## WeSmart Energy Flow Card
+
+Visualizzazione grafica in tempo reale del flusso energetico: rete, solare, batteria e consumi domestici. I nodi sorgente (grid, solar, battery) sono tutti opzionali — mostrati solo se l'entità è configurata.
+
+```yaml
+type: custom:wesmart-energy-flow-card
+title: Energy Flow
+theme: dark
+home_power: sensor.home_power
+grid_power: sensor.grid_power
+solar_power: sensor.solar_power
+battery_power: sensor.battery_power
+```
+
+**Layout visivo:**
+
+```
+        ☀️ Solar
+           ↓
+⚡ Grid ── 🏠 Home ── 🔋 Battery
+```
+
+Frecce animate con pallini in movimento indicano direzione e fonte del flusso energetico.
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'Energy Flow'` | Titolo della card |
+| `icon` | string | `mdi:lightning-bolt-circle` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `home_power` | string | — | **Obbligatorio.** Entità consumo casa (W o kW) |
+| `grid_power` | string | — | Opzionale. Entità potenza rete (positivo = import, negativo = export) |
+| `solar_power` | string | — | Opzionale. Entità produzione solare (sempre positivo) |
+| `battery_power` | string | — | Opzionale. Entità batteria (positivo = carica, negativo = scarica) |
+| `battery_invert` | boolean | `false` | `true` → inverte la convenzione dei segni della batteria |
+
+**Unità di misura:**
+Auto-rilevate dall'attributo `unit_of_measurement` dell'entità. Supporta sia `W` che `kW`.
+
+**Colori per stato:**
+
+| Stato | Colore |
+|-------|--------|
+| Solar (produzione) | Giallo `#F0C060` |
+| Grid Import (prelievo) | Arancione `#D97757` |
+| Grid Export (immissione) | Verde `#7EC8A0` |
+| Battery Charging | Verde `#7EC8A0` |
+| Battery Discharging | Blu `#60B4D8` |
+
+**Funzionalità:**
+- Nodi con anello colorato + glow effect quando attivi
+- Connettori animati: pallini in movimento mostrano direzione del flusso
+- Nodo Solar solo se `solar_power` configurato
+- Nodo Grid solo se `grid_power` configurato
+- Nodo Battery solo se `battery_power` configurato
+- Barra **Net Balance** (Import / Export / Balanced) — solo se grid configurato
+- Pill **Live** con dot verde animato in header
+- Valori auto-formattati: `kW` sopra 1 kW, `W` sotto 1 kW
+
+**Temi:** `dark` · `light` · `auto`
+
+---
+
+## WeSmart Media Player Card
+
+Card completa per controllare qualsiasi `media_player.*` con album art, barra di avanzamento animata in tempo reale e controlli adattativi basati su `supported_features`.
+
+```yaml
+type: custom:wesmart-media-player-card
+entity: media_player.living_room
+title: Living Room
+theme: dark
+show_shuffle: true
+show_repeat: true
+show_volume: true
+show_source: false
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `entity` | string | — | **Obbligatorio.** Entità `media_player.*` |
+| `title` | string | friendly_name | Titolo nell'header |
+| `icon` | string | `mdi:music-note` | Icona header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `show_shuffle` | boolean | `true` | Pulsante shuffle |
+| `show_repeat` | boolean | `true` | Pulsante repeat (off / all / one) |
+| `show_volume` | boolean | `true` | Slider volume con mute |
+| `show_source` | boolean | `false` | Selettore sorgente |
+
+**Funzionalità:**
+- Album art come sfondo blurred + thumbnail — fallback con icona se non disponibile
+- Barra avanzamento aggiornata ogni secondo con calcolo locale della posizione
+- Click sulla barra → seek (se supportato dall'entità)
+- Pulsanti adattativi: disabilitati se la feature non è supportata dall'integrazione
+- Repeat cicla: `off → all → one`
+- Volume slider interattivo con riempimento arancione
+- State pill: verde animato (playing), arancione (paused), grigio (idle/off)
+
+**Compatibile con:** Sonos, Spotify, Apple TV, Samsung TV, Chromecast, Plex, Kodi, VLC, MPD e qualsiasi integrazione `media_player.*`
+
+**Temi:** `dark` · `light` · `auto`
+
+---
+
+## WeSmart Weather Card
+
+Condizioni meteo correnti con icona colorata per condizione, temperatura grande, stats e forecast giornaliero o orario.
+
+```yaml
+type: custom:wesmart-weather-card
+entity: weather.home
+title: Milano
+theme: dark
+forecast_type: daily
+forecast_days: 5
+show_humidity: true
+show_wind: true
+show_pressure: false
+show_visibility: false
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `entity` | string | — | **Obbligatorio.** Entità `weather.*` |
+| `title` | string | friendly_name | Titolo header |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `forecast_type` | string | `'daily'` | `daily` \| `hourly` |
+| `forecast_days` | number | `5` | Slot forecast da mostrare (1–7) |
+| `show_humidity` | boolean | `true` | Umidità nelle stats |
+| `show_wind` | boolean | `true` | Vento con direzione cardinale |
+| `show_pressure` | boolean | `false` | Pressione |
+| `show_visibility` | boolean | `false` | Visibilità |
+
+**Funzionalità:**
+- Icona condizione 44px con colore e glow specifici per ogni condizione (soleggiato, nuvoloso, pioggia, neve, ecc.)
+- Temperatura in caratteri grandi con "Feels like"
+- Stats strip con pills (umidità, vento + direzione, pressione, visibilità, UV index automatico)
+- Forecast via **WebSocket API** `weather/get_forecasts` (HA 2023.9+) con fallback automatico all'attributo
+- Refresh forecast ogni 30 minuti
+- Giorno "Today" evidenziato in arancione
+- Probabilità precipitazioni in blu se > 0%
+- Unità rilevate automaticamente dall'entità (°C/°F, km/h, hPa…)
+
+**Compatibile con:** Met.no, OpenWeatherMap, AccuWeather, Tomorrow.io, Pirate Weather e qualsiasi `weather.*`
+
+**Temi:** `dark` · `light` · `auto`
+
+---
+
 ## Struttura Progetto
 
 ```
@@ -857,7 +987,6 @@ custom card home assistant/
 │   └── README.md                              ← questo file
 │
 ├── WeSmart-Original/                          ← card standard (palette fissa)
-│   ├── Hub/wesmart-commander-hub.js
 │   ├── Light/wesmart-light-card.js
 │   ├── Lights/wesmart-lights-card.js + wesmart-lights-expand-card.js
 │   ├── Climate/wesmart-climate-card.js + wesmart-climate-compact-card.js
@@ -868,11 +997,14 @@ custom card home assistant/
 │   ├── Battery/wesmart-battery-status-card.js
 │   ├── Switches/wesmart-switches-card.js
 │   ├── Clock/wesmart-clock-card.js
-│   └── Chart/wesmart-chart-card.js            ← NEW
+│   ├── Chart/wesmart-chart-card.js
+│   ├── Energy/wesmart-energy-flow-card.js
+│   ├── MediaPlayer/wesmart-media-player-card.js
+│   └── Weather/wesmart-weather-card.js
 │
 └── WeSmart-InfiniteColor/
     ├── History/wesmart-infinite-color-card.js
-    └── Chart/wesmart-infinite-chart-card.js   ← NEW
+    └── Chart/wesmart-infinite-chart-card.js
 ```
 
 ---
@@ -888,7 +1020,6 @@ A collection of custom cards for Home Assistant Dashboard, styled after the **An
 
 | Card | File | Entity type | Theme |
 |------|------|-------------|-------|
-| [**WeSmart Commander Hub**](#wesmart-commander-hub) | `Hub/wesmart-commander-hub.js` | **Hub / multi** | Dark / Light / Auto |
 | [WeSmart Light Card](#wesmart-light-card) | `Light/wesmart-light-card.js` | `light.*` | Dark / Light / Auto |
 | [WeSmart Lights Card](#wesmart-lights-card) | `Lights/wesmart-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
 | [WeSmart Lights Expand Card](#wesmart-lights-expand-card) | `Lights/wesmart-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
@@ -912,7 +1043,6 @@ A collection of custom cards for Home Assistant Dashboard, styled after the **An
 Copy the `.js` file of each card you want to use into `config/www/`:
 
 ```
-config/www/wesmart-commander-hub.js
 config/www/wesmart-light-card.js
 config/www/wesmart-lights-card.js
 config/www/wesmart-lights-expand-card.js
@@ -934,7 +1064,6 @@ In Home Assistant → **Settings → Dashboards → Resources**, add one entry p
 
 | URL | Type |
 |-----|------|
-| `/local/wesmart-commander-hub.js` | JavaScript module |
 | `/local/wesmart-light-card.js` | JavaScript module |
 | `/local/wesmart-lights-card.js` | JavaScript module |
 | `/local/wesmart-lights-expand-card.js` | JavaScript module |
@@ -1004,33 +1133,6 @@ window.customCards.push({ type, name, description })
 ```
 
 No build step. No dependencies. Pure vanilla JS.
-
----
-
-## WeSmart Commander Hub
-
-The flagship central dashboard card. Features a smart greeting, tabbed navigation, and automated system alerts.
-
-```yaml
-type: custom:wesmart-commander-hub
-title: System Overview
-entities:
-  - light.living_room
-  - switch.kettle
-stats:
-  - sensor.outdoor_temperature
-  - sensor.energy_consumption
-```
-
-**Tabs:**
-- **Summary**: Auto-scans for active lights, unlocked doors, and low batteries.
-- **Controls**: Quick access to your favorite toggles.
-- **Sensors**: Environmental tracking and statistics.
-
-**Features:**
-- Real-time greeting and clock.
-- Premium glassmorphic UI with radial glow effects.
-- Unified alert system.
 
 ---
 
@@ -1657,9 +1759,6 @@ custom card home assistant/
 │   └── README.md                              ← this file
 │
 ├── WeSmart-Original/                          ← standard cards (fixed palette)
-│   ├── Hub/
-│   │   ├── wesmart-commander-hub.js           ← flagship central hub
-│   │   └── README.md
 │   ├── Light/
 │   │   ├── wesmart-light-card.js
 │   │   └── README.md

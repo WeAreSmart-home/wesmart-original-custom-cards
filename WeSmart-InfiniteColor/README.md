@@ -152,8 +152,7 @@ Some cards keep fixed colors for specific meanings that cannot be derived from t
 
 | Color | Code | Used in |
 |--------|--------|---------|
-| Cool blue | `#60B4D8` | Cooling mode in climate card · Climate tab in Super Dashboard |
-| Amber | `#D4A84B` | Lights-on warnings in Commander Hub · Sensors tab in Super Dashboard |
+| Cool blue | `#60B4D8` | Cooling mode in climate card |
 | Green | `#7EC8A0` | Closed state in Doors Card |
 
 These colors have universal semantic meaning (cold = blue, closed = green) and remain fixed regardless of the chosen `accent`.
@@ -176,8 +175,6 @@ These colors have universal semantic meaning (cold = blue, closed = green) and r
 | Buttons Bar | `Buttons/wesmart-infinite-buttons-bar-card.js` | `wesmart-infinite-buttons-bar-card` | any / service |
 | Buttons Grid | `Buttons/wesmart-infinite-buttons-grid-card.js` | `wesmart-infinite-buttons-grid-card` | any / service |
 | Clock | `Clock/wesmart-infinite-clock-card.js` | `wesmart-infinite-clock-card` | any (max 3 extras) |
-| Commander Hub | `Hub/wesmart-infinite-commander-hub.js` | `wesmart-infinite-commander-hub` | Hub / multi |
-| Super Dashboard | `Hub/wesmart-infinite-super-dashboard.js` | `wesmart-infinite-super-dashboard` | Auto-discovery |
 
 ---
 
@@ -200,8 +197,6 @@ config/www/wesmart-infinite-switches-card.js
 config/www/wesmart-infinite-buttons-bar-card.js
 config/www/wesmart-infinite-buttons-grid-card.js
 config/www/wesmart-infinite-clock-card.js
-config/www/wesmart-infinite-commander-hub.js
-config/www/wesmart-infinite-super-dashboard.js
 ```
 
 ### 2. Add resources in Home Assistant
@@ -222,8 +217,6 @@ config/www/wesmart-infinite-super-dashboard.js
 | `/local/wesmart-infinite-buttons-bar-card.js` | JavaScript module |
 | `/local/wesmart-infinite-buttons-grid-card.js` | JavaScript module |
 | `/local/wesmart-infinite-clock-card.js` | JavaScript module |
-| `/local/wesmart-infinite-commander-hub.js` | JavaScript module |
-| `/local/wesmart-infinite-super-dashboard.js` | JavaScript module |
 
 ### 3. Reload
 
@@ -620,79 +613,6 @@ extras:
 
 ---
 
-### wesmart-infinite-commander-hub
-
-Multifunctional central hub with greeting, tabs, and automated alerts.
-
-```yaml
-type: custom:wesmart-infinite-commander-hub
-color: '#D97757'
-theme: dark
-entities:
-  - light.living_room
-  - switch.kitchen_outlet
-stats:
-  - sensor.outdoor_temperature
-  - sensor.energy_consumption
-```
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `color` | string | `'#D97757'` | Base color for the palette |
-| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
-| `title` | string | `'Commander'` | Title (used internally) |
-| `entities` | list | — | Entities for the Controls tab |
-| `stats` | list | — | Entities for the Sensors tab |
-
-**Summary tab** — automatic alerts (no configuration required):
-
-| Alert | Threshold | Color |
-|-------|-----------|-------|
-| Lights on | > 0 | Amber `#D4A84B` |
-| Locks open | > 0 | `accent` |
-| Blinds/shutters open | > 0 | Blue `#60B4D8` |
-| Low batteries | ≤ 20% | `accent` |
-
----
-
-### wesmart-infinite-super-dashboard
-
-Full-screen dashboard with auto-discovery, 6-tab navigation, and visibility settings.
-
-```yaml
-type: custom:wesmart-infinite-super-dashboard
-color: '#D97757'
-theme: dark
-exclude_entities:
-  - light.living_room_group
-  - sensor.internal_sensor
-max_overview_items: 6
-```
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `color` | string | `'#D97757'` | Base color for the palette |
-| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
-| `exclude_entities` | list | `[]` | Entities to always exclude (YAML) |
-| `max_overview_items` | number | `6` | Max entities per section in Overview tab |
-
-**Available tabs:**
-
-| Tab | Content |
-|-----|---------|
-| Overview | Overview of all categories (up to `max_overview_items` per type) |
-| Lights | All discovered `light.*` entities |
-| Climate | All discovered `climate.*` entities |
-| Sensors | All `sensor.*` and `binary_sensor.*` |
-| Switches | All `switch.*` |
-| Settings | Visibility toggle for each entity (saved in the browser) |
-
-**Auto-discovery:** the card reads `hass.states` and classifies entities by domain. Filters out groups (entities with an `entity_id` array attribute) and internal entities (`entity_category`, `hidden`).
-
-**Local visibility:** exclusions set in the Settings tab are saved in `localStorage` under the key `wesmart_inf_dashboard_hidden`. They are separate from YAML exclusions and reset when browser data is cleared.
-
----
-
 ## Architectural Notes
 
 - **No build step.** Pure vanilla JS, one file per card.
@@ -772,8 +692,7 @@ Se `color` è omesso, le card usano `#D97757` (arancione WeSmart originale).
 
 | Colore | Codice | Dove viene usato |
 |--------|--------|-----------------|
-| Blu freddo | `#60B4D8` | Stato raffreddamento clima · Tab Climate nel Super Dashboard |
-| Ambra | `#D4A84B` | Avvisi luci accese nel Commander Hub |
+| Blu freddo | `#60B4D8` | Stato raffreddamento clima |
 | Verde | `#7EC8A0` | Stato porte chiuse nella Doors Card |
 
 Per la documentazione completa delle card in italiano, fare riferimento alla versione inglese con le stesse opzioni YAML — i nomi delle proprietà sono identici.
