@@ -13,6 +13,7 @@ Experimental cards under active development. These cards are not production-read
 | Home Panel | `wesmart-labs-home-panel` | `wesmart-labs-home-panel.js` |
 | Clean Panel | `wesmart-labs-clean-panel` | `wesmart-labs-clean-panel.js` |
 | Surface | `wesmart-labs-surface` | `wesmart-labs-surface.js` |
+| Cross Pad | `wesmart-labs-cross-pad` | `wesmart-labs-cross-pad.js` |
 
 ---
 
@@ -432,3 +433,147 @@ doors:
   - entity: binary_sensor.finestra_cucina
     name: Finestra cucina
 ```
+
+---
+
+*When this card matures, it will graduate to [WeSmart-InfiniteColor](../WeSmart-InfiniteColor/).*
+
+---
+
+## wesmart-labs-cross-pad
+
+**The transparent button pad.** No card shell, no border, no background. A single thin cross — one vertical line, one horizontal line — divides the space into four pressable quadrants. Each quadrant holds a button: icon, label, and an optional entity or service call.
+
+**What makes it different:**
+- Zero card container — floats invisibly on whatever background is behind it
+- Layout is the cross itself — two 1px lines, nothing else
+- State-aware: icon turns accent-colored when the linked entity is `on` / `open` / `unlocked`
+- Four tap targets: entity toggle · explicit service · HA navigation · or empty
+
+```
+  ┌──────────┬──────────┐
+  │   icon   │   icon   │
+  │  label   │  label   │
+  ├──────────┼──────────┤  ← cross: two 1px lines in --border color
+  │   icon   │   icon   │
+  │  label   │  label   │
+  └──────────┴──────────┘
+```
+
+### Installation
+
+Copy `wesmart-labs-cross-pad.js` to `config/www/`, add it as a JavaScript module resource in HA → Settings → Dashboards → Resources, then hard refresh.
+
+---
+
+### YAML — Minimal
+
+```yaml
+type: custom:wesmart-labs-cross-pad
+color: '#D97757'
+theme: auto
+size: 160
+buttons:
+  top_left:
+    icon: mdi:lightbulb
+    label: Luci
+    entity: light.salone
+  top_right:
+    icon: mdi:fan
+    label: Fan
+    entity: switch.fan
+  bottom_left:
+    icon: mdi:lock
+    label: Serratura
+    entity: lock.porta
+  bottom_right:
+    icon: mdi:cog
+    label: Config
+    navigate: /lovelace/0
+```
+
+---
+
+### YAML — Complete
+
+```yaml
+type: custom:wesmart-labs-cross-pad
+
+# ── Palette & theme ────────────────────────────────────────────────────────
+color: '#D97757'    # Any hex — drives the entire InfiniteColor palette
+theme: auto         # dark | light | auto
+size: 160           # Card height in px (default: 160)
+
+buttons:
+
+  # ── top_left ──────────────────────────────────────────────────────────────
+  top_left:
+    icon: mdi:lightbulb          # MDI icon (optional)
+    label: Luci                  # Label shown below the icon (optional)
+    entity: light.salone         # Linked entity — drives icon color (on/off)
+    # If only entity is set → tap auto-toggles (turn_on / turn_off)
+
+  # ── top_right ─────────────────────────────────────────────────────────────
+  top_right:
+    icon: mdi:fan
+    label: Fan
+    service: switch.toggle       # Explicit service call on tap
+    service_data:
+      entity_id: switch.fan
+    # entity: switch.fan         # Optional: also drives icon color
+
+  # ── bottom_left ───────────────────────────────────────────────────────────
+  bottom_left:
+    icon: mdi:lock
+    label: Serratura
+    entity: lock.porta
+    # entity alone → auto toggle (lock / unlock)
+
+  # ── bottom_right ──────────────────────────────────────────────────────────
+  bottom_right:
+    icon: mdi:arrow-right
+    label: Vai
+    navigate: /lovelace/0        # Navigate to a Lovelace path on tap
+```
+
+---
+
+### Config reference
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `color` | string | `#D97757` | Base hex color for the InfiniteColor palette |
+| `theme` | string | `auto` | `dark`, `light`, or `auto` |
+| `size` | number | `160` | Card height in px |
+| `buttons.{pos}` | object | — | One of: `top_left`, `top_right`, `bottom_left`, `bottom_right` |
+| `buttons.{pos}.icon` | string | — | MDI icon name (e.g. `mdi:lightbulb`) |
+| `buttons.{pos}.label` | string | — | Short label shown below the icon |
+| `buttons.{pos}.entity` | string | — | HA entity — drives icon state color; auto-toggles on tap if no `service` |
+| `buttons.{pos}.service` | string | — | Service to call on tap (format: `domain.service`) |
+| `buttons.{pos}.service_data` | object | — | Data passed to the service call |
+| `buttons.{pos}.navigate` | string | — | Lovelace path to navigate to on tap |
+
+---
+
+### Tap behaviour
+
+| Configuration | Action on tap |
+|---|---|
+| `entity` only | Auto-toggle: `turn_on` if off, `turn_off` if on |
+| `service` + `service_data` | Call service directly |
+| `entity` + `service` | Call service; injects `entity_id` into data if missing |
+| `navigate` | Push Lovelace path via `history.pushState` |
+
+---
+
+### Icon state colors
+
+| Entity state | Icon color |
+|---|---|
+| `on`, `open`, `unlocked`, `home`, `playing` | `--accent` (InfiniteColor accent) |
+| Any other state | `--text-dim` (muted grey) |
+| No entity set | `--text-dim` always |
+
+---
+
+*When this card matures, it will graduate to [WeSmart-InfiniteColor](../WeSmart-InfiniteColor/).*
