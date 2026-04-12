@@ -9,7 +9,7 @@ A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSm
 | | Collection | Cards | Status |
 |---|---|---|---|
 | ◆ | **WeSmart InfiniteColor** | 14 | Production-ready |
-| ■ | **WeSmart Original** | 17 | Production-ready |
+| ■ | **WeSmart Original** | 18 | Production-ready |
 | ⚗️ | **WeSmart Labs** | 4 | Experimental |
 
 ---

@@ -1,0 +1,143 @@
+# WeSmart Person Card
+
+Una card compatta ed elegante per Home Assistant progettata per monitorare la presenza delle persone, le zone in cui si trovano e lo stato della batteria dei loro dispositivi. Stile **WeSmart Original**.
+
+---
+
+## Anteprima layout
+
+```text
+┌─────────────────────────────────────────┐
+│ 👥 Family                    2 home · 3 total
+├─────────────────────────────────────────┤
+│                                         │
+│  👤 [●]  Mario                          │
+│          Home                     🔋 85% │
+│                                         │
+│  👩 [●]  Luigi                          │
+│          Lavoro                   🔋 15% │
+│                                         │
+│  👦 [○]  Anna                           │
+│          Away                     🔋 50% │
+└─────────────────────────────────────────┘
+```
+*(L'indicatore `[●]` rappresenta il dot colorato sovrapposto all'avatar)*
+
+---
+
+## Funzionalità
+
+- **Multi-entità:** Monitora più entità `person.*` raggruppate in un'unica card elegante.
+- **Avatar intelligente:** Mostra l'immagine del profilo configurata su HA; se assente, utilizza un'icona fallback `mdi:account`.
+- **Indicatore di stato (Status Dot):**
+  - **Verde:** Home
+  - **Arancione:** Zona specifica (es. Lavoro, Scuola)
+  - **Grigio Muted:** Away (not_home) / Disconnesso
+- **Integrazione Batteria:** Collegando un sensore batteria, mostra la percentuale e un'icona dinamica che cambia in base alla carica (step del 10%). Se la batteria scende sotto il 20%, l'indicatore diventa arancione.
+- **Header Dinamico:** Il sottotitolo si aggiorna automaticamente mostrando il conteggio delle persone a casa sul totale (es. `2 home · 4 total`).
+- **Interattiva:** Cliccando su una riga si apre il popup "More Info" nativo di Home Assistant.
+- **Temi:** Supporta le modalità `dark`, `light` e `auto` (segue le impostazioni di sistema).
+
+---
+
+## Installazione
+
+1. Copia il file `wesmart-person-card.js` in:
+   ```text
+   config/www/wesmart-person-card.js
+   ```
+
+2. In Home Assistant, vai su **Impostazioni → Dashboard → Risorse**, e aggiungi:
+   - **URL:** `/local/wesmart-person-card.js`
+   - **Tipo:** `Modulo JavaScript`
+
+3. Esegui un hard refresh del browser (`Cmd+Shift+R` o `Ctrl+Shift+R`).
+
+---
+
+## Configurazione
+
+### Configurazione Minima (Solo array di stringhe)
+
+```yaml
+type: custom:wesmart-person-card
+entities:
+  - person.mario
+  - person.luigi
+```
+
+### Configurazione Completa (Nomi personalizzati e Batterie)
+
+```yaml
+type: custom:wesmart-person-card
+title: Famiglia
+icon: mdi:home-heart
+theme: dark
+entities:
+  - entity: person.mario
+    name: Papà
+    battery_entity: sensor.mario_phone_battery_level
+  - entity: person.luigi
+    name: Mamma
+    battery_entity: sensor.luigi_phone_battery_level
+  - entity: person.anna
+    battery_entity: sensor.anna_tablet_battery
+```
+
+---
+
+## Tutte le Opzioni
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'Family'` | Titolo della card |
+| `icon` | string | `'mdi:account-group'` | Icona visualizzata nell'header |
+| `theme` | string | `'dark'` | Tema della card (`dark`, `light`, `auto`) |
+| `entities` | array | — | **Obbligatorio.** Lista delle entità da visualizzare |
+
+### Opzioni per la singola entità (in `entities`)
+
+| Campo | Tipo | Default | Descrizione |
+|-------|------|---------|-------------|
+| `entity` | string | — | **Obbligatorio.** ID dell'entità persona (es. `person.mario`) |
+| `name` | string | friendly_name | Sovrascrive il nome visualizzato per questa persona |
+| `battery_entity` | string | — | ID del sensore batteria associato (es. `sensor.phone_battery`) |
+
+---
+
+## Colori e Stati
+
+### Presenza (Status Dot)
+| Stato | Colore WeSmart | Variabile CSS |
+|-------|----------------|---------------|
+| `home` | Verde | `--claude-green` (`#7EC8A0`) |
+| Zone personalizzate | Arancione | `--claude-orange` (`#D97757`) |
+| `not_home` | Grigio Muted | `--text-dim` (`#6B5F56`) |
+| `unavailable` | Trasparenza 38% | — |
+
+### Batteria
+| Livello | Colore WeSmart | Comportamento |
+|---------|----------------|---------------|
+| > 20% | Grigio Muted | Icona batteria basata sul decile corrente |
+| ≤ 20% | Arancione | Testo e icona evidenziati per attirare l'attenzione |
+
+---
+
+## Architettura Tecnica
+
+La card è sviluppata in **Vanilla JavaScript** puro e isolata tramite Shadow DOM, garantendo performance ottimali e zero conflitti CSS con il resto della dashboard. 
+Non richiede dipendenze esterne o build step.
+
+```text
+wesmart-person-card.js
+  └─ class WeSmartPersonCard extends HTMLElement
+      ├─ attachShadow({ mode: 'open' })
+      ├─ setConfig(config)              → Analisi e validazione YAML
+      ├─ set hass(hass)                 → Aggiornamento reattivo di presenze e batterie
+      ├─ _render()                      → Iniezione CSS e markup iniziale
+      ├─ _getHTML()                     → Costruzione dinamica delle righe utenti
+      ├─ _updateState()                 → Logica di aggiornamento (colori, testi, icone)
+      └─ _bindEvents()                  → Gestione click (more-info popup)
+```
+
+*Progetto parte della suite custom cards "WeSmart Original".*

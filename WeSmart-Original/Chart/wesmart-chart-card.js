@@ -232,6 +232,26 @@
 
   // ─── Main card class ───────────────────────────────────────────────────────────
   class WeSmartChartCard extends HTMLElement {
+    
+    // Configurazione visiva richiamata da Home Assistant!
+    static getConfigElement() {
+      // Carica l'editor personalizzato in lazy loading
+      import('./editor/wesmart-chart-card-editor.js');
+      return document.createElement('wesmart-chart-card-editor');
+    }
+
+    // Configurazione di default quando viene trascinata la card vuota
+    static getStubConfig(hass, entities, entitiesFallback) {
+      const entity = entitiesFallback[0] || 'sun.sun';
+      return {
+        type: 'custom:wesmart-chart-card',
+        title: 'Grafico WeSmart',
+        entity: entity,
+        hours: 24,
+        theme: 'dark'
+      };
+    }
+
     constructor() {
       super();
       this.attachShadow({ mode: 'open' });
@@ -784,22 +804,15 @@
     }
   }
 
-  // ─── Editor stub ──────────────────────────────────────────────────────────────
-  class WeSmartChartCardEditor extends HTMLElement {
-    setConfig(c) { this._config = c; }
-    set hass(h)  { this._hass   = h; }
-  }
-
   // ─── Registration ─────────────────────────────────────────────────────────────
   customElements.define(CARD_TAG,   WeSmartChartCard);
-  customElements.define(EDITOR_TAG, WeSmartChartCardEditor);
 
   window.customCards = window.customCards || [];
   window.customCards.push({
     type:        CARD_TAG,
     name:        'WeSmart Chart Card',
     description: 'Single or multi-entity chart with drag-to-zoom, tooltip, and time range pills.',
-    preview:     false,
+    preview:     true,
   });
 
   console.info(
