@@ -26,6 +26,8 @@ Una collezione di card personalizzate per il Dashboard di Home Assistant, ispira
 | [**WeSmart Weather Card**](#wesmart-weather-card) | `Weather/wesmart-weather-card.js` | `weather.*` | Dark / Light / Auto |
 | [**WeSmart Chart Card**](#wesmart-chart-card) | `Chart/wesmart-chart-card.js` | qualsiasi / multi | Dark / Light / Auto |
 | [**WeSmart Infinite Chart Card**](#wesmart-infinite-chart-card) | `Chart/wesmart-infinite-chart-card.js` | qualsiasi / multi | Palette dinamica |
+| [**WeSmart Person Card**](#wesmart-person-card) | `Person/wesmart-person-card.js` | `person.*` (multi) | Dark / Light / Auto |
+| [**WeSmart Scene Interpolator Card**](#wesmart-scene-interpolator-card) ⚠️ | `SceneInterpolator/wesmart-scene-interpolator-card.js` | `light.*` | Dark (fixed) |
 
 ---
 
@@ -54,6 +56,8 @@ config/www/wesmart-infinite-chart-card.js
 config/www/wesmart-energy-flow-card.js
 config/www/wesmart-media-player-card.js
 config/www/wesmart-weather-card.js
+config/www/wesmart-person-card.js
+config/www/wesmart-scene-interpolator-card.js
 ```
 
 ### 2. Aggiungi le risorse
@@ -80,6 +84,8 @@ In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi una v
 | `/local/wesmart-energy-flow-card.js` | Modulo JavaScript |
 | `/local/wesmart-media-player-card.js` | Modulo JavaScript |
 | `/local/wesmart-weather-card.js` | Modulo JavaScript |
+| `/local/wesmart-person-card.js` | Modulo JavaScript |
+| `/local/wesmart-scene-interpolator-card.js` | Modulo JavaScript |
 
 ### 3. Ricarica
 

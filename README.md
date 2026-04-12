@@ -9,7 +9,7 @@ A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSm
 | | Collection | Cards | Status |
 |---|---|---|---|
 | ◆ | **WeSmart InfiniteColor** | 14 | Production-ready |
-| ■ | **WeSmart Original** | 18 | Production-ready |
+| ■ | **WeSmart Original** | 20 | Production-ready |
 | ⚗️ | **WeSmart Labs** | 4 | Experimental |
 
 ---
@@ -102,7 +102,7 @@ Pick any hex color and all InfiniteColor cards instantly adapt:
 
 ## ■ WeSmart Original
 
-Fixed warm charcoal palette (`#D97757` accent). 17 production-ready cards.
+Fixed warm charcoal palette (`#D97757` accent). 20 cards.
 
 | Token | Dark | Light |
 |-------|------|-------|
@@ -132,6 +132,8 @@ Fixed warm charcoal palette (`#D97757` accent). 17 production-ready cards.
 | Weather | `wesmart-weather-card` | `weather.*` |
 | Energy Flow | `wesmart-energy-flow-card` | `sensor.*` power/energy |
 | Media Player | `wesmart-media-player-card` | `media_player.*` |
+| Person | `wesmart-person-card` | `person.*` (multi) |
+| Scene Interpolator ⚠️ | `wesmart-scene-interpolator-card` | `light.*` (single or group) |
 
 ### Highlights
 
@@ -194,6 +196,32 @@ entities:
 
 ![Clock](asset/images/clock-card.webp)
 
+**Person Card** — Presence tracking list: avatars (entity_picture or fallback icon), status dot (Home / Zone / Away), optional linked battery sensor per person. Themes: `dark` · `light` · `auto`.
+
+```yaml
+type: custom:wesmart-person-card
+title: Family
+theme: dark
+entities:
+  - entity: person.massimo
+    battery_entity: sensor.massimo_iphone_battery_level
+  - entity: person.giulia
+```
+
+**Scene Interpolator** ⚠️ *Early development* — XY pad for smooth bilinear interpolation between 4 lighting scenes (brightness + color temperature). Drag the thumb to blend atmospheres in real time. Supports single lights and groups; auto-detects color temp capability and clamps to entity range.
+
+```yaml
+type: custom:wesmart-scene-interpolator-card
+entity: light.gruppo_salotto
+corners:
+  top_left:    { name: "Mattina",    brightness: 80, color_temp: 200 }
+  top_right:   { name: "Pomeriggio", brightness: 60, color_temp: 300 }
+  bottom_left: { name: "Sera",       brightness: 40, color_temp: 400 }
+  bottom_right: { name: "Notte",     brightness: 10, color_temp: 500 }
+```
+
+> ⚠️ Scene Interpolator is in early development. YAML config and behavior may change without notice. Not recommended for production dashboards.
+
 ---
 
 ---
@@ -234,7 +262,7 @@ Proofs of concept exploring new layout patterns beyond the standard card metapho
 
 ```
 .
-├── WeSmart-Original/        # Fixed palette — 17 cards
+├── WeSmart-Original/        # Fixed palette — 20 cards
 │   ├── Light/               # Single light card
 │   ├── Lights/              # Lights list + Lights Expand
 │   ├── Climate/             # Climate + Climate Compact
@@ -248,7 +276,9 @@ Proofs of concept exploring new layout patterns beyond the standard card metapho
 │   ├── Weather/             # Weather card
 │   ├── Energy/              # Energy flow card
 │   ├── MediaPlayer/         # Media player card
-│   └── Chart/               # Chart card
+│   ├── Chart/               # Chart card
+│   ├── Person/              # Person presence card
+│   └── SceneInterpolator/   # ⚠️ XY pad scene blending (early dev)
 │
 ├── WeSmart-InfiniteColor/   # Dynamic HSL color engine — 14 cards
 │   ├── Light/ Lights/       # Light cards
