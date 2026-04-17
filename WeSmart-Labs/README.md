@@ -332,35 +332,38 @@ doors:
 
 ![Surface](../asset/images/labs/labs-surface.png)
 
-**The cardless dashboard.** No containers, no borders, no shadows. Content lives directly on the background — hierarchy expressed only through scale, weight, color, and space.
+**The professional cardless dashboard.** No containers, no borders, no boxes. Content lives directly on the surface, with a fluid layout perfectly optimized for both mobile and tablet displays. Hierarchy is established exclusively through negative space, dynamic typography, and a refined monochromatic color palette.
 
 **What makes it different from every other card:**
-- Zero card containers — all elements float on the panel background
-- A single thin **accent gradient rule** after the header — the only decoration
-- Sections divided by a 1px hairline and whitespace, not boxes
-- Light rows **bleed to the panel edges on hover** — the whole row feels interactive
-- Temperature numbers at 58px weight 200 — dominant and effortless
-- Color temp shown as a tiny 8px spectrum dot (warm → cool), not a text badge
+- **Zero Boxes, Subtle Structure:** Abandons traditional card containers. Uses a beautifully structured layout with very light horizontal separators (`border-bottom`) between rows to provide rhythm and readability without feeling boxed in.
+- **Responsive CSS Grid:** Designed specifically to leverage tablet (e.g., iPad) displays. Automatically switches from a mobile vertical stack to a sophisticated multi-column grid on screens wider than 768px.
+- **Fluid Typography:** Fonts scale dynamically using `clamp()` relative to the viewport, ensuring the dashboard "breathes" beautifully on any device size.
+- **Professional Monochromatic Base + Semantic Accents:** Uses a highly desaturated, elegant monochromatic base (deep anthracite in Dark mode, pearl in Light mode) with a user-defined accent color. Additionally, introduces controlled, soft semantic colors (warm amber for lights, elegant coral for open doors) to enhance glanceability.
+- **MDI Icon Support:** Replaces abstract dots with native Home Assistant Material Design Icons (`<ha-icon>`), instantly clarifying the type of device (lightbulb, door, window) while maintaining the minimal aesthetic.
+- **Interactive Rows:** Light and Door lists feature edge-to-edge negative-margin hovers. Brightness bars are implemented as ultra-thin tracks that scale effortlessly.
 
 ```
-  HOME                                  18:42
+  Dashboard                             18:42
   Buongiorno, Massimo        18 mar · Sora
   ● In casa
-  ─────────── (accent gradient, fades right)
-  METEO               CLIMA
-  7.8°                21° → 20°
-  Parz. nuvoloso · 67%     att.   target
-  Vento N 7.9 km/h         ● Riscaldamento
-  ─────────────────────────────────────────
-  LUCI                            2 accese
-  ● Cucina       ────────────   75%  ⬤warm
-  ● Camera       ───────        30%  ⬤warm
-  ○ Cortesia                         Tutte le luci ↗
-  ─────────────────────────────────────────
-  PORTE & INGRESSI
-  ● Portone d'ingresso              Chiuso
-  ● Finestra cucina                 Chiusa
-                                    Sicurezza ↗
+  
+  Meteo               Clima
+  [icon] 7.8°         [icon] 21° → 20°
+  Parz. nuvoloso      att.   target
+  Vento N 7.9 km/h    [icon] Riscaldamento
+  
+  Illuminazione                   2 attive
+  [icon] Cucina  ────────────   75%
+  ───────────────────────────────────────
+  [icon] Camera  ───────        30%
+  ───────────────────────────────────────
+  [icon] Cortesia                Tutte le luci →
+  
+  Accessi                       Tutte chiuse
+  [icon] Portone d'ingresso         Chiuso
+  ───────────────────────────────────────
+  [icon] Finestra cucina            Chiusa
+                                 Sicurezza →
 ```
 
 ### Installation
@@ -373,7 +376,7 @@ Copy `wesmart-labs-surface.js` to `config/www/`, add it as a JavaScript module r
 
 ```yaml
 type: custom:wesmart-labs-surface
-color: '#D97757'
+color: '#a3a3a3'
 theme: auto
 name: Massimo
 weather:
@@ -381,7 +384,7 @@ weather:
 presence:
   entity: person.massimo
 lights:
-  - entity: light.cucina_parete_yeelight
+  - entity: light.cucina
     name: Cucina
 doors:
   - entity: binary_sensor.portone
@@ -395,7 +398,7 @@ doors:
 ```yaml
 type: custom:wesmart-labs-surface
 
-color: '#D97757'    # Any hex — drives the entire InfiniteColor palette
+color: '#a3a3a3'    # Defines the single elegant accent color against the monochromatic base
 theme: auto         # dark | light | auto
 
 name: Massimo       # Greeting name
@@ -403,35 +406,40 @@ location: Sora      # Shown next to the date
 
 presence:
   entity: person.massimo
-  zone: zone.home                        # Zone label shown when at home
+  zone: zone.home                        # Zone label shown when at home ("In casa" or custom zone)
 
 weather:
   entity: weather.forecast_home
   internal_sensor: sensor.temperature_home   # Indoor sensor (optional)
-  details_link: /lovelace/meteo              # Nav link "Previsioni ↗" (optional)
+  details_link: /lovelace/meteo              # Nav link "Previsioni →" (optional)
 
 climate:
   entity: climate.aqara_trv_e1
-  name: CLIMA                                # Kicker label (optional)
+  name: Clima                                # Section label (optional)
 
-# Rows: dot · name · full-width brightness bar · % · color-temp dot
-# Clicking a row toggles the light.
+# Rows: MDI icon · name · sleek brightness bar · %
+# Icons adapt to the entity state (e.g., warm amber when ON).
 lights:
-  details_link: /lovelace/luci               # Nav link "Tutte le luci ↗" (optional)
+  details_link: /lovelace/luci               # Nav link "Tutte le luci →" (optional)
   - entity: light.cucina_parete_yeelight
-    name: Cucina — Yeelight
+    name: Cucina
+    icon: mdi:ceiling-light                  # Optional MDI icon override
   - entity: light.camera_da_letto
-    name: Camera da letto
+    name: Camera
+    icon: mdi:lamp
   - entity: light.cortesia_rientro
-    name: Cortesia Rientro
+    name: Cortesia
 
-# Rows: dot · name · status text (Chiuso / Aperto)
+# Rows: MDI icon · name · status text
+# Icons adapt to the entity state (e.g., elegant coral when OPEN).
 doors:
-  details_link: /lovelace/sicurezza          # Nav link "Sicurezza ↗" (optional)
+  details_link: /lovelace/sicurezza          # Nav link "Sicurezza →" (optional)
   - entity: binary_sensor.portone
-    name: Portone d'ingresso
+    name: Ingresso
+    icon: mdi:door                           # Optional MDI icon override
   - entity: binary_sensor.finestra_cucina
     name: Finestra cucina
+    icon: mdi:window-closed                  # Optional MDI icon override
 ```
 
 ---

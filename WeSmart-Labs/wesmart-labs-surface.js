@@ -1,12 +1,12 @@
 /**
  * WeSmart Labs — Surface
- * Cardless dashboard. No containers — content lives directly on the surface.
- * Hierarchy through space, scale, and color. Zero borders, zero boxes.
+ * Professional cardless dashboard. Elegantly structured for tablet & desktop.
+ * Uses CSS Grid, semantic colors, and MDI icons for high readability.
  *
  * STATUS: EXPERIMENTAL
  * YAML tag: wesmart-labs-surface
  *
- * @version 0.1.0
+ * @version 0.3.0
  */
 (() => {
 
@@ -16,15 +16,62 @@
       display: block;
       font-family: -apple-system, 'Inter', BlinkMacSystemFont, 'Söhne', sans-serif;
       -webkit-font-smoothing: antialiased;
+      
+      /* Fluid spacing variables */
+      --sp-xs: clamp(4px, 1vw, 8px);
+      --sp-sm: clamp(8px, 2vw, 16px);
+      --sp-md: clamp(16px, 3vw, 24px);
+      --sp-lg: clamp(24px, 4vw, 32px);
+      --sp-xl: clamp(32px, 5vw, 48px);
+      --sp-edge: clamp(20px, 4vw, 40px);
+
+      /* Semantic Colors */
+      --color-light-on: #f59e0b; /* Warm amber */
+      --color-door-open: #ef4444; /* Soft coral/red */
     }
 
-    /* ── Surface (no card, no shadow, no border) ────────────────────── */
+    /* ── Surface ────────────────────────────────────────────────────── */
     .surface {
       background: var(--bg);
       min-height: 100%;
       box-sizing: border-box;
+      padding: var(--sp-xl) var(--sp-edge);
       display: flex;
       flex-direction: column;
+      gap: var(--sp-xl);
+    }
+
+    /* Tablet/Desktop Layout using CSS Grid */
+    @media (min-width: 768px) {
+      .surface {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        grid-auto-rows: min-content;
+        gap: var(--sp-xl) var(--sp-lg);
+        align-items: start;
+      }
+      .s-header { grid-column: span 12; }
+      
+      /* Subtle separation for the Atmosphere section on larger screens */
+      .s-atmosphere { 
+        grid-column: span 12; 
+        padding-bottom: var(--sp-lg);
+        border-bottom: 1px solid var(--border);
+      }
+      .s-lights { grid-column: span 7; }
+      .s-doors { grid-column: span 5; }
+    }
+
+    @media (min-width: 1024px) {
+      .s-atmosphere { 
+        grid-column: span 4; 
+        border-bottom: none;
+        border-right: 1px solid var(--border);
+        padding-bottom: 0;
+        padding-right: var(--sp-lg);
+      }
+      .s-lights { grid-column: span 4; }
+      .s-doors { grid-column: span 4; }
     }
 
     /* ── Header ─────────────────────────────────────────────────────── */
@@ -32,156 +79,127 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      padding: 32px 28px 26px;
     }
 
     .s-eyebrow {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--text-dim);
-      margin-bottom: 7px;
+      margin-bottom: var(--sp-xs);
     }
 
     .s-greeting {
-      font-size: 30px;
-      font-weight: 500;
+      font-size: clamp(28px, 4vw, 36px);
+      font-weight: 400;
       color: var(--text);
-      letter-spacing: -0.015em;
+      letter-spacing: -0.02em;
       line-height: 1.1;
     }
 
     .s-presence {
       display: flex;
       align-items: center;
-      gap: 7px;
-      margin-top: 8px;
-      font-size: 12px;
+      gap: var(--sp-sm);
+      margin-top: var(--sp-sm);
+      font-size: 13px;
       color: var(--text-muted);
     }
 
     .s-pdot {
-      width: 7px; height: 7px;
+      width: 6px; height: 6px;
       border-radius: 50%;
       background: var(--text-dim);
       flex-shrink: 0;
       transition: background 0.4s;
     }
     .s-pdot.home {
-      background: #5aad6f;
-      animation: pulse-home 3.5s ease-in-out infinite;
-    }
-    .s-pdot.away { background: var(--text-dim); }
-
-    @keyframes pulse-home {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.4; }
+      background: var(--text);
+      box-shadow: 0 0 8px var(--text-muted);
     }
 
     .s-time {
-      font-size: 42px;
-      font-weight: 200;
+      font-size: clamp(36px, 5vw, 48px);
+      font-weight: 300;
       color: var(--text);
-      letter-spacing: -0.04em;
+      letter-spacing: -0.03em;
       line-height: 1;
       font-variant-numeric: tabular-nums;
       text-align: right;
     }
 
     .s-date {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-muted);
-      margin-top: 6px;
+      margin-top: var(--sp-sm);
       text-align: right;
     }
 
-    /* ── Accent rule — the only decoration ──────────────────────────── */
-    .accent-rule {
-      height: 1px;
-      margin: 0 28px;
-      background: linear-gradient(to right, var(--accent) 0%, transparent 65%);
-      opacity: 0.45;
-    }
-
-    /* ── Thin separator between sections ───────────────────────────── */
-    .sep {
-      height: 1px;
-      margin: 0 28px;
-      background: var(--border);
-    }
-
-    /* ── Atmosphere block (weather + climate, side by side) ─────────── */
+    /* ── Atmosphere block (weather + climate) ─────────── */
     .s-atmosphere {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      padding: 0;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: var(--sp-lg);
     }
 
     .atm-col {
-      padding: 26px 28px;
-    }
-    .atm-col + .atm-col {
-      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
     }
 
     .atm-kicker {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.10em;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--text-dim);
-      margin-bottom: 4px;
+      margin-bottom: var(--sp-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .atm-kicker ha-icon {
+      --mdc-icon-size: 14px;
     }
 
     .atm-temp {
-      font-size: 58px;
-      font-weight: 200;
-      color: var(--text);
-      letter-spacing: -0.045em;
-      line-height: 0.95;
-      margin: 2px 0 10px;
-    }
-
-    .atm-condition {
-      font-size: 13px;
-      font-weight: 400;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-    }
-
-    .atm-metric {
-      font-size: 11px;
-      color: var(--text-dim);
-      line-height: 1.7;
-    }
-
-    .atm-internal {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-    }
-
-    .atm-int-val   { font-size: 22px; font-weight: 300; color: var(--text); letter-spacing: -0.02em; }
-    .atm-int-label { font-size: 11px; color: var(--text-dim); }
-
-    /* Climate column */
-    .cl-temps {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      margin: 4px 0 6px;
-    }
-
-    .cl-current {
-      font-size: 52px;
+      font-size: clamp(48px, 6vw, 64px);
       font-weight: 200;
       color: var(--text);
       letter-spacing: -0.04em;
-      line-height: 0.95;
+      line-height: 1;
+      margin: 0 0 var(--sp-sm);
+    }
+
+    .atm-condition {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-bottom: var(--sp-md);
+    }
+
+    .atm-metric {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* Climate specific */
+    .cl-temps {
+      display: flex;
+      align-items: baseline;
+      gap: var(--sp-sm);
+      margin-bottom: var(--sp-xs);
+    }
+
+    .cl-current {
+      font-size: clamp(40px, 5vw, 56px);
+      font-weight: 200;
+      color: var(--text);
+      letter-spacing: -0.04em;
+      line-height: 1;
     }
 
     .cl-arrow {
@@ -192,198 +210,207 @@
     }
 
     .cl-target {
-      font-size: 34px;
+      font-size: clamp(28px, 4vw, 36px);
       font-weight: 300;
       color: var(--accent);
-      letter-spacing: -0.025em;
-      line-height: 0.95;
+      letter-spacing: -0.02em;
+      line-height: 1;
     }
 
     .cl-sublabels {
       display: flex;
-      gap: 18px;
-      font-size: 10px;
+      gap: 24px;
+      font-size: 11px;
       color: var(--text-dim);
-      letter-spacing: 0.04em;
-      margin-bottom: 14px;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--sp-md);
+      text-transform: uppercase;
     }
 
     .cl-mode {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
+      gap: 8px;
+      font-size: 13px;
       font-weight: 500;
       color: var(--accent);
+      margin-top: auto;
     }
-    .cl-mode-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
+    .cl-mode ha-icon {
+      --mdc-icon-size: 16px;
     }
     .cl-mode.idle { color: var(--text-dim); }
-    .cl-mode.idle .cl-mode-dot { background: var(--text-dim); }
 
     /* ── Nav link ────────────────────────────────────────────────────── */
     .nav-link {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      margin-top: 16px;
-      font-size: 12px;
+      gap: 6px;
+      margin-top: var(--sp-md);
+      font-size: 13px;
       font-weight: 500;
       color: var(--text-dim);
       cursor: pointer;
       text-decoration: none;
-      transition: color 0.15s;
+      transition: color 0.2s;
       user-select: none;
     }
-    .nav-link:hover { color: var(--accent); }
-    .nav-link::after { content: ' ↗'; }
+    .nav-link:hover { color: var(--text); }
+    .nav-link::after { content: '→'; font-size: 14px; }
 
-    /* ── Lights section ─────────────────────────────────────────────── */
-    .s-lights { padding: 24px 28px; }
-
-    .section-row {
+    /* ── List Sections (Lights, Doors) ──────────────────────────────── */
+    .section-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
+      align-items: baseline;
+      margin-bottom: var(--sp-md);
     }
 
     .section-kicker {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.10em;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--text-dim);
     }
 
     .section-count {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--text-muted);
       transition: color 0.3s;
     }
 
-    /* Light rows bleed to panel edges on hover — the key "no card" effect */
-    .light-row {
+    .list-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Item Rows (With Separators) ───────────────────────────────── */
+    .row {
       display: flex;
       align-items: center;
-      gap: 13px;
-      padding: 13px 28px;
-      margin: 0 -28px;
-      cursor: pointer;
+      gap: var(--sp-md);
+      padding: var(--sp-md) 0;
       border-bottom: 1px solid var(--border);
-      transition: background 0.12s;
+      cursor: pointer;
+      transition: background 0.2s, padding 0.2s;
+      user-select: none;
     }
-    .light-row:last-of-type { border-bottom: none; }
-    .light-row:hover        { background: var(--row-hover); }
-    .light-row:active       { background: var(--accent-soft); }
+    .row:last-child {
+      border-bottom: none;
+    }
+    /* Add horizontal padding on hover to create a highlight effect without permanent boxes */
+    .row:hover { 
+      background: var(--row-hover); 
+      padding-left: var(--sp-sm);
+      padding-right: var(--sp-sm);
+      margin: 0 calc(var(--sp-sm) * -1);
+      border-radius: 8px;
+      border-color: transparent;
+    }
+    .row:active { background: var(--accent-soft); }
 
-    .lr-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex-shrink: 0;
-      transition: background 0.25s, opacity 0.25s;
+    /* Icons */
+    .row ha-icon {
+      color: var(--text-dim);
+      transition: color 0.3s, transform 0.2s;
     }
-    .lr-dot.off { background: var(--text-dim); opacity: 0.35; }
+
+    /* Light Row */
+    .light-row.on ha-icon {
+      color: var(--color-light-on);
+      transform: scale(1.1);
+    }
+    .light-row.off ha-icon {
+      opacity: 0.5;
+    }
 
     .lr-name {
-      font-size: 13px;
-      font-weight: 500;
+      font-size: 14px;
+      font-weight: 400;
       color: var(--text);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      min-width: 90px;
-      max-width: 175px;
-      transition: color 0.2s;
+      flex: 0 1 auto;
+      min-width: 80px;
+      transition: color 0.3s, font-weight 0.3s;
     }
+    .light-row.on .lr-name { font-weight: 500; }
     .light-row.off .lr-name { color: var(--text-muted); }
 
-    /* Full-stretch bar — grows to fill all remaining space */
-    .lr-bar-wrap { flex: 1; min-width: 0; }
+    .lr-bar-wrap { flex: 1; min-width: 20px; display: flex; align-items: center; }
 
     .lr-bar-track {
+      width: 100%;
       height: 2px;
-      background: var(--border);
+      background: transparent;
       border-radius: 1px;
       overflow: hidden;
     }
+    .light-row.on .lr-bar-track { background: var(--border); }
 
     .lr-bar-fill {
       height: 100%;
       border-radius: 1px;
-      background: var(--accent);
+      background: var(--color-light-on);
       transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .lr-pct {
-      font-size: 11px;
-      font-weight: 500;
+      font-size: 12px;
+      font-weight: 400;
       color: var(--text-dim);
-      min-width: 28px;
+      min-width: 32px;
       text-align: right;
       font-variant-numeric: tabular-nums;
     }
+    .light-row.on .lr-pct { color: var(--text); }
 
-    /* Tiny color-temp dot — warm orange to cool blue */
-    .lr-kt {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      transition: background 0.4s;
+    /* Door Row */
+    .door-row.open ha-icon {
+      color: var(--color-door-open);
+      transform: scale(1.1);
     }
-
-    /* ── Doors section ──────────────────────────────────────────────── */
-    .s-doors { padding: 24px 28px; }
-
-    .door-row {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-      transition: opacity 0.2s;
-    }
-    .door-row:last-child { border-bottom: none; }
-
-    .dr-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: #5aad6f;
-      flex-shrink: 0;
-      transition: background 0.3s;
-    }
-    .dr-dot.open { background: #e57363; }
 
     .dr-name {
-      font-size: 13px;
-      font-weight: 500;
+      font-size: 14px;
+      font-weight: 400;
       color: var(--text);
       flex: 1;
+      transition: color 0.3s, font-weight 0.3s;
     }
+    .door-row.open .dr-name { font-weight: 500; }
 
     .dr-status {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--text-dim);
       transition: color 0.3s;
+      text-transform: lowercase;
     }
-    .door-row.open .dr-status { color: #e57363; font-weight: 500; }
+    .door-row.open .dr-status { color: var(--color-door-open); font-weight: 500; }
   `;
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
   const WEATHER_LABELS = {
-    'clear-night':'Cielo sereno','cloudy':'Nuvoloso','fog':'Nebbia','hail':'Grandine',
-    'lightning':'Temporale','lightning-rainy':'Temporale con pioggia',
-    'partlycloudy':'Parz. nuvoloso','pouring':'Pioggia intensa','rainy':'Pioggia',
-    'snowy':'Neve','snowy-rainy':'Misto neve/pioggia','sunny':'Soleggiato',
+    'clear-night':'Sereno','cloudy':'Nuvoloso','fog':'Nebbia','hail':'Grandine',
+    'lightning':'Temporale','lightning-rainy':'Temporale/Pioggia',
+    'partlycloudy':'Parz. nuvoloso','pouring':'Rovescio','rainy':'Pioggia',
+    'snowy':'Neve','snowy-rainy':'Neve/Pioggia','sunny':'Soleggiato',
     'windy':'Ventoso','windy-variant':'Molto ventoso',
   };
 
+  const WEATHER_ICONS = {
+    'clear-night':'mdi:weather-night', 'cloudy':'mdi:weather-cloudy', 'fog':'mdi:weather-fog', 'hail':'mdi:weather-hail',
+    'lightning':'mdi:weather-lightning', 'lightning-rainy':'mdi:weather-lightning-rainy',
+    'partlycloudy':'mdi:weather-partly-cloudy', 'pouring':'mdi:weather-pouring', 'rainy':'mdi:weather-rainy',
+    'snowy':'mdi:weather-snowy', 'snowy-rainy':'mdi:weather-snowy-rainy', 'sunny':'mdi:weather-sunny',
+    'windy':'mdi:weather-windy', 'windy-variant':'mdi:weather-windy-variant',
+  };
+
   function weatherLabel(s) { return WEATHER_LABELS[s] || s || '—'; }
+  function weatherIcon(s)  { return WEATHER_ICONS[s] || 'mdi:weather-cloudy'; }
 
   function bearingToCompass(deg) {
     if (deg == null) return '';
@@ -409,16 +436,6 @@
     return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   }
 
-  // Color temperature → a small spectrum dot color
-  function ktColor(kelvin) {
-    const k = Number(kelvin);
-    if (k < 2500) return '#C8712A';
-    if (k < 3200) return '#D4943A';
-    if (k < 4200) return '#C2A255';
-    if (k < 5500) return '#8899AA';
-    return '#6688CC';
-  }
-
   // ─── Card Class ───────────────────────────────────────────────────────────
 
   class WeSmartLabsSurface extends HTMLElement {
@@ -434,7 +451,7 @@
     }
 
     setConfig(config) {
-      this._config = { color: '#D97757', theme: 'auto', name: '', location: '', ...config };
+      this._config = { color: '#a3a3a3', theme: 'auto', name: '', location: '', ...config };
       this._applyPalette();
       this._render();
     }
@@ -453,7 +470,7 @@
 
     getCardSize() { return 10; }
 
-    // ── Color Engine ──────────────────────────────────────────────────────
+    // ── Color Engine (Professional Monochromatic + Accent) ─────────────────
 
     _hexToHsl(hex) {
       let r = parseInt(hex.slice(1,3),16)/255;
@@ -480,30 +497,29 @@
 
     _buildPalette(hex, isDark) {
       const { h, s, l } = this._hexToHsl(hex);
-      const c = this._clamp.bind(this);
+      
+      // Professional slate/zinc base palette with the user's accent
       if (isDark) {
-        const aL = c(l, 50, 65);
         return {
-          accent:    this._hsl(h, s, aL),
-          accentSoft:this._hsla(h, s, aL, 0.09),
-          bg:        this._hsl(h, c(Math.round(s*0.35),25,45), 10),
-          border:    `hsla(0,0%,100%,0.07)`,
-          text:      this._hsl(h, c(Math.round(s*0.08),5,10), 93),
-          textMuted: this._hsl(h, c(Math.round(s*0.12),8,15), 62),
-          textDim:   this._hsl(h, c(Math.round(s*0.10),6,12), 38),
-          rowHover:  `hsla(0,0%,100%,0.03)`,
+          accent:    this._hsl(h, s, l),
+          accentSoft:this._hsla(h, s, l, 0.1),
+          bg:        `#121212`, // Deep anthracite
+          border:    `rgba(255,255,255,0.08)`,
+          text:      `#f3f4f6`,
+          textMuted: `#9ca3af`,
+          textDim:   `#6b7280`,
+          rowHover:  `rgba(255,255,255,0.04)`,
         };
       } else {
-        const aL = c(l, 35, 52);
         return {
-          accent:    this._hsl(h, s, aL),
-          accentSoft:this._hsla(h, s, aL, 0.07),
-          bg:        this._hsl(h, c(Math.round(s*0.05),3,6), 98),
-          border:    this._hsla(h, c(Math.round(s*0.12),8,16), 20, 0.08),
-          text:      this._hsl(h, c(Math.round(s*0.25),18,35), 12),
-          textMuted: this._hsl(h, c(Math.round(s*0.18),12,24), 42),
-          textDim:   this._hsl(h, c(Math.round(s*0.12),8,16), 60),
-          rowHover:  this._hsla(h, c(Math.round(s*0.12),8,16), 20, 0.03),
+          accent:    this._hsl(h, s, l),
+          accentSoft:this._hsla(h, s, l, 0.08),
+          bg:        `#fafafa`, // Off-white/pearl
+          border:    `rgba(0,0,0,0.08)`,
+          text:      `#111827`,
+          textMuted: `#4b5563`,
+          textDim:   `#9ca3af`,
+          rowHover:  `rgba(0,0,0,0.03)`,
         };
       }
     }
@@ -556,23 +572,22 @@
 
       /* ── light rows ── */
       const lightRowsHTML = lights.map((l, i) => `
-        <div class="light-row off" data-light-idx="${i}" id="lr-${i}">
-          <div class="lr-dot off" id="lr-dot-${i}"></div>
+        <div class="row light-row off" data-light-idx="${i}" id="lr-${i}">
+          <ha-icon icon="${l.icon || 'mdi:lightbulb-outline'}" id="lr-icon-${i}"></ha-icon>
           <div class="lr-name">${l.name || l.entity}</div>
           <div class="lr-bar-wrap">
-            <div class="lr-bar-track" id="lr-track-${i}" style="display:none">
+            <div class="lr-bar-track" id="lr-track-${i}">
               <div class="lr-bar-fill" id="lr-bar-${i}" style="width:0%"></div>
             </div>
           </div>
           <div class="lr-pct" id="lr-pct-${i}"></div>
-          <div class="lr-kt" id="lr-kt-${i}" style="display:none"></div>
         </div>
       `).join('');
 
       /* ── door rows ── */
       const doorRowsHTML = doors.map((d, i) => `
-        <div class="door-row" id="dr-${i}">
-          <div class="dr-dot" id="dr-dot-${i}"></div>
+        <div class="row door-row" id="dr-${i}">
+          <ha-icon icon="${d.icon || 'mdi:door-closed'}" id="dr-icon-${i}"></ha-icon>
           <div class="dr-name">${d.name || d.entity}</div>
           <div class="dr-status" id="dr-status-${i}">—</div>
         </div>
@@ -592,7 +607,7 @@
         <!-- ────── Header ────── -->
         <header class="s-header">
           <div>
-            <div class="s-eyebrow">HOME</div>
+            <div class="s-eyebrow">Dashboard</div>
             <div class="s-greeting" id="s-greeting">${greeting(cfg.name)}</div>
             <div class="s-presence">
               <span class="s-pdot" id="s-pdot"></span>
@@ -605,70 +620,70 @@
           </div>
         </header>
 
-        <!-- one thin accent line, the only decoration -->
-        <div class="accent-rule"></div>
-
         <!-- ────── Weather + Climate ────── -->
         ${(hasW || hasCl) ? `
         <div class="s-atmosphere">
 
           ${hasW ? `
           <div class="atm-col">
-            <div class="atm-kicker">METEO</div>
+            <div class="atm-kicker">
+              <ha-icon icon="mdi:weather-partly-cloudy" id="w-icon"></ha-icon>
+              Meteo
+            </div>
             <div class="atm-temp" id="w-temp">—</div>
             <div class="atm-condition" id="w-cond">—</div>
             <div class="atm-metric" id="w-m1" style="display:none">—</div>
             <div class="atm-metric" id="w-m2" style="display:none">—</div>
-            ${cfg.weather?.internal_sensor ? `
-            <div class="atm-internal" id="w-internal" style="display:none">
-              <div class="atm-int-val" id="w-int-val">—</div>
-              <div class="atm-int-label" id="w-int-label">interno</div>
-            </div>` : ''}
             ${wNav}
           </div>
-          ` : '<div></div>'}
+          ` : ''}
 
           ${hasCl ? `
           <div class="atm-col">
-            <div class="atm-kicker">${cfg.climate?.name || 'CLIMA'}</div>
+            <div class="atm-kicker">
+              <ha-icon icon="mdi:thermostat"></ha-icon>
+              ${cfg.climate?.name || 'Clima'}
+            </div>
             <div class="cl-temps">
               <div class="cl-current" id="cl-current">—</div>
               <div class="cl-arrow">→</div>
               <div class="cl-target"  id="cl-target">—</div>
             </div>
-            <div class="cl-sublabels"><span>attuale</span><span>target</span></div>
+            <div class="cl-sublabels"><span>Attuale</span><span>Target</span></div>
             <div class="cl-mode" id="cl-mode" style="display:none">
-              <div class="cl-mode-dot"></div>
+              <ha-icon icon="mdi:power" id="cl-mode-icon"></ha-icon>
               <span id="cl-mode-text">—</span>
             </div>
           </div>
-          ` : '<div></div>'}
+          ` : ''}
 
         </div>
         ` : ''}
 
         <!-- ────── Lights ────── -->
         ${hasL ? `
-        <div class="sep"></div>
         <div class="s-lights">
-          <div class="section-row">
-            <span class="section-kicker">LUCI</span>
+          <div class="section-header">
+            <span class="section-kicker">Illuminazione</span>
             <span class="section-count" id="lights-count"></span>
           </div>
-          ${lightRowsHTML}
+          <div class="list-container">
+            ${lightRowsHTML}
+          </div>
           ${lNav}
         </div>
         ` : ''}
 
         <!-- ────── Doors ────── -->
         ${hasD ? `
-        <div class="sep"></div>
         <div class="s-doors">
-          <div class="section-row">
-            <span class="section-kicker">PORTE & INGRESSI</span>
+          <div class="section-header">
+            <span class="section-kicker">Accessi</span>
             <span class="section-count" id="doors-count"></span>
           </div>
-          ${doorRowsHTML}
+          <div class="list-container">
+            ${doorRowsHTML}
+          </div>
           ${dNav}
         </div>
         ` : ''}
@@ -709,7 +724,7 @@
       if (dot) dot.className = `s-pdot ${isHome ? 'home' : 'away'}`;
       if (loc) {
         const zone = this._config.presence?.zone?.replace('zone.', '') || '';
-        loc.textContent = isHome ? (zone || 'In casa') : 'Fuori casa';
+        loc.textContent = isHome ? (zone || 'In casa') : 'Fuori';
       }
     }
 
@@ -718,6 +733,9 @@
       if (!eid || !this._hass.states[eid]) return;
       const s = this._hass.states[eid];
       const a = s.attributes || {};
+
+      const iconEl = this._q('#w-icon');
+      if (iconEl) iconEl.setAttribute('icon', weatherIcon(s.state));
 
       const tempEl = this._q('#w-temp');
       if (tempEl) tempEl.textContent = a.temperature != null ? `${a.temperature}°` : '—';
@@ -744,18 +762,6 @@
         m2.style.display = '';
         m2.textContent = `${dp}${cc}`;
       }
-
-      const intEid = this._config.weather?.internal_sensor;
-      if (intEid && this._hass.states[intEid]) {
-        const iS   = this._hass.states[intEid];
-        const unit = iS.attributes?.unit_of_measurement || '°';
-        const blk  = this._q('#w-internal');
-        const val  = this._q('#w-int-val');
-        const lbl  = this._q('#w-int-label');
-        if (blk) blk.style.display = '';
-        if (val) val.textContent = `${parseFloat(iS.state).toFixed(1)}${unit}`;
-        if (lbl) lbl.textContent = iS.attributes?.friendly_name || 'interno';
-      }
     }
 
     _updateClimate() {
@@ -772,12 +778,17 @@
 
       const mode    = this._q('#cl-mode');
       const modeTxt = this._q('#cl-mode-text');
+      const modeIco = this._q('#cl-mode-icon');
       if (mode && a.hvac_action) {
         const idle = a.hvac_action === 'idle' || a.hvac_action === 'off';
         mode.style.display = '';
         mode.className = idle ? 'cl-mode idle' : 'cl-mode';
-        const MAP = { heating:'Riscaldamento', cooling:'Raffreddamento', idle:'In attesa', fan:'Ventilazione', off:'Spento' };
-        if (modeTxt) modeTxt.textContent = MAP[a.hvac_action] || a.hvac_action;
+        
+        const MAP_TXT = { heating:'Riscaldamento', cooling:'Raffreddamento', idle:'Attesa', fan:'Ventilazione', off:'Spento' };
+        if (modeTxt) modeTxt.textContent = MAP_TXT[a.hvac_action] || a.hvac_action;
+
+        const MAP_ICO = { heating:'mdi:fire', cooling:'mdi:snowflake', idle:'mdi:sleep', fan:'mdi:fan', off:'mdi:power' };
+        if (modeIco) modeIco.setAttribute('icon', MAP_ICO[a.hvac_action] || 'mdi:thermostat');
       }
     }
 
@@ -793,36 +804,35 @@
         if (isOn) on++;
 
         const row   = this._q(`#lr-${i}`);
-        const dot   = this._q(`#lr-dot-${i}`);
-        const track = this._q(`#lr-track-${i}`);
+        const icon  = this._q(`#lr-icon-${i}`);
         const bar   = this._q(`#lr-bar-${i}`);
         const pct   = this._q(`#lr-pct-${i}`);
-        const kt    = this._q(`#lr-kt-${i}`);
 
-        if (row) row.className = `light-row${isOn ? '' : ' off'}`;
-        if (dot) dot.className = `lr-dot${isOn ? '' : ' off'}`;
+        if (row) row.className = `row light-row${isOn ? ' on' : ' off'}`;
+        
+        // Update icon based on state (can use provided on/off icons or default MDI)
+        if (icon) {
+          if (isOn) {
+            icon.setAttribute('icon', lCfg.icon_on || lCfg.icon || 'mdi:lightbulb-on');
+          } else {
+            icon.setAttribute('icon', lCfg.icon_off || lCfg.icon || 'mdi:lightbulb-outline');
+          }
+        }
 
         if (isOn && a.brightness != null) {
           const p = Math.round(a.brightness / 255 * 100);
-          if (track) track.style.display = '';
-          if (bar)   bar.style.width     = `${p}%`;
-          if (pct)   pct.textContent     = `${p}%`;
+          if (bar) bar.style.width = `${p}%`;
+          if (pct) pct.textContent = `${p}%`;
         } else {
-          if (track) track.style.display = 'none';
-          if (pct)   pct.textContent     = '';
-        }
-
-        if (isOn && a.color_temp_kelvin) {
-          if (kt) { kt.style.display = ''; kt.style.background = ktColor(a.color_temp_kelvin); }
-        } else {
-          if (kt) kt.style.display = 'none';
+          if (bar) bar.style.width = `0%`;
+          if (pct) pct.textContent = '';
         }
       });
 
       const countEl = this._q('#lights-count');
       if (countEl) {
-        countEl.textContent = on > 0 ? `${on} acces${on > 1 ? 'e' : 'a'}` : 'Tutte spente';
-        countEl.style.color = on > 0 ? 'var(--accent)' : '';
+        countEl.textContent = on > 0 ? `${on} attiv${on > 1 ? 'e' : 'a'}` : 'Spente';
+        countEl.style.color = on > 0 ? 'var(--text)' : '';
       }
     }
 
@@ -837,18 +847,26 @@
         if (isOpen) openCount++;
 
         const row    = this._q(`#dr-${i}`);
-        const dot    = this._q(`#dr-dot-${i}`);
+        const icon   = this._q(`#dr-icon-${i}`);
         const status = this._q(`#dr-status-${i}`);
 
-        if (row)    row.className    = `door-row${isOpen ? ' open' : ''}`;
-        if (dot)    dot.className    = `dr-dot${isOpen ? ' open' : ''}`;
+        if (row) row.className = `row door-row${isOpen ? ' open' : ''}`;
+        
+        if (icon) {
+          if (isOpen) {
+            icon.setAttribute('icon', dCfg.icon_open || dCfg.icon || 'mdi:door-open');
+          } else {
+            icon.setAttribute('icon', dCfg.icon_closed || dCfg.icon || 'mdi:door-closed');
+          }
+        }
+
         if (status) status.textContent = isOpen ? 'Aperto' : 'Chiuso';
       });
 
       const countEl = this._q('#doors-count');
       if (countEl) {
-        countEl.textContent = openCount > 0 ? `${openCount} apert${openCount > 1 ? 'e' : 'a'}` : '';
-        countEl.style.color = openCount > 0 ? '#e57363' : '';
+        countEl.textContent = openCount > 0 ? `${openCount} apert${openCount > 1 ? 'e' : 'a'}` : 'Tutte chiuse';
+        countEl.style.color = openCount > 0 ? 'var(--color-door-open)' : '';
       }
     }
 
@@ -881,21 +899,21 @@
 
     static getStubConfig() {
       return {
-        color:    '#D97757',
+        color:    '#a3a3a3', // Neutral elegant accent
         theme:    'auto',
         name:     'Massimo',
         location: 'Sora',
-        weather:  { entity: 'weather.forecast_home', internal_sensor: 'sensor.temperature_home', details_link: '/lovelace/meteo' },
+        weather:  { entity: 'weather.forecast_home', details_link: '/lovelace/meteo' },
         presence: { entity: 'person.massimo', zone: 'zone.home' },
-        climate:  { entity: 'climate.aqara_trv_e1', name: 'CLIMA' },
+        climate:  { entity: 'climate.aqara_trv_e1', name: 'Clima' },
         lights: [
-          { entity: 'light.cucina_parete_yeelight', name: 'Cucina — Yeelight' },
-          { entity: 'light.camera_da_letto',        name: 'Camera da letto' },
-          { entity: 'light.cortesia_rientro',       name: 'Cortesia Rientro' },
+          { entity: 'light.cucina_parete_yeelight', name: 'Cucina', icon: 'mdi:ceiling-light' },
+          { entity: 'light.camera_da_letto',        name: 'Camera', icon: 'mdi:lamp' },
+          { entity: 'light.cortesia_rientro',       name: 'Cortesia', icon: 'mdi:lightbulb-group' },
         ],
         doors: [
-          { entity: 'binary_sensor.portone',         name: "Portone d'ingresso" },
-          { entity: 'binary_sensor.finestra_cucina', name: 'Finestra cucina' },
+          { entity: 'binary_sensor.portone',         name: 'Ingresso', icon: 'mdi:door' },
+          { entity: 'binary_sensor.finestra_cucina', name: 'Finestra cucina', icon: 'mdi:window-closed' },
         ],
       };
     }
@@ -907,7 +925,7 @@
   window.customCards.push({
     type:        'wesmart-labs-surface',
     name:        'WeSmart Labs — Surface',
-    description: '[LABS] Cardless dashboard. No containers — content lives directly on the surface.',
+    description: '[LABS] Professional cardless dashboard. Optimized for tablet, structured.',
     preview:     false,
   });
 
