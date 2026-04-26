@@ -14,6 +14,61 @@ Experimental cards under active development. These cards are not production-read
 | Clean Panel | `wesmart-labs-clean-panel` | `wesmart-labs-clean-panel.js` |
 | Surface | `wesmart-labs-surface` | `wesmart-labs-surface.js` |
 | Cross Pad | `wesmart-labs-cross-pad` | `wesmart-labs-cross-pad.js` |
+| Energy Card | `wesmart-labs-energy-card` | `wesmart-labs-energy-card.js` |
+
+---
+
+## wesmart-labs-energy-card
+
+Advanced energy dashboard with live flow, usage gauge, and device list. Faithful reproduction of the "Lumina Automation" / "Human-Centric Technical" aesthetic.
+
+**Features:**
+- **Live Energy Flow**: SVG-animated paths showing current flow between Solar, Home, and Grid.
+- **Usage Now Gauge**: Semi-circular gauge showing current consumption relative to household capacity.
+- **Today's Split**: Stacked bar chart showing energy sources for the current day.
+- **Active Devices**: Dynamic list of high-consumption devices with real-time power and daily energy totals.
+
+### Installation
+
+1. Copy `wesmart-labs-energy-card.js` to `config/www/`
+2. HA → Settings → Dashboards → Resources → Add:
+   - URL: `/local/wesmart-labs-energy-card.js`
+   - Type: `JavaScript module`
+3. Hard refresh the browser (`Cmd+Shift+R` / `Ctrl+Shift+R`)
+
+---
+
+### YAML — Complete
+
+```yaml
+type: custom:wesmart-labs-energy-card
+capacity_w: 6000 # Max household capacity for the gauge
+
+# Live Flow nodes
+flow:
+  solar: sensor.inverter_power
+  grid: sensor.grid_power
+  home: sensor.home_power # Optional: auto-calculated as (solar - grid) if omitted
+
+# Daily split horizontal bar
+split_today:
+  solar: sensor.solar_yield_today
+  battery: sensor.battery_discharge_today
+  grid: sensor.grid_import_today
+
+# Dynamic device list
+devices:
+  - entity: switch.tesla_charger
+    name: Tesla Charger
+    icon: mdi:ev-station
+    power_sensor: sensor.tesla_power
+    daily_sensor: sensor.tesla_energy_today
+  - entity: light.living_room_lights
+    name: Living Room AC
+    icon: mdi:ac-unit
+    power_sensor: sensor.ac_power
+    daily_sensor: sensor.ac_energy_today
+```
 
 ---
 

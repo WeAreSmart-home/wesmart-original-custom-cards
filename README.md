@@ -10,7 +10,7 @@ A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSm
 |---|---|---|---|
 | ◆ | **WeSmart InfiniteColor** | 14 | Production-ready |
 | ■ | **WeSmart Original** | 20 | Production-ready |
-| ⚗️ | **WeSmart Labs** | 4 | Experimental |
+| ⚗️ | **WeSmart Labs** | 5 | Experimental |
 
 ---
 
@@ -243,6 +243,9 @@ Proofs of concept exploring new layout patterns beyond the standard card metapho
 | Clean Panel | `wesmart-labs-clean-panel` | ⚗️ Experimental |
 | Surface | `wesmart-labs-surface` | ⚗️ Experimental |
 | Cross Pad | `wesmart-labs-cross-pad` | ⚗️ Experimental |
+| Energy Card ⚠️ | `wesmart-labs-energy-card` | ⚗️ Experimental |
+
+> ⚠️ **Energy Card** is in early development. Non finita, non usare. YAML config and behavior may change.
 
 **Home Panel** — Dense tablet dashboard: weather + presence, KPI tiles, light controls, climate + security, system updates + AI tasks.
 
@@ -255,6 +258,8 @@ Proofs of concept exploring new layout patterns beyond the standard card metapho
 ![Surface](asset/images/labs/labs-surface.png)
 
 **Cross Pad** — Transparent button pad. A single cross divides space into four pressable quadrants. No card shell.
+
+**Energy Card** — Advanced energy dashboard with live flow, usage gauge, and device list.
 
 ---
 
@@ -289,11 +294,12 @@ Proofs of concept exploring new layout patterns beyond the standard card metapho
 │   ├── Clock/ History/      # Clock + history cards
 │   └── Chart/               # Infinite Chart card
 │
-├── WeSmart-Labs/            # ⚗️ Experimental — 4 cards
+├── WeSmart-Labs/            # ⚗️ Experimental — 5 cards
 │   ├── wesmart-labs-home-panel.js
 │   ├── wesmart-labs-clean-panel.js
 │   ├── wesmart-labs-surface.js
-│   └── wesmart-labs-cross-pad.js
+│   ├── wesmart-labs-cross-pad.js
+│   └── wesmart-labs-energy-card.js
 │
 ├── asset/
 │   ├── images/              # Preview screenshots
