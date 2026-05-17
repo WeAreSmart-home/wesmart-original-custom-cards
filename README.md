@@ -38,6 +38,16 @@ A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSm
 
 ---
 
+## 📚 Full Documentation & Card Reference
+
+To learn how to configure each specific card, discover all available YAML options, and see detailed examples, please refer to the dedicated comprehensive documentation pages:
+
+- **[◆ WeSmart InfiniteColor Documentation ↗](WeSmart-InfiniteColor/README.md)**: Full reference for the dynamic HSL palette cards (including the new Garbage Card).
+- **[■ WeSmart Original Documentation ↗](doc/README.md)**: Comprehensive guide for all standard fixed-palette cards (Chart, Weather, Energy Flow, etc.).
+- **[⚗️ WeSmart Labs Documentation ↗](WeSmart-Labs/README.md)**: Details on the experimental cardless layouts.
+
+---
+
 ## Preview
 
 ![Garbage Card](asset/images/garbage.png)
