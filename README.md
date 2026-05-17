@@ -6,6 +6,16 @@
 
 ### About the Founder & Vision
 
+Hi! I'm **Massimo Di Vona** (formerly known as *Max Novadi*), founder of [Wearesmart.it](https://www.wearesmart.it).
+
+This project started as an experiment for the Home Assistant community. My vision is to combine a passion for home automation with the power of modern **Artificial Intelligence** (like *Gemini* and *Claude Code*). The goal is to create a collection of specific, aesthetically pleasing, and functional cards, born from human-AI collaboration to meet real user needs in real-time.
+
+Both the **WeSmart Original** and **InfiniteColor** collections are constantly evolving: I use AI not only to write clean code but to push the boundaries of design and logic on Lovelace, creating "smart" and ever-improving cards.
+
+---
+
+### Fondatore e Visione
+
 Ciao! Sono **Massimo Di Vona** (precedentemente noto come *Max Novadi*), fondatore di [Wearesmart.it](https://www.wearesmart.it).
 
 Questo progetto nasce come un esperimento per la community di Home Assistant. La mia visione è quella di unire la passione per la domotica con la potenza delle nuove **Intelligenze Artificiali** (come *Gemini* e *Claude Code*). L'obiettivo è creare una collezione di card specifiche, esteticamente curate e funzionali, nate dalla collaborazione uomo-AI per rispondere alle reali necessità degli utenti in tempo reale.
