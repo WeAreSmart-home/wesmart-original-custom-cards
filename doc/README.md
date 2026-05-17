@@ -21,12 +21,10 @@ Una collezione di card personalizzate per il Dashboard di Home Assistant, ispira
 | [WeSmart Battery Status Card](#wesmart-battery-status-card) | `Battery/wesmart-battery-status-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
 | [WeSmart Switches Card](#wesmart-switches-card) | `Switches/wesmart-switches-card.js` | `switch.*` (multi) | Dark / Light / Auto |
 | [WeSmart Clock Card](#wesmart-clock-card) | `Clock/wesmart-clock-card.js` | qualsiasi (max 3 extra) | Dark / Light / Auto |
-| [**WeSmart Infinite Garbage Card**](#wesmart-infinite-garbage-card) | `Garbage/wesmart-infinite-garbage-card.js` | — | Palette dinamica |
 | [**WeSmart Energy Flow Card**](#wesmart-energy-flow-card) | `Energy/wesmart-energy-flow-card.js` | `sensor.*` (power/energy) | Dark / Light / Auto |
 | [**WeSmart Media Player Card**](#wesmart-media-player-card) | `MediaPlayer/wesmart-media-player-card.js` | `media_player.*` | Dark / Light / Auto |
 | [**WeSmart Weather Card**](#wesmart-weather-card) | `Weather/wesmart-weather-card.js` | `weather.*` | Dark / Light / Auto |
 | [**WeSmart Chart Card**](#wesmart-chart-card) | `Chart/wesmart-chart-card.js` | qualsiasi / multi | Dark / Light / Auto |
-| [**WeSmart Infinite Chart Card**](#wesmart-infinite-chart-card) | `Chart/wesmart-infinite-chart-card.js` | qualsiasi / multi | Palette dinamica |
 | [**WeSmart Person Card**](#wesmart-person-card) | `Person/wesmart-person-card.js` | `person.*` (multi) | Dark / Light / Auto |
 | [**WeSmart Scene Interpolator Card**](#wesmart-scene-interpolator-card) ⚠️ | `SceneInterpolator/wesmart-scene-interpolator-card.js` | `light.*` | Dark (fixed) |
 
@@ -52,9 +50,7 @@ config/www/wesmart-buttons-grid-card.js
 config/www/wesmart-battery-status-card.js
 config/www/wesmart-switches-card.js
 config/www/wesmart-clock-card.js
-config/www/wesmart-infinite-garbage-card.js
 config/www/wesmart-chart-card.js
-config/www/wesmart-infinite-chart-card.js
 config/www/wesmart-energy-flow-card.js
 config/www/wesmart-media-player-card.js
 config/www/wesmart-weather-card.js
@@ -81,9 +77,7 @@ In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi una v
 | `/local/wesmart-battery-status-card.js` | Modulo JavaScript |
 | `/local/wesmart-switches-card.js` | Modulo JavaScript |
 | `/local/wesmart-clock-card.js` | Modulo JavaScript |
-| `/local/wesmart-infinite-garbage-card.js` | Modulo JavaScript |
 | `/local/wesmart-chart-card.js` | Modulo JavaScript |
-| `/local/wesmart-infinite-chart-card.js` | Modulo JavaScript |
 | `/local/wesmart-energy-flow-card.js` | Modulo JavaScript |
 | `/local/wesmart-media-player-card.js` | Modulo JavaScript |
 | `/local/wesmart-weather-card.js` | Modulo JavaScript |
@@ -712,37 +706,6 @@ extra_entities:
 
 ---
 
-## WeSmart Infinite Color Card
-
-Card storico con motore HSL che genera l'intera palette da un singolo colore di input.
-
-```yaml
-type: custom:wesmart-infinite-color-card
-title: Storico Casa
-color: '#f73747'
-theme: dark
-hours: 24
-entities:
-  - light.soggiorno
-  - sensor.temperatura
-  - binary_sensor.porta_ingresso
-```
-
-**Opzioni:**
-
-| Opzione | Tipo | Default | Descrizione |
-|---------|------|---------|-------------|
-| `color` | string | `'#D97757'` | Colore base hex — genera l'intera palette |
-| `title` | string | `'History'` | Intestazione card |
-| `icon` | string | `mdi:chart-line` | Icona header |
-| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
-| `hours` | number | `24` | Range temporale default |
-| `entities` | list | — | **Obbligatorio.** Qualsiasi tipo di entità |
-
-**Temi:** `dark` · `light` · `auto`
-
----
-
 ## WeSmart Chart Card
 
 Card grafico singola o multi-entità con drag-to-zoom, tooltip hover e pill filtro temporale.
@@ -789,103 +752,6 @@ entities:
 - Tooltip hover con ora + valori per ogni entità
 - Etichette asse Y min/max · asse temporale allineato
 - Legenda: dot colorato · stato corrente · range min–max
-
----
-
-## WeSmart Infinite Chart Card
-
-Stessa card grafico della versione Original ma con **Infinite Color Engine**: l'intera palette
-viene generata da un singolo colore hex. I colori multi-entità usano la rotazione dell'hue
-con angolo aureo per una distribuzione percettivamente ottimale.
-
-```yaml
-type: custom:wesmart-infinite-chart-card
-title: Temperature
-color: '#60B4D8'
-theme: dark
-hours: 24
-entities:
-  - entity: sensor.temperatura_soggiorno
-    name: Soggiorno
-  - entity: sensor.temperatura_cucina
-    name: Cucina
-```
-
-**Opzioni:**
-
-| Opzione | Tipo | Default | Descrizione |
-|---------|------|---------|-------------|
-| `color` | string | `'#D97757'` | Colore base hex — genera tutta la palette |
-| `title` | string | `'Grafico'` | Titolo card |
-| `icon` | string | `mdi:chart-line` | Icona header |
-| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
-| `hours` | number | `24` | Range temporale default (1 · 6 · 24 · 168) |
-| `height` | number | `100` | Altezza area grafico in px |
-| `show_grid` | boolean | `false` | Grid lines orizzontali |
-| `zoom` | boolean | `true` | Abilita drag-to-zoom |
-| `entity` | string | — | Entità singola (alternativa a `entities`) |
-| `entities` | list | — | Lista entità multi |
-
-**Differenze rispetto alla versione Original:**
-- `color:` guida tutta la palette (sfondo, superfici, testi, tooltip)
-- Colori multi-entità calcolati con angolo aureo (`hue + i × 137.5°`) — sempre in armonia con il tema
-- `theme: auto` ricalcola la palette in tempo reale al cambio `prefers-color-scheme`
-- `disconnectedCallback()` rimuove i listener per evitare memory leak
-
----
-
-## WeSmart Infinite Garbage Card
-
-Card per il calendario della raccolta differenziata porta a porta. Funziona in modo **autonomo senza sensori**, basandosi sulla programmazione settimanale definita nello YAML. Sfrutta l'Infinite Color Engine per l'interfaccia e permette colori personalizzati per ogni rifiuto.
-
-```yaml
-type: custom:wesmart-infinite-garbage-card
-title: Raccolta Rifiuti
-color: '#A09080'
-theme: auto
-schedule:
-  - name: Umido
-    icon: mdi:leaf
-    waste_color: '#8B4513'
-    days: [1, 4] # Lunedì e Giovedì
-  - name: Plastica
-    icon: mdi:recycle
-    waste_color: '#F59E0B'
-    days: [3]    # Mercoledì
-  - name: Carta
-    icon: mdi:newspaper
-    waste_color: '#3B82F6'
-    days: [2]    # Martedì
-  - name: Indifferenziata
-    icon: mdi:trash-can
-    waste_color: '#57534E'
-    days: [5]    # Venerdì
-```
-
-**Opzioni:**
-
-| Opzione | Tipo | Default | Descrizione |
-|---------|------|---------|-------------|
-| `title` | string | `'Raccolta Rifiuti'` | Titolo della card |
-| `icon` | string | `mdi:trash-can` | Icona nell'header |
-| `color` | string | `'#A09080'` | Colore base per la palette InfiniteColor |
-| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
-| `schedule` | list | — | **Obbligatorio.** Lista dei rifiuti e giorni di ritiro |
-
-**Campi elemento schedule:**
-
-| Campo | Tipo | Descrizione |
-|-------|------|-------------|
-| `name` | string | Nome del rifiuto (es. "Umido") |
-| `icon` | string | Icona MDI (es. `mdi:leaf`) |
-| `waste_color` | string | Colore specifico del rifiuto (hex) |
-| `days` | list | Giorni di ritiro (1=Lun, 2=Mar, 3=Mer, 4=Gio, 5=Ven, 6=Sab, 7=Dom) |
-
-**Funzionalità:**
-- **Hero Section:** Mostra in evidenza i ritiri imminenti (Oggi o Domani) con icona grande e animazione "glow" colorata.
-- **Lista Prossimi:** Sotto l'elemento in evidenza, elenca i successivi ritiri in ordine cronologico.
-- **Calcolo Autonomo:** Determina i giorni mancanti internamente; non richiede entità `sensor.*` in Home Assistant.
-- **Dynamic Messages:** Cambia etichetta in "Esporre oggi" o "Esporre stasera" in base all'urgenza.
 
 ---
 
@@ -1065,10 +931,6 @@ custom card home assistant/
 │   ├── Energy/wesmart-energy-flow-card.js
 │   ├── MediaPlayer/wesmart-media-player-card.js
 │   └── Weather/wesmart-weather-card.js
-│
-└── WeSmart-InfiniteColor/
-    ├── History/wesmart-infinite-color-card.js
-    └── Chart/wesmart-infinite-chart-card.js
 ```
 
 ---
@@ -1769,52 +1631,6 @@ extra_entities:
 
 ---
 
-## WeSmart Infinite Color Card
-
-History card identica alla `wesmart-history-card` ma con un motore HSL che genera l'intera palette da un singolo colore di input.
-
-```yaml
-type: custom:wesmart-infinite-color-card
-title: Storico Casa
-color: '#f73747'          # colore base — qualsiasi hex
-theme: dark               # dark | light | auto
-hours: 24
-entities:
-  - light.soggiorno
-  - sensor.temperatura
-  - binary_sensor.porta_ingresso
-```
-
-**Options:**
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `color` | string | `'#D97757'` | Colore base hex — genera l'intera palette |
-| `title` | string | `'History'` | Intestazione card |
-| `icon` | string | `mdi:chart-line` | Icona header |
-| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
-| `hours` | number | `24` | Range temporale default (`1` · `6` · `24` · `168`) |
-| `entities` | list | — | **Required.** Qualsiasi tipo di entità |
-
-**Algoritmo palette (HSL):**
-
-A partire dal colore base vengono generati automaticamente tutti i token:
-
-| Token | Dark theme | Light theme |
-|-------|-----------|-------------|
-| `--accent` | hue pieno, L normalizzata 50–65% | hue pieno, L 40–55% |
-| `--bg` | hue, S 25–45%, L 11% | hue, S 3–8%, L 98% |
-| `--surface` | hue, S 20–38%, L 16% | hue, S 5–12%, L 93% |
-| `--text` | hue tenue, L 93% | hue tenue, L 10% |
-| `--text-muted` | hue tenue, L 65% | hue tenue, L 38% |
-| `--text-dim` | hue tenue, L 42% | hue tenue, L 58% |
-
-**Features:** identiche alla History card originale — timeline bar (binary) · line chart SVG (numeric) · time pills 1h/6h/24h/7d · stat summary · More Info on tap
-
-**Themes:** `dark` · `light` · `auto` (auto segue `prefers-color-scheme` e reagisce ai cambi live)
-
----
-
 ## Project Structure
 
 ```
@@ -1859,9 +1675,7 @@ custom card home assistant/
 │   └── Energy/
 │       └── wesmart-energy-flow-card.js        ← real-time energy flow diagram
 │
-└── WeSmart-InfiniteColor/                     ← dynamic color palette cards
-    └── History/
-        └── wesmart-infinite-color-card.js     ← history card with HSL color engine
+└── WeSmart-Original/
 ```
 
 ---

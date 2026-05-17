@@ -170,12 +170,14 @@ These colors have universal semantic meaning (cold = blue, closed = green) and r
 | Climate | `Climate/wesmart-infinite-climate-card.js` | `wesmart-infinite-climate-card` | `climate.*` (single) |
 | Climate Compact | `Climate/wesmart-infinite-climate-compact-card.js` | `wesmart-infinite-climate-compact-card` | `climate.*` (multi) |
 | Sensors | `Sensors/wesmart-infinite-sensors-card.js` | `wesmart-infinite-sensors-card` | `sensor.*` (multi) |
-| Doors | `Doors/wesmart-infinite-doors-card.js` | `wesmart-infinite-doors-card` | `binary_sensor.*` (multi) |
+| Battery | `Battery/wesmart-infinite-battery-card.js` | `wesmart-infinite-battery-card` | `sensor.*` (multi) |
+| Doors | `Doors/wesmart-infinite-doors-card.js` | `binary_sensor.*` (multi) |
 | Garbage | `Garbage/wesmart-infinite-garbage-card.js` | `wesmart-infinite-garbage-card` | autonomous (YAML schedule) |
 | Switches | `Switches/wesmart-infinite-switches-card.js` | `wesmart-infinite-switches-card` | `switch.*` (multi) |
 | Buttons Bar | `Buttons/wesmart-infinite-buttons-bar-card.js` | `wesmart-infinite-buttons-bar-card` | any / service |
 | Buttons Grid | `Buttons/wesmart-infinite-buttons-grid-card.js` | `wesmart-infinite-buttons-grid-card` | any / service |
 | Clock | `Clock/wesmart-infinite-clock-card.js` | `wesmart-infinite-clock-card` | any (max 3 extras) |
+| Chart | `Chart/wesmart-infinite-chart-card.js` | `wesmart-infinite-chart-card` | any (single or multi) |
 
 ---
 
@@ -193,12 +195,14 @@ config/www/wesmart-infinite-light-card.js
 config/www/wesmart-infinite-climate-card.js
 config/www/wesmart-infinite-climate-compact-card.js
 config/www/wesmart-infinite-sensors-card.js
+config/www/wesmart-infinite-battery-card.js
 config/www/wesmart-infinite-doors-card.js
 config/www/wesmart-infinite-garbage-card.js
 config/www/wesmart-infinite-switches-card.js
 config/www/wesmart-infinite-buttons-bar-card.js
 config/www/wesmart-infinite-buttons-grid-card.js
 config/www/wesmart-infinite-clock-card.js
+config/www/wesmart-infinite-chart-card.js
 ```
 
 ### 2. Add resources in Home Assistant
@@ -214,12 +218,14 @@ config/www/wesmart-infinite-clock-card.js
 | `/local/wesmart-infinite-climate-card.js` | JavaScript module |
 | `/local/wesmart-infinite-climate-compact-card.js` | JavaScript module |
 | `/local/wesmart-infinite-sensors-card.js` | JavaScript module |
+| `/local/wesmart-infinite-battery-card.js` | JavaScript module |
 | `/local/wesmart-infinite-doors-card.js` | JavaScript module |
 | `/local/wesmart-infinite-garbage-card.js` | JavaScript module |
 | `/local/wesmart-infinite-switches-card.js` | JavaScript module |
 | `/local/wesmart-infinite-buttons-bar-card.js` | JavaScript module |
 | `/local/wesmart-infinite-buttons-grid-card.js` | JavaScript module |
 | `/local/wesmart-infinite-clock-card.js` | JavaScript module |
+| `/local/wesmart-infinite-chart-card.js` | JavaScript module |
 
 ### 3. Reload
 
@@ -650,6 +656,54 @@ extras:
 **The date** uses `accent` as its color (your custom color).
 
 **Extra fields:** `entity` (req) · `label`
+
+---
+
+### wesmart-infinite-battery-card
+
+Multi-entity battery monitor with dynamic icons and multiple visualization styles (icon, linear, circular).
+
+```yaml
+type: custom:wesmart-infinite-battery-card
+title: Batteries
+color: '#F59E0B'
+theme: dark
+display_type: circular
+entities:
+  - sensor.phone_battery
+  - entity: sensor.tablet_battery
+    display_type: linear
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `color` | string | `'#D97757'` | Base color for the palette |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `display_type` | string | `'icon'` | `icon` \| `linear` \| `circular` |
+| `entities` | list | — | **Required.** List of battery sensors |
+
+---
+
+### wesmart-infinite-chart-card
+
+Advanced history chart for numeric and binary entities with drag-to-zoom and multi-entity support.
+
+```yaml
+type: custom:wesmart-infinite-chart-card
+title: Temperature
+color: '#60B4D8'
+hours: 24
+entities:
+  - sensor.indoor_temp
+  - sensor.outdoor_temp
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `color` | string | `'#D97757'` | Base color for the palette |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `hours` | number | `24` | Default time range (1, 6, 24, 168) |
+| `entities` | list | — | **Required.** List of entities |
 
 ---
 
