@@ -11,7 +11,7 @@ A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSm
 | | Collection | Cards | Status |
 |---|---|---|---|
 | ◆ | **WeSmart InfiniteColor** | 15 | Production-ready |
-| ■ | **WeSmart Original** | 20 | Production-ready |
+| ■ | **WeSmart Original** | 19 | Production-ready |
 | ⚗️ | **WeSmart Labs** | 5 | Experimental |
 
 ---
@@ -77,6 +77,24 @@ Pick any hex color and all InfiniteColor cards instantly adapt:
 | `'#F59E0B'` | Amber/gold — ideal for sensors/battery |
 | `'#EC4899'` | Pink |
 | `'#14B8A6'` | Teal/seafoam |
+
+### InfiniteColor Highlights
+
+**Infinite Garbage Card** — Self-contained waste collection calendar. No sensors required. Shows today's pickups in an illuminated Hero section and upcoming ones in an orderly list below.
+
+![Garbage Card](asset/images/garbage.png)
+
+```yaml
+type: custom:wesmart-infinite-garbage-card
+title: Waste Schedule
+color: '#A09080'
+theme: auto
+schedule:
+  - name: Organic
+    icon: mdi:leaf
+    waste_color: '#8B4513'
+    days: [1, 4]
+```
 
 ### Cards
 
@@ -271,7 +289,7 @@ Proofs of concept exploring new layout patterns beyond the standard card metapho
 
 ```
 .
-├── WeSmart-Original/        # Fixed palette — 20 cards
+├── WeSmart-Original/        # Fixed palette — 19 cards
 │   ├── Light/               # Single light card
 │   ├── Lights/              # Lights list + Lights Expand
 │   ├── Climate/             # Climate + Climate Compact
@@ -289,11 +307,12 @@ Proofs of concept exploring new layout patterns beyond the standard card metapho
 │   ├── Person/              # Person presence card
 │   └── SceneInterpolator/   # ⚠️ XY pad scene blending (early dev)
 │
-├── WeSmart-InfiniteColor/   # Dynamic HSL color engine — 14 cards
+├── WeSmart-InfiniteColor/   # Dynamic HSL color engine — 15 cards
 │   ├── Light/ Lights/       # Light cards
 │   ├── Climate/             # Climate cards
 │   ├── Sensors/ Doors/      # Sensor cards
 │   ├── Switches/ Battery/   # Switch + battery cards
+│   ├── Garbage/             # Autonomous garbage calendar
 │   ├── Buttons/             # Bar + Grid button cards
 │   ├── Clock/ History/      # Clock + history cards
 │   └── Chart/               # Infinite Chart card
