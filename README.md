@@ -2,6 +2,18 @@
 
 > 🎉 **What's New:** Introducing the **WeSmart Infinite Garbage Card**! A completely autonomous garbage collection calendar card powered by the InfiniteColor engine. No sensors or backend integrations required.
 
+---
+
+### About the Founder & Vision
+
+Ciao! Sono **Massimo Di Vona** (precedentemente noto come *Max Novadi*), fondatore di [Wearesmart.it](https://www.wearesmart.it).
+
+Questo progetto nasce come un esperimento per la community di Home Assistant. La mia visione è quella di unire la passione per la domotica con la potenza delle nuove **Intelligenze Artificiali** (come *Gemini* e *Claude Code*). L'obiettivo è creare una collezione di card specifiche, esteticamente curate e funzionali, nate dalla collaborazione uomo-AI per rispondere alle reali necessità degli utenti in tempo reale.
+
+Sia la collezione **WeSmart Original** che la **InfiniteColor** sono in continua evoluzione: uso l'IA non solo per scrivere codice pulito, ma per spingere i confini del design e della logica su Lovelace, creando card "intelligenti" e sempre migliori.
+
+---
+
 A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSmart AI** aesthetic: warm charcoal dark theme, orange accent, minimal typography. No build step. No dependencies. Pure vanilla JS.
 
 ---
