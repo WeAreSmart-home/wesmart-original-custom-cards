@@ -1,5 +1,7 @@
 # WeSmart Custom Cards — Home Assistant
 
+> 🎉 **What's New:** Introducing the **WeSmart Infinite Garbage Card**! A completely autonomous garbage collection calendar card powered by the InfiniteColor engine. No sensors or backend integrations required.
+
 A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSmart AI** aesthetic: warm charcoal dark theme, orange accent, minimal typography. No build step. No dependencies. Pure vanilla JS.
 
 ---
@@ -8,7 +10,7 @@ A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSm
 
 | | Collection | Cards | Status |
 |---|---|---|---|
-| ◆ | **WeSmart InfiniteColor** | 14 | Production-ready |
+| ◆ | **WeSmart InfiniteColor** | 15 | Production-ready |
 | ■ | **WeSmart Original** | 20 | Production-ready |
 | ⚗️ | **WeSmart Labs** | 5 | Experimental |
 
@@ -16,6 +18,7 @@ A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSm
 
 ## Preview
 
+![Garbage Card](asset/images/garbage.png)
 ![Lights Cards](asset/images/lights-cards.webp)
 ![Sensors](asset/images/sensor.webp)
 ![Climate Cards](asset/images/climate-e-compact-cards.webp)
@@ -79,6 +82,7 @@ Pick any hex color and all InfiniteColor cards instantly adapt:
 
 | Card | YAML Tag | Entities |
 |------|----------|---------|
+| Infinite Garbage | `wesmart-infinite-garbage-card` | autonomous (YAML schedule) |
 | Infinite Chart | `wesmart-infinite-chart-card` | any (single or multi) |
 | History | `wesmart-infinite-history-card` | any (multi) |
 | Lights | `wesmart-infinite-lights-card` | `light.*` (multi) |

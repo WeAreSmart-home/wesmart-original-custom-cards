@@ -21,6 +21,7 @@ Una collezione di card personalizzate per il Dashboard di Home Assistant, ispira
 | [WeSmart Battery Status Card](#wesmart-battery-status-card) | `Battery/wesmart-battery-status-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
 | [WeSmart Switches Card](#wesmart-switches-card) | `Switches/wesmart-switches-card.js` | `switch.*` (multi) | Dark / Light / Auto |
 | [WeSmart Clock Card](#wesmart-clock-card) | `Clock/wesmart-clock-card.js` | qualsiasi (max 3 extra) | Dark / Light / Auto |
+| [**WeSmart Infinite Garbage Card**](#wesmart-infinite-garbage-card) | `Garbage/wesmart-infinite-garbage-card.js` | — | Palette dinamica |
 | [**WeSmart Energy Flow Card**](#wesmart-energy-flow-card) | `Energy/wesmart-energy-flow-card.js` | `sensor.*` (power/energy) | Dark / Light / Auto |
 | [**WeSmart Media Player Card**](#wesmart-media-player-card) | `MediaPlayer/wesmart-media-player-card.js` | `media_player.*` | Dark / Light / Auto |
 | [**WeSmart Weather Card**](#wesmart-weather-card) | `Weather/wesmart-weather-card.js` | `weather.*` | Dark / Light / Auto |
@@ -51,6 +52,7 @@ config/www/wesmart-buttons-grid-card.js
 config/www/wesmart-battery-status-card.js
 config/www/wesmart-switches-card.js
 config/www/wesmart-clock-card.js
+config/www/wesmart-infinite-garbage-card.js
 config/www/wesmart-chart-card.js
 config/www/wesmart-infinite-chart-card.js
 config/www/wesmart-energy-flow-card.js
@@ -79,6 +81,7 @@ In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi una v
 | `/local/wesmart-battery-status-card.js` | Modulo JavaScript |
 | `/local/wesmart-switches-card.js` | Modulo JavaScript |
 | `/local/wesmart-clock-card.js` | Modulo JavaScript |
+| `/local/wesmart-infinite-garbage-card.js` | Modulo JavaScript |
 | `/local/wesmart-chart-card.js` | Modulo JavaScript |
 | `/local/wesmart-infinite-chart-card.js` | Modulo JavaScript |
 | `/local/wesmart-energy-flow-card.js` | Modulo JavaScript |
@@ -828,6 +831,61 @@ entities:
 - Colori multi-entità calcolati con angolo aureo (`hue + i × 137.5°`) — sempre in armonia con il tema
 - `theme: auto` ricalcola la palette in tempo reale al cambio `prefers-color-scheme`
 - `disconnectedCallback()` rimuove i listener per evitare memory leak
+
+---
+
+## WeSmart Infinite Garbage Card
+
+Card per il calendario della raccolta differenziata porta a porta. Funziona in modo **autonomo senza sensori**, basandosi sulla programmazione settimanale definita nello YAML. Sfrutta l'Infinite Color Engine per l'interfaccia e permette colori personalizzati per ogni rifiuto.
+
+```yaml
+type: custom:wesmart-infinite-garbage-card
+title: Raccolta Rifiuti
+color: '#A09080'
+theme: auto
+schedule:
+  - name: Umido
+    icon: mdi:leaf
+    waste_color: '#8B4513'
+    days: [1, 4] # Lunedì e Giovedì
+  - name: Plastica
+    icon: mdi:recycle
+    waste_color: '#F59E0B'
+    days: [3]    # Mercoledì
+  - name: Carta
+    icon: mdi:newspaper
+    waste_color: '#3B82F6'
+    days: [2]    # Martedì
+  - name: Indifferenziata
+    icon: mdi:trash-can
+    waste_color: '#57534E'
+    days: [5]    # Venerdì
+```
+
+**Opzioni:**
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `title` | string | `'Raccolta Rifiuti'` | Titolo della card |
+| `icon` | string | `mdi:trash-can` | Icona nell'header |
+| `color` | string | `'#A09080'` | Colore base per la palette InfiniteColor |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `schedule` | list | — | **Obbligatorio.** Lista dei rifiuti e giorni di ritiro |
+
+**Campi elemento schedule:**
+
+| Campo | Tipo | Descrizione |
+|-------|------|-------------|
+| `name` | string | Nome del rifiuto (es. "Umido") |
+| `icon` | string | Icona MDI (es. `mdi:leaf`) |
+| `waste_color` | string | Colore specifico del rifiuto (hex) |
+| `days` | list | Giorni di ritiro (1=Lun, 2=Mar, 3=Mer, 4=Gio, 5=Ven, 6=Sab, 7=Dom) |
+
+**Funzionalità:**
+- **Hero Section:** Mostra in evidenza i ritiri imminenti (Oggi o Domani) con icona grande e animazione "glow" colorata.
+- **Lista Prossimi:** Sotto l'elemento in evidenza, elenca i successivi ritiri in ordine cronologico.
+- **Calcolo Autonomo:** Determina i giorni mancanti internamente; non richiede entità `sensor.*` in Home Assistant.
+- **Dynamic Messages:** Cambia etichetta in "Esporre oggi" o "Esporre stasera" in base all'urgenza.
 
 ---
 

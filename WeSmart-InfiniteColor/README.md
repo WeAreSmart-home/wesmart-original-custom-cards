@@ -171,6 +171,7 @@ These colors have universal semantic meaning (cold = blue, closed = green) and r
 | Climate Compact | `Climate/wesmart-infinite-climate-compact-card.js` | `wesmart-infinite-climate-compact-card` | `climate.*` (multi) |
 | Sensors | `Sensors/wesmart-infinite-sensors-card.js` | `wesmart-infinite-sensors-card` | `sensor.*` (multi) |
 | Doors | `Doors/wesmart-infinite-doors-card.js` | `wesmart-infinite-doors-card` | `binary_sensor.*` (multi) |
+| Garbage | `Garbage/wesmart-infinite-garbage-card.js` | `wesmart-infinite-garbage-card` | autonomous (YAML schedule) |
 | Switches | `Switches/wesmart-infinite-switches-card.js` | `wesmart-infinite-switches-card` | `switch.*` (multi) |
 | Buttons Bar | `Buttons/wesmart-infinite-buttons-bar-card.js` | `wesmart-infinite-buttons-bar-card` | any / service |
 | Buttons Grid | `Buttons/wesmart-infinite-buttons-grid-card.js` | `wesmart-infinite-buttons-grid-card` | any / service |
@@ -193,6 +194,7 @@ config/www/wesmart-infinite-climate-card.js
 config/www/wesmart-infinite-climate-compact-card.js
 config/www/wesmart-infinite-sensors-card.js
 config/www/wesmart-infinite-doors-card.js
+config/www/wesmart-infinite-garbage-card.js
 config/www/wesmart-infinite-switches-card.js
 config/www/wesmart-infinite-buttons-bar-card.js
 config/www/wesmart-infinite-buttons-grid-card.js
@@ -213,6 +215,7 @@ config/www/wesmart-infinite-clock-card.js
 | `/local/wesmart-infinite-climate-compact-card.js` | JavaScript module |
 | `/local/wesmart-infinite-sensors-card.js` | JavaScript module |
 | `/local/wesmart-infinite-doors-card.js` | JavaScript module |
+| `/local/wesmart-infinite-garbage-card.js` | JavaScript module |
 | `/local/wesmart-infinite-switches-card.js` | JavaScript module |
 | `/local/wesmart-infinite-buttons-bar-card.js` | JavaScript module |
 | `/local/wesmart-infinite-buttons-grid-card.js` | JavaScript module |
@@ -444,6 +447,43 @@ entities:
 | others | `text-muted` |
 
 **Alert state:** when a threshold is exceeded, the entire row uses `accent` (your custom color) to highlight the anomaly.
+
+---
+
+### wesmart-infinite-garbage-card
+
+Self-contained garbage collection calendar. **No sensors required**, it calculates everything internally based on your weekly schedule.
+
+```yaml
+type: custom:wesmart-infinite-garbage-card
+title: Waste Schedule
+color: '#A09080'
+theme: auto
+schedule:
+  - name: Organic
+    icon: mdi:leaf
+    waste_color: '#8B4513'
+    days: [1, 4]
+  - name: Plastic
+    icon: mdc:recycle
+    waste_color: '#F59E0B'
+    days: [3]
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `color` | string | `'#A09080'` | Base color for the palette |
+| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
+| `title` | string | `'Raccolta Rifiuti'` | Card title |
+| `icon` | string | `mdi:trash-can` | Header icon |
+| `schedule` | list | — | **Required.** List of waste types and days |
+
+**Schedule item fields:** `name` · `icon` · `waste_color` (hex) · `days` (1=Mon, ..., 7=Sun)
+
+**Features:**
+- **Hero Section:** Highlights pickups for "Today" or "Tomorrow" with large icons and a colored glow effect.
+- **Orderly List:** Shows the rest of the schedule in chronological order.
+- **Adaptive Labels:** Changes from "Next" to "Put out tonight" or "Put out today" based on urgency.
 
 ---
 
