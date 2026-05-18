@@ -1,6 +1,6 @@
 # WeSmart Custom Cards — Home Assistant
 
-> 🎉 **What's New:** Introducing the **WeSmart Infinite Garbage Card**! A completely autonomous garbage collection calendar card powered by the InfiniteColor engine. No sensors or backend integrations required.
+> 🎉 **What's New:** Introducing the **WeSmart Garbage Solution**! A unified system with a backend component for real persistence and a frontend card for visual scheduling. [Read the full guide here ↗](WeSmart-Labs/wesmart_garbage/README.md)
 
 ---
 

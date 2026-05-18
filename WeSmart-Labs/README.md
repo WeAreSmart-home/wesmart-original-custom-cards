@@ -15,6 +15,49 @@ Experimental cards under active development. These cards are not production-read
 | Surface | `wesmart-labs-surface` | `wesmart-labs-surface.js` |
 | Cross Pad | `wesmart-labs-cross-pad` | `wesmart-labs-cross-pad.js` |
 | Energy Card | `wesmart-labs-energy-card` | `wesmart-labs-energy-card.js` |
+| Infinite Garbage | `wesmart-infinite-garbage-lab-card` | `wesmart-infinite-garbage-lab-card.js` |
+
+---
+
+## wesmart-infinite-garbage-lab-card
+
+![Garbage Card](../asset/images/wesmaer-garbage.png)
+
+A self-contained garbage collection system. This card allows you to both monitor upcoming collections and program your entire weekly schedule directly from the UI, with real persistence provided by a companion backend component.
+
+**Features:**
+- **Visual Programming**: Toggle days for each waste type using a built-in config grid.
+- **InfiniteColor Engine**: Dynamic HSL palette that adapts to your chosen accent color.
+- **Backend Persistence**: Saves your schedule to HA's internal storage (survives restarts).
+- **Hero Mode & List**: Shows the next collection with a glow animation and an optional weekly list.
+
+### Installation
+
+1. Install the backend component: `WeSmart-Labs/wesmart_garbage/`
+2. Copy `wesmart-infinite-garbage-lab-card.js` to `config/www/`
+3. Add the resource in HA Settings → Dashboards → Resources.
+
+---
+
+### YAML — Minimal
+
+```yaml
+type: custom:wesmart-infinite-garbage-lab-card
+color: '#D97757'
+```
+
+---
+
+### YAML — Complete
+
+```yaml
+type: custom:wesmart-infinite-garbage-lab-card
+title: Raccolta Rifiuti
+icon: mdi:trash-can
+color: '#D97757'          # Drives the InfiniteColor palette
+theme: auto               # dark | light | auto
+show_weekly_schedule: true # Show upcoming days below the hero section
+```
 
 ---
 
