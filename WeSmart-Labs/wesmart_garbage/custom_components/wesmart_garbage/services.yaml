@@ -1,0 +1,22 @@
+update_schedule:
+  description: Update the garbage collection schedule for a specific day.
+  fields:
+    day:
+      description: Day of the week (1=Monday, 7=Sunday).
+      example: 1
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 7
+    waste_type:
+      description: Type of waste to collect.
+      example: "Organic"
+      required: true
+      selector:
+        text:
+    icon:
+      description: MDI icon for the waste type.
+      example: "mdi:leaf"
+      selector:
+        text:
