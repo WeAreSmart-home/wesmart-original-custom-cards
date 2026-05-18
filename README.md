@@ -34,7 +34,22 @@ A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSm
 |---|---|---|---|
 | ◆ | **WeSmart InfiniteColor** | 15 | Production-ready |
 | ■ | **WeSmart Original** | 19 | Production-ready |
-| ⚗️ | **WeSmart Labs** | 5 | Experimental |
+| ⚗️ | **WeSmart Labs** | 6 | Experimental |
+| 🗑️ | **WeSmart Garbage** | 1 + Backend | **New: Unified Solution** |
+
+---
+
+## 🗑️ WeSmart Garbage Solution
+
+The first **Unified Solution** in the WeSmart ecosystem. It bridges the gap between Lovelace and the Home Assistant backend.
+
+![WeSmart Garbage UI](asset/images/wesmart-garbage.png)
+
+*   **Real Persistence**: A Python custom component that saves your schedule to HA storage.
+*   **Visual Programming**: Configure your weekly garbage calendar directly from the card.
+*   **InfiniteColor Engine**: Beautiful, dynamic UI that matches your dashboard theme.
+
+[**Get started with WeSmart Garbage →**](WeSmart-Labs/wesmart_garbage/README.md)
 
 ---
 
