@@ -2,7 +2,7 @@
 
 Questa soluzione completa combina un'integrazione backend (Custom Component) e una card frontend (Lovelace Card) per gestire il calendario della raccolta rifiuti con **persistenza reale** e un'interfaccia di configurazione intuitiva.
 
-![WeSmart Garbage UI](../../asset/images/wesmaer-garbage.png)
+![WeSmart Garbage UI](../../asset/images/wesmart-garbage.png)
 
 ## 1. Backend: Integrazione `wesmart_garbage`
 

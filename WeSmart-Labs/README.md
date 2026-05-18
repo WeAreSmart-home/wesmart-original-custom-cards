@@ -21,7 +21,7 @@ Experimental cards under active development. These cards are not production-read
 
 ## wesmart-infinite-garbage-lab-card
 
-![Garbage Card](../asset/images/wesmaer-garbage.png)
+![Garbage Card](../asset/images/wesmart-garbage.png)
 
 A self-contained garbage collection system. This card allows you to both monitor upcoming collections and program your entire weekly schedule directly from the UI, with real persistence provided by a companion backend component.
 
