@@ -909,6 +909,46 @@ show_visibility: false
 
 ---
 
+## WeSmart Scene Interpolator Card
+
+Card per il morphing fluido tra scene luminose salvate tramite un pad 2D.
+
+> ⚠️ Tema `dark` fisso — tema `light` non ancora implementato (vedi TODO).
+
+```yaml
+type: custom:wesmart-scene-interpolator-card
+entities:
+  - light.soggiorno
+  - light.cucina
+scenes:
+  - scene.mattina
+  - scene.sera
+  - scene.notte
+  - scene.relax
+```
+
+---
+
+## Progetti Esterni — Graduated from Labs
+
+Alcune card sono uscite dalla fase Labs e vivono in repository dedicati:
+
+### WeSmart Garbage Card
+
+Sistema completo per la raccolta differenziata — card + custom component HA.
+
+| Repo | Contenuto |
+|------|-----------|
+| [wesmart-garbage-card](https://github.com/WeAreSmart-home/wesmart-garbage-card) | Card Lovelace (`wesmart-garbage-card.js`) |
+| [wesmart-garbage](https://github.com/WeAreSmart-home/wesmart-garbage) | Custom component HA (integrazione / backend) |
+
+**Installazione:**
+1. Installa il custom component da [wesmart-garbage](https://github.com/WeAreSmart-home/wesmart-garbage) via HACS o manualmente in `config/custom_components/`
+2. Copia `wesmart-garbage-card.js` in `config/www/` dal repo [wesmart-garbage-card](https://github.com/WeAreSmart-home/wesmart-garbage-card)
+3. Aggiungi la risorsa in HA → Impostazioni → Dashboard → Risorse
+
+---
+
 ## Struttura Progetto
 
 ```

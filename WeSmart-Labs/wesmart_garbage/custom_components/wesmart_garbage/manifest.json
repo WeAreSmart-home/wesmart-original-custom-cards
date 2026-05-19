@@ -1,9 +1,0 @@
-{
-  "domain": "wesmart_garbage",
-  "name": "WeSmart Garbage",
-  "version": "1.0.0",
-  "documentation": "https://github.com/wearesmart/custom-cards",
-  "dependencies": [],
-  "codeowners": ["@massimodivona"],
-  "iot_class": "local_polling"
-}
