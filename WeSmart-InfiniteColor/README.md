@@ -460,6 +460,10 @@ entities:
 
 Self-contained garbage collection calendar. **No sensors required**, it calculates everything internally based on your weekly schedule.
 
+| Before 18:00 | After 18:00 |
+|---|---|
+| ![Before 18:00](../asset/images/card-garbage-prima-18.png) | ![After 18:00](../asset/images/card-garbage-dopo-18.png) |
+
 ```yaml
 type: custom:wesmart-infinite-garbage-card
 title: Waste Schedule
@@ -471,7 +475,7 @@ schedule:
     waste_color: '#8B4513'
     days: [1, 4]
   - name: Plastic
-    icon: mdc:recycle
+    icon: mdi:recycle
     waste_color: '#F59E0B'
     days: [3]
 ```
@@ -486,10 +490,16 @@ schedule:
 
 **Schedule item fields:** `name` · `icon` · `waste_color` (hex) · `days` (1=Mon, ..., 7=Sun)
 
-**Features:**
-- **Hero Section:** Highlights pickups for "Today" or "Tomorrow" with large icons and a colored glow effect.
-- **Orderly List:** Shows the rest of the schedule in chronological order.
-- **Adaptive Labels:** Changes from "Next" to "Put out tonight" or "Put out today" based on urgency.
+**Phase system (automatic, no config needed):**
+
+| Phase | Condition | Label | Visual |
+|-------|-----------|-------|--------|
+| `soon` | Pickup in 2+ days | "Prossimo: [day]" | None |
+| `tonight` | Pickup tomorrow, before 18:00 | "Esporre stasera" | Muted text |
+| `urgent` | Pickup tomorrow, after 18:00 | "Esporre adesso" | Amber text + pulsing dot + warm border — today's group fades to gray |
+| `today` | Pickup day | "Ritiro oggi" | Green text + dot + soft green border |
+
+**Hero layout:** today's pickups and tomorrow's pickups are shown side by side with a vertical divider. The list below only shows pickups from the day after tomorrow onward.
 
 ---
 

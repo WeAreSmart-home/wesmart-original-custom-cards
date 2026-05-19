@@ -4,13 +4,29 @@ Card per il calendario della raccolta differenziata porta a porta. Funziona in m
 
 Sfrutta l'**Infinite Color Engine** per generare l'interfaccia (sfondi, testi, ombre), ma permette di definire colori specifici e personalizzati (`waste_color`) per ogni tipo di rifiuto.
 
-![Garbage Card Preview](../../asset/images/garbage.png)
+| Prima delle 18:00 | Dopo le 18:00 |
+|---|---|
+| ![Prima delle 18:00](../../asset/images/card-garbage-prima-18.png) | ![Dopo le 18:00](../../asset/images/card-garbage-dopo-18.png) |
 
 ## Come Funziona
 
 L'interfaccia è divisa in due blocchi:
-1.  **Hero Section (In Evidenza):** Mostra il ritiro più imminente (Oggi o Domani). Ha un'icona grande con un anello/glow del colore specifico del rifiuto. Il testo si adatta automaticamente mostrando "Esporre oggi" o "Esporre stasera".
-2.  **Lista Futuri:** Sotto l'elemento in evidenza, elenca i successivi ritiri della settimana in ordine cronologico.
+
+1. **Hero Section:** Mostra sempre i ritiri di **oggi** e **domani** affiancati. I due gruppi sono separati da un divisore verticale. Se è già sera (dopo le 18:00) e il ritiro oggi è già avvenuto o in corso, il gruppo "oggi" sfuma in grigio cedendo il focus visivo a "domani".
+2. **Lista Futuri:** Sotto l'hero, elenca in ordine cronologico tutti i ritiri da **dopodomani** in poi, con testo contestuale sulla riga.
+
+### Sistema a Fasi
+
+La card determina automaticamente la fase in base al giorno e all'orario corrente. La soglia serale è **18:00** (fissa, nessuna configurazione richiesta).
+
+| Fase | Condizione | Testo hero / riga lista | Segnale visivo |
+|------|------------|-------------------------|----------------|
+| `soon` | Raccolta tra 2+ giorni | "Prossimo: [giorno]" | Nessuno |
+| `tonight` | Raccolta domani, prima delle 18:00 | "Esporre stasera" | Testo attenuato |
+| `urgent` | Raccolta domani, dopo le 18:00 | "Esporre adesso" | Testo amber + dot pulsante + bordo warm — gruppo oggi diventa grigio |
+| `today` | Giorno della raccolta | "Ritiro oggi" | Testo verde + dot verde + bordo verde soft |
+
+La card si aggiorna automaticamente al cambio di giorno e quando si supera la soglia delle 18:00, senza bisogno di configurazione aggiuntiva.
 
 ## Configurazione YAML
 

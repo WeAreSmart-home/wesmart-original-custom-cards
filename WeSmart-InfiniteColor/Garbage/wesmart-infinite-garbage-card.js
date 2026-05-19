@@ -3,7 +3,7 @@
  * Self-contained garbage collection calendar card.
  * Part of the WeSmart InfiniteColor system — full palette derived from one base color.
  * No sensors required — logic is handled internally based on YAML schedule.
- * Version: 1.0.0
+ * Version: 1.1.0
  *
  * Config:
  *   type: custom:wesmart-infinite-garbage-card
@@ -15,12 +15,18 @@
  *       icon: mdi:leaf
  *       waste_color: "#8B4513"
  *       days: [1, 4] # 1=Mon, 4=Thu
+ *
+ * Phase system (auto, no config needed):
+ *   soon    → collection in 2+ days, neutral display
+ *   tonight → collection tomorrow, before 18:00 — muted "Esporre stasera"
+ *   urgent  → collection tomorrow, after 18:00  — amber dot + warm border
+ *   today   → collection day                    — green dot + green border
  */
 
 (() => {
   'use strict';
 
-  const CARD_VERSION = '1.0.0';
+  const CARD_VERSION = '1.1.0';
 
   const styles = `
   :host {
@@ -73,7 +79,7 @@
     background: var(--surface);
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
-    padding: 20px;
+    padding: 24px 20px 20px;
     margin-bottom: 20px;
     display: flex;
     flex-direction: column;
@@ -85,10 +91,27 @@
 
   .hero-items {
     display: flex;
-    gap: 24px;
+    gap: 28px;
     justify-content: center;
+    align-items: flex-start;
     flex-wrap: wrap;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    width: 100%;
+  }
+
+  .hero-group {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .hero-divider {
+    width: 1px;
+    min-height: 80px;
+    align-self: center;
+    background: var(--border);
+    flex-shrink: 0;
+    margin: 0 4px;
   }
 
   .hero-item {
@@ -151,6 +174,41 @@
     color: var(--text);
     margin-top: 4px;
     letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .hero-time.tonight { color: var(--text-muted); }
+  .hero-time.urgent  { color: #F59E0B; }
+  .hero-time.today   { color: #10B981; }
+
+  .phase-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .phase-dot.urgent {
+    background: #F59E0B;
+    box-shadow: 0 0 0 3px rgba(245,158,11,0.3);
+    animation: pulse-dot 2s infinite ease-in-out;
+  }
+  .phase-dot.today {
+    background: #10B981;
+    box-shadow: 0 0 0 3px rgba(16,185,129,0.3);
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(245,158,11,0.2); }
+    50%       { box-shadow: 0 0 0 6px rgba(245,158,11,0.08); }
+  }
+
+  .hero-container.phase-urgent {
+    border-color: rgba(245,158,11,0.35);
+    box-shadow: inset 0 0 40px rgba(245,158,11,0.05), 0 0 0 1px rgba(245,158,11,0.12);
+  }
+  .hero-container.phase-today {
+    border-color: rgba(16,185,129,0.3);
+    box-shadow: inset 0 0 40px rgba(16,185,129,0.04);
   }
 
   /* List Section */
@@ -256,11 +314,12 @@
     }
 
     set hass(hass) {
-      // This card doesn't rely on hass for state, but we need it for icons and themes
       this._hass = hass;
-      // We re-render if the day has changed since last render
-      const today = new Date().toDateString();
-      if (this._lastRenderDay !== today) {
+      const now = new Date();
+      // Re-render when day changes OR when crossing the 18:00 urgency threshold
+      const phaseKey = `${now.toDateString()}-${now.getHours() >= 18 ? 1 : 0}`;
+      if (this._lastPhaseKey !== phaseKey) {
+        this._lastPhaseKey = phaseKey;
         this._render();
       }
     }
@@ -285,6 +344,20 @@
       });
 
       return schedule.sort((a, b) => a.daysUntil - b.daysUntil);
+    }
+
+    _getPhase(daysUntil) {
+      if (daysUntil === 0) return 'today';
+      if (daysUntil === 1) return new Date().getHours() >= 18 ? 'urgent' : 'tonight';
+      return 'soon';
+    }
+
+    _getRowTimeHtml(daysUntil) {
+      const phase = this._getPhase(daysUntil);
+      if (phase === 'today')   return `<div class="row-time" style="color:#10B981;font-weight:800;">Ritiro oggi</div>`;
+      if (phase === 'urgent')  return `<div class="row-time" style="color:#F59E0B;font-weight:800;">Esporre adesso</div>`;
+      if (phase === 'tonight') return `<div class="row-time" style="font-weight:700;">Esporre stasera</div>`;
+      return `<div class="row-time">${this._getDayLabel(daysUntil)}</div>`;
     }
 
     _getDayLabel(daysUntil) {
@@ -385,9 +458,29 @@
 
       const schedule = this._getCalculatedSchedule();
       const minDays = schedule[0]?.daysUntil ?? 0;
-      
-      const heroItems = schedule.filter(item => item.daysUntil === minDays);
-      const listItems = schedule.filter(item => item.daysUntil !== minDays);
+
+      const todayItems    = schedule.filter(item => item.daysUntil === 0);
+      const tomorrowItems = schedule.filter(item => item.daysUntil === 1);
+      const heroItems     = [...todayItems, ...tomorrowItems];
+      const listItems     = schedule.filter(item => item.daysUntil > 1);
+
+      const hasToday    = todayItems.length > 0;
+      const hasTomorrow = tomorrowItems.length > 0;
+
+      // Phase is driven by tomorrow if present (actionable), else today
+      const heroTimePhase = hasTomorrow ? this._getPhase(1) : (hasToday ? 'today' : this._getPhase(minDays));
+      const containerPhase = heroTimePhase;
+
+      const phaseLabel = {
+        today:   'Ritiro oggi',
+        tonight: 'Esporre stasera',
+        urgent:  'Esporre adesso',
+        soon:    `Prossimo: ${this._getDayLabel(minDays)}`,
+      }[heroTimePhase];
+
+      const phaseDot = heroTimePhase === 'urgent' || heroTimePhase === 'today'
+        ? `<span class="phase-dot ${heroTimePhase}"></span>`
+        : '';
 
       const container = document.createElement('div');
       container.className = 'card';
@@ -400,23 +493,44 @@
           </div>
         </div>
 
-        <div class="hero-container">
+        <div class="hero-container phase-${containerPhase}">
           <div class="hero-items">
-            ${heroItems.map(item => `
-              <div class="hero-item">
-                <div class="hero-icon-wrap" style="background: ${item.waste_color}20;">
-                  <div class="hero-glow" style="background: ${item.waste_color};"></div>
-                  <ha-icon icon="${item.icon}" style="color: ${item.waste_color};"></ha-icon>
-                </div>
-                <div class="hero-label">${item.name}</div>
-                <div class="hero-badge" style="background: ${item.waste_color}; color: #fff;">
-                  ${this._getDayLabel(item.daysUntil)}
-                </div>
+            ${todayItems.length > 0 ? `
+              <div class="hero-group" style="${heroTimePhase === 'urgent' ? 'filter: grayscale(0.7); opacity: 0.45; transition: all 0.4s ease;' : ''}">
+                ${todayItems.map(item => `
+                  <div class="hero-item">
+                    <div class="hero-icon-wrap" style="background: ${item.waste_color}20;">
+                      <div class="hero-glow" style="background: ${item.waste_color};"></div>
+                      <ha-icon icon="${item.icon}" style="color: ${item.waste_color};"></ha-icon>
+                    </div>
+                    <div class="hero-label">${item.name}</div>
+                    <div class="hero-badge" style="background: ${item.waste_color}; color: #fff;">
+                      ${this._getDayLabel(item.daysUntil)}
+                    </div>
+                  </div>
+                `).join('')}
               </div>
-            `).join('')}
+            ` : ''}
+            ${todayItems.length > 0 && tomorrowItems.length > 0 ? '<div class="hero-divider"></div>' : ''}
+            ${tomorrowItems.length > 0 ? `
+              <div class="hero-group">
+                ${tomorrowItems.map(item => `
+                  <div class="hero-item">
+                    <div class="hero-icon-wrap" style="background: ${item.waste_color}20;">
+                      <div class="hero-glow" style="background: ${item.waste_color};"></div>
+                      <ha-icon icon="${item.icon}" style="color: ${item.waste_color};"></ha-icon>
+                    </div>
+                    <div class="hero-label">${item.name}</div>
+                    <div class="hero-badge" style="background: ${item.waste_color}; color: #fff;">
+                      ${this._getDayLabel(item.daysUntil)}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
           </div>
-          <div class="hero-time">
-            ${minDays === 0 ? 'Esporre oggi' : minDays === 1 ? 'Esporre stasera' : `Prossimo: ${this._getDayLabel(minDays)}`}
+          <div class="hero-time ${heroTimePhase}">
+            ${phaseDot}${phaseLabel}
           </div>
         </div>
 
@@ -432,7 +546,7 @@
                   <div class="row-name">${item.name}</div>
                   <div class="row-days">${item.days.map(d => ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'][d-1]).join(', ')}</div>
                 </div>
-                <div class="row-time">${this._getDayLabel(item.daysUntil)}</div>
+                ${this._getRowTimeHtml(item.daysUntil)}
               </div>
             `).join('')}
           </div>
