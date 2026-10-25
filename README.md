@@ -66,9 +66,7 @@ La suite comprende **17 categorie** e oltre **20 card**:
 | **Energy Flow** | [`cards/Energy/`](cards/Energy/) | `wesmart-energy-flow-card` | `wesmart-infinite-energy-flow-card` | `sensor.*` (potenza/energia) |
 | **Garbage** | [`cards/Garbage/`](cards/Garbage/) | `wesmart-garbage-card` | `wesmart-infinite-garbage-card` | calendario raccolta differenziata |
 | **History** | [`cards/History/`](cards/History/) | `wesmart-history-card` | `wesmart-infinite-history-card`, `wesmart-infinite-color-card` | qualsiasi entità / cronologia |
-| **Light ✨ v2.0** | [`cards/Light/`](cards/Light/) | `wesmart-light-card` | `wesmart-infinite-light-card` | `light.*` (singola, dimmer, rgb + **Visual Editor GUI**) |
-| **Lights ✨ v2.0** | [`cards/Lights/`](cards/Lights/) | `wesmart-lights-card` | `wesmart-infinite-lights-card` | `light.*` (lista compatta + **Visual Editor GUI**) |
-| **Lights Expand ✨ v2.0** | [`cards/Lights/`](cards/Lights/) | `wesmart-lights-expand-card` | `wesmart-infinite-lights-expand-card` | `light.*` (slider inline + **Visual Editor GUI**) |
+| **Light Suite ✨ v2.1 (3-in-1)** | [`cards/Light/`](cards/Light/) | `wesmart-light-card` | `wesmart-infinite-light-card`, `wesmart-lights-card`, `wesmart-lights-expand-card` | `light.*` (**Singola + Lista + Expand** selezionabili da **Visual Editor GUI**) |
 | **Media Player** | [`cards/MediaPlayer/`](cards/MediaPlayer/) | `wesmart-media-player-card` | `wesmart-infinite-media-player-card` | `media_player.*` |
 | **Person** | [`cards/Person/`](cards/Person/) | `wesmart-person-card` | `wesmart-infinite-person-card` | `person.*` (presenza e zone) |
 | **Scene Interpolator** | [`cards/SceneInterpolator/`](cards/SceneInterpolator/) | `wesmart-scene-interpolator-card` | `wesmart-infinite-scene-interpolator-card` | `light.*` (morphing 2D 4 scene) |
@@ -81,18 +79,18 @@ La suite comprende **17 categorie** e oltre **20 card**:
 ## 🚀 Installazione Rapida
 
 ### 1. Copia i file JavaScript
-Copia i file `.js` delle card desiderate (dalla cartella [`cards/`](cards/)) all'interno della cartella `config/www/` del tuo Home Assistant:
+Crea una sottocartella ordinata `wesmart-cards` dentro `config/www/` del tuo Home Assistant e copia i file `.js` desiderati (dalla cartella [`cards/`](cards/)):
 ```
-config/www/wesmart-light-card.js
-config/www/wesmart-climate-card.js
-config/www/wesmart-garbage-card.js
-config/www/wesmart-chart-card.js
+config/www/wesmart-cards/wesmart-light-card.js
+config/www/wesmart-cards/wesmart-climate-card.js
+config/www/wesmart-cards/wesmart-garbage-card.js
+config/www/wesmart-cards/wesmart-chart-card.js
 ...
 ```
 
 ### 2. Aggiungi le Risorse in Lovelace
 In Home Assistant vai su **Impostazioni → Dashboard → Risorse** (in alto a destra nei tre puntini) e aggiungi una risorsa per ciascun file:
-- **URL**: `/local/wesmart-light-card.js`
+- **URL**: `/local/wesmart-cards/wesmart-light-card.js`
 - **Tipo**: `Modulo JavaScript`
 
 ### 3. Ricarica la Dashboard

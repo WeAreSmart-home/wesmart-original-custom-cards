@@ -1,132 +1,121 @@
-# WeSmart Light Card v2.0.0 — Documentazione Tecnica & Blueprint Visual Editor
+# WeSmart Light Card — Documentazione Tecnica & Architettura (`v2.1.0`)
 
-> **Versione:** `2.0.0` · **Tag Principale:** `custom:wesmart-light-card` · **Alias:** `custom:wesmart-infinite-light-card` · **File:** `cards/Light/wesmart-light-card.js`
-
----
-
-## Indice
-
-1. [Panoramica Architetturale](#1-panoramica-architetturale)
-2. [Blueprint: Come Funziona il Visual Editor (Stile Bubble Card)](#2-blueprint-come-funziona-il-visual-editor-stile-bubble-card)
-3. [Motore Cromatico InfiniteColor & Dynamic Light Sync](#3-motore-cromatico-infinitecolor--dynamic-light-sync)
-4. [Opzioni di Configurazione & Schema Dati](#4-opzioni-di-configurazione--schema-dati)
-5. [Rilevamento Capacità Entità Home Assistant](#5-rilevamento-capacità-entità-home-assistant)
-6. [Retrocompatibilità (`safeDefine`)](#6-retrocompatibilità-safedefine)
+Questa guida documenta nel dettaglio l'architettura **3-in-1 Unified Suite** di `wesmart-light-card.js` (ispirata al paradigma *Bubble Card*), il funzionamento del **Visual Editor GUI** nativo per Home Assistant Lovelace e tutte le proprietà di configurazione.
 
 ---
 
-## 1. Panoramica Architetturale
+## 1. Paradigma "3-in-1 Unified Card" (Stile Bubble Card)
 
-**WeSmart Light Card v2.0.0** è un singolo modulo JavaScript autonomo (Zero Build Step, Zero Dipendenze esterne) che racchiude due Web Components standard:
-1. **`WeSmartInfiniteLightCard`** (`<wesmart-light-card>`): il componente grafico principale renderizzato nella dashboard Lovelace.
-2. **`WeSmartLightCardEditor`** (`<wesmart-light-card-editor>`): il configuratore grafico dedicato montato automaticamente da Home Assistant nella finestra modale **"Modifica Card"**.
+Invece di costringere l'utente a installare e cercare tre card diverse per gestire le luci, **`wesmart-light-card.js` (`v2.1.0`)** unifica l'intera esperienza in:
+
+- **1 solo file JavaScript** (`/config/www/wesmart-cards/wesmart-light-card.js`)
+- **1 sola voce nel Card Picker di Home Assistant** (*WeSmart Light Card (3-in-1)*)
+- **3 modalità operative (`card_type`)** selezionabili dall'utente in cima all'Editor Visuale:
+  1. `single` — Controllo completo per singola entità `light.*` (Luminosità, Temperatura Colore Kelvin, Colore Hue RGB).
+  2. `list` — Lista compatta multi-entità con Master Toggle di gruppo, toggle rapidi per riga e apertura dialogo *More Info*.
+  3. `expand` — Lista multi-entità espandibile a fisarmonica con slider inline animati (Luminosità + Kelvin) per ciascuna luce accesa.
+
+### Risoluzione Automatica della Modalità (`get _mode()`)
+La card determina la modalità attiva con questa priorità:
+1. Se `config.card_type` è definito (`'single'`, `'list'`, `'expand'`), usa `config.card_type`.
+2. Se la card è stata istanziata tramite un tag alias legacy (`custom:wesmart-lights-card` o `custom:wesmart-lights-expand-card`), usa la modalità corrispondente (`'list'` o `'expand'`).
+3. Se `config.entities` contiene elementi e `config.entity` è vuoto, usa `'list'`.
+4. Altrimenti usa `'single'` (default).
 
 ---
 
-## 2. Blueprint: Come Funziona il Visual Editor (Stile Bubble Card)
+## 2. Come Funziona il Visual Editor in Home Assistant Lovelace
 
-Questo pattern architetturale rappresenta lo **standard ufficiale WeSmart v2.0** da replicare su tutte le card della collezione.
+Quando l'utente clicca su **"Modifica"** su una card in Home Assistant, Lovelace esegue questo ciclo di vita:
 
-### 2.1 Aggancio tra Card e Finestra Modale di Home Assistant
+```mermaid
+sequenceDiagram
+    participant User as Utente (Browser)
+    participant HA as Home Assistant Dialog
+    participant Card as WeSmartInfiniteLightCard
+    participant Editor as WeSmartLightCardEditor
 
-Nella classe della Card vengono esposti due metodi statici:
-
-```javascript
-static getConfigElement() {
-  return document.createElement('wesmart-light-card-editor');
-}
-
-static getStubConfig(hass, entities) {
-  const allEntities = entities || Object.keys(hass?.states || {});
-  const firstLight = allEntities.find(e => e.startsWith('light.')) || 'light.example';
-  return {
-    entity:              firstLight,
-    color:               '#D97757',
-    theme:               'dark',
-    show_brightness:     true,
-    show_color_temp:     true,
-    show_color:          true,
-    collapse_when_off:   false,
-    dynamic_light_color: false,
-    show_footer:         true,
-  };
-}
+    User->>HA: Clicca "+ Aggiungi Card" o "Modifica"
+    HA->>Card: Chiama static getConfigElement()
+    Card-->>HA: Restituisce document.createElement('wesmart-light-card-editor')
+    HA->>Editor: Imposta editor.hass = hass
+    HA->>Editor: Chiama editor.setConfig(config)
+    Editor-->>User: Renderizza Selettore Tipo (Single/List/Expand) + Sezioni GUI
+    User->>Editor: Cambia Tipo di Card, Entità o Colore
+    Editor->>HA: Dispara CustomEvent('config-changed', { detail: { config: newConfig } })
+    HA->>Card: Chiama card.setConfig(newConfig) (Anteprima Live istantanea)
 ```
 
-- Quando l'utente clicca su **"Modifica"**, Lovelace invoca `getConfigElement()`, istanzia `<wesmart-light-card-editor>`, gli passa `editor.hass = hass` e chiama `editor.setConfig(config)`.
+### Componenti chiave dell'architettura (`wesmart-light-card.js`)
 
-### 2.2 Approccio Ibrido: Layout Accordion WeSmart + Selettori Nativi `<ha-form>`
-
-Per offrire sia l'estetica raffinata di **Bubble Card** (sezioni espandibili a fisarmonica, pastiglie colore cliccabili, segmented buttons) sia la potenza dei selettori ufficiali di Home Assistant (ricerca entità con stanze e icone MDI), l'editor adotta un **approccio ibrido**:
-
-1. **Sezioni Accordion Custom (`.section` / `.section-header` / `.section-body`)**:
-   - Gestiscono l'apertura/chiusura fluida dei blocchi logici (*1. Entità & Identità*, *2. Aspetto & Motore InfiniteColor*, *3. Controlli & Comportamento*).
-2. **Selettori Nativi tramite `<ha-form>`**:
-   - All'interno della Sezione 1 viene inserito un elemento `<ha-form id="ha-identity-form">` configurato con gli **HA Selectors**:
-     ```javascript
-     form.schema = [
-       { name: 'entity', required: true,  selector: { entity: { domain: 'light' } } },
-       { name: 'name',   required: false, selector: { text: {} } },
-       { name: 'icon',   required: false, selector: { icon: { placeholder: 'mdi:lightbulb' } } },
-     ];
-     ```
-   - Questo garantisce che Home Assistant carichi automaticamente in *lazy-loading* il menu a tendina ufficiale delle entità (filtrato sul dominio `light`) e il selettore icone MDI, senza alcun rischio di componenti non registrati.
-3. **Emissione dell'evento `config-changed`**:
-   - Ogni modifica nell'editor invoca `_updateConfig(patch)`, che aggiorna lo stato interno e scatena:
-     ```javascript
-     this.dispatchEvent(new CustomEvent('config-changed', {
-       detail: { config: next },
-       bubbles: true,
-       composed: true,
-     }));
-     ```
-   - Home Assistant intercetta l'evento e aggiorna l'anteprima della card a destra in tempo reale, mantenendo il focus sui campi dell'editor.
+1. **`static getConfigElement()`**:
+   Metodo statico su `WeSmartInfiniteLightCard` che restituisce `<wesmart-light-card-editor>`. Indica a Home Assistant di montare la nostra interfaccia visuale invece dell'editor YAML testuale.
+2. **`static getStubConfig()`**:
+   Restituisce la configurazione iniziale quando si aggiunge la card dal selettore visuale (`card_type: 'single'`, `color: '#D97757'`, `theme: 'dark'`, ecc.).
+3. **Selettore Tipo di Card (`card_type`) con Migrazione Intelligente**:
+   Quando l'utente passa da `single` a `list` o `expand` nell'editor, se `config.entity` era già impostato (es. `light.soggiorno`) e `config.entities` era vuoto, l'editor copia automaticamente `light.soggiorno` come prima voce di `config.entities`. Viceversa, tornando a `single`, recupera la prima entità della lista.
+4. **Integrazione ibrida `<ha-form>` + Controlli Custom WeSmart**:
+   - All'interno delle sezioni a fisarmonica dell'editor, usiamo `<ha-form>` nativo con gli schema selector ufficiali di Home Assistant (`{ entity: { domain: 'light' } }`, `{ icon: {} }`, `{ text: {} }`) per avere il menu a tendina ricercabile delle luci e il selettore icone MDI ufficiale senza dipendenze esterne.
+   - Per il selettore **Tipo di Card**, il **Gestore Lista Luci** (riordino `↑`/`↓`, impostazioni riga `⚙️`, rimozione `✕`) e la **Palette InfiniteColor** (8 preset + color picker nativo + input HEX), usiamo componenti custom in stile WeSmart Dark/Light.
 
 ---
 
-## 3. Motore Cromatico InfiniteColor & Dynamic Light Sync
+## 3. Riferimento Completo delle Opzioni (`config`)
 
-La funzione `_buildPalette(hex, isDark)` converte qualsiasi colore esadecimale nello spazio colore **HSL** e calcola automaticamente:
-- `--accent`, `--accent-soft`, `--accent-glow`, `--accent-glow-strong`, `--accent-border`
-- `--bg`, `--surface`, `--border`
-- `--text`, `--text-muted`, `--text-dim`, `--overlay-bg`, `--shadow`
+### Opzioni Globali (valide per tutte le modalità)
 
-Con il colore predefinito `#D97757`, la palette generata corrisponde esattamente al tema **WeSmart Original** (carbone caldo e arancione).
-
-### Dynamic Light Color (`dynamic_light_color: true`)
-Quando l'opzione `dynamic_light_color` è attiva e l'entità `light.*` è accesa (`state === 'on'`) con attributo `rgb_color: [r, g, b]`, la card converte i valori RGB in HEX (`_rgbToHex`) e sovrascrive dinamicamente i token `--accent*`, creando un effetto immersivo che riflette il colore reale della lampadina nella stanza.
-
----
-
-## 4. Opzioni di Configurazione & Schema Dati
-
-| Chiave YAML | Tipo | Default | Sezione Visual Editor |
-|-------------|------|---------|-----------------------|
-| `entity` | `string` | `''` | 1. Entità & Identità (`entity` selector) |
-| `name` | `string` | `null` | 1. Entità & Identità (`text` selector) |
-| `icon` | `string` | `null` | 1. Entità & Identità (`icon` selector) |
-| `theme` | `'dark' \| 'light' \| 'auto'` | `'dark'` | 2. Aspetto & InfiniteColor (Segmented Pills) |
-| `color` | `string` (HEX) | `'#D97757'` | 2. Aspetto & InfiniteColor (Swatches + Color Picker) |
-| `dynamic_light_color` | `boolean` | `false` | 2. Aspetto & InfiniteColor (Switch) |
-| `show_brightness` | `boolean` | `true` | 3. Controlli & Comportamento (Switch) |
-| `show_color_temp` | `boolean` | `true` | 3. Controlli & Comportamento (Switch) |
-| `show_color` | `boolean` | `true` | 3. Controlli & Comportamento (Switch) |
-| `collapse_when_off` | `boolean` | `false` | 3. Controlli & Comportamento (Switch) |
-| `show_footer` | `boolean` | `true` | 3. Controlli & Comportamento (Switch) |
+| Proprietà | Tipo | Default | Descrizione |
+|---|---|---|---|
+| `type` | `string` | **Obbligatorio** | `custom:wesmart-light-card` |
+| `card_type` | `string` | `'single'` | Modalità della card: `'single'`, `'list'` oppure `'expand'`. |
+| `color` | `string` | `'#D97757'` | Colore primario HEX (`#RRGGBB`) per il motore **InfiniteColor**. |
+| `theme` | `string` | `'dark'` | Tema della card: `'dark'`, `'light'` oppure `'auto'` (segue il sistema operativo). |
+| `dynamic_light_color` | `boolean` | `false` | Se `true`, quando una luce RGB è accesa, l'accento della card (o della riga) assume il colore reale della lampadina (`rgb_color`). |
+| `show_footer` | `boolean` | `true` | Mostra o nasconde la barra informativa inferiore della card. |
 
 ---
 
-## 5. Rilevamento Capacità Entità Home Assistant
+### Opzioni Modalità `single` (`card_type: single`)
 
-La card legge `stateObj.attributes.supported_color_modes` e gli attributi `color_temp_kelvin` / `min_color_temp_kelvin` / `max_color_temp_kelvin` (con fallback a `min_mireds` / `max_mireds`):
-- **Brightness**: mostrata se `show_brightness: true` e la luce supporta `brightness`, `color_temp`, `hs`, `rgb`, `rgbw`, `rgbww`, `xy`.
-- **Kelvin / Color Temp**: mostrata se `show_color_temp: true` e la luce espone il range Kelvin/Mired.
-- **Hue Picker**: mostrato se `show_color: true` e la luce supporta `hs`, `rgb`, `rgbw`, `rgbww`, `xy`.
+| Proprietà | Tipo | Default | Descrizione |
+|---|---|---|---|
+| `entity` | `string` | **Obbligatorio** | ID dell'entità luce (es. `light.soggiorno`). |
+| `name` | `string` | `null` | Nome personalizzato (se omesso usa `friendly_name` dell'entità). |
+| `icon` | `string` | `null` | Icona MDI personalizzata (es. `mdi:floor-lamp`). |
+| `show_brightness` | `boolean` | `true` | Mostra lo slider della luminosità (1–100%). |
+| `show_color_temp` | `boolean` | `true` | Mostra lo slider della temperatura colore (Kelvin), se supportato dalla lampadina. |
+| `show_color` | `boolean` | `true` | Mostra lo slider della tonalità RGB (Hue 0–360°), se supportato dalla lampadina. |
+| `collapse_when_off` | `boolean` | `false` | Se `true`, nasconde tutti gli slider quando la luce è spenta per risparmiare spazio verticale. |
 
 ---
 
-## 6. Retrocompatibilità (`safeDefine`)
+### Opzioni Modalità `list` & `expand` (`card_type: list` / `card_type: expand`)
 
-Per garantire che nessuna dashboard esistente si interrompa dopo l'unificazione, il modulo registra sia i tag principali sia gli alias storici:
-- `wesmart-light-card` e `wesmart-infinite-light-card`
-- `wesmart-light-card-editor` e `wesmart-infinite-light-card-editor`
+| Proprietà | Tipo | Default | Descrizione |
+|---|---|---|---|
+| `title` | `string` | `'Lights'` | Titolo mostrato nell'header della card. |
+| `icon` | `string` | `'mdi:lightbulb-group'` | Icona mostrata nell'header accanto al titolo. |
+| `entities` | `array` | **Obbligatorio** | Lista di stringhe (`light.id`) o oggetti `{ entity, name, icon }`. |
+
+#### Formato degli elementi in `entities`
+Ogni elemento dell'array `entities` può essere una stringa semplice oppure un oggetto:
+
+```yaml
+entities:
+  - light.lampadario_sala
+  - entity: light.striscia_led_tv
+    name: LED Retro TV
+    icon: mdi:led-strip-variant
+```
+
+---
+
+## 4. Comportamento Interattivo nelle 3 Modalità
+
+| Azione Utente | `single` | `list` | `expand` |
+|---|---|---|---|
+| **Tap sul Toggle principale (Header)** | Accende / Spegne la luce | Accende tutte le luci (se tutte spente) o spegne tutte (se almeno una è accesa) | Accende tutte le luci o spegne tutte e chiude i pannelli aperti |
+| **Tap su Info Header (Titolo/Icona)** | Apre il dialogo nativo *More Info* di Home Assistant | — | — |
+| **Tap su una Riga Luce** | — | Apre il dialogo nativo *More Info* di Home Assistant per quella luce | Espande/chiude a fisarmonica il pannello inline con slider Luminosità e Kelvin (se la luce è accesa); se spenta, la accende |
+| **Tap sul Toggle di Riga** | — | Accende / Spegne la singola luce | Accende / Spegne la singola luce (chiudendo il pannello se viene spenta) |
+| **Drag sugli Slider** | Regola Luminosità, Kelvin o Hue RGB con anteprima fluida e invio a HA al rilascio | — | Regola Luminosità o Kelvin della singola riga espansa |

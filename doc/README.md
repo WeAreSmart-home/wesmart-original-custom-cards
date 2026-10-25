@@ -8,9 +8,7 @@ Una collezione unificata di card personalizzate per il Dashboard di Home Assista
 
 | Card | File | Tipo entità | Tema |
 |------|------|-------------|-------|
-| [WeSmart Light Card](#wesmart-light-card) | `cards/Light/wesmart-light-card.js` | `light.*` | Dark / Light / Auto |
-| [WeSmart Lights Card](#wesmart-lights-card) | `cards/Lights/wesmart-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
-| [WeSmart Lights Expand Card](#wesmart-lights-expand-card) | `cards/Lights/wesmart-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
+| [WeSmart Light Card (3-in-1)](#wesmart-light-card) | `cards/Light/wesmart-light-card.js` | `light.*` (Singola / Lista / Expand) | Dark / Light / Auto |
 | [WeSmart Climate Card](#wesmart-climate-card) | `cards/Climate/wesmart-climate-card.js` | `climate.*` | Dark / Light / Auto |
 | [WeSmart Climate Compact Card](#wesmart-climate-compact-card) | `cards/Climate/wesmart-climate-compact-card.js` | `climate.*` (multi) | Dark / Light / Auto |
 | [WeSmart Sensors Card](#wesmart-sensors-card) | `cards/Sensors/wesmart-sensors-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
@@ -35,29 +33,27 @@ Una collezione unificata di card personalizzate per il Dashboard di Home Assista
 
 ### 1. Copia i file
 
-Copia il file `.js` di ogni card che vuoi usare (dalla cartella `cards/`) in `config/www/`:
+Crea una sottocartella ordinata `wesmart-cards` in `config/www/` e copia il file `.js` di ogni card che vuoi usare (dalla cartella `cards/`):
 
 ```
-config/www/wesmart-light-card.js
-config/www/wesmart-lights-card.js
-config/www/wesmart-lights-expand-card.js
-config/www/wesmart-climate-card.js
-config/www/wesmart-climate-compact-card.js
-config/www/wesmart-sensors-card.js
-config/www/wesmart-doors-card.js
-config/www/wesmart-history-card.js
-config/www/wesmart-buttons-bar-card.js
-config/www/wesmart-buttons-grid-card.js
-config/www/wesmart-battery-card.js
-config/www/wesmart-switches-card.js
-config/www/wesmart-clock-card.js
-config/www/wesmart-garbage-card.js
-config/www/wesmart-chart-card.js
-config/www/wesmart-energy-flow-card.js
-config/www/wesmart-media-player-card.js
-config/www/wesmart-weather-card.js
-config/www/wesmart-person-card.js
-config/www/wesmart-scene-interpolator-card.js
+config/www/wesmart-cards/wesmart-light-card.js
+config/www/wesmart-cards/wesmart-climate-card.js
+config/www/wesmart-cards/wesmart-climate-compact-card.js
+config/www/wesmart-cards/wesmart-sensors-card.js
+config/www/wesmart-cards/wesmart-doors-card.js
+config/www/wesmart-cards/wesmart-history-card.js
+config/www/wesmart-cards/wesmart-buttons-bar-card.js
+config/www/wesmart-cards/wesmart-buttons-grid-card.js
+config/www/wesmart-cards/wesmart-battery-card.js
+config/www/wesmart-cards/wesmart-switches-card.js
+config/www/wesmart-cards/wesmart-clock-card.js
+config/www/wesmart-cards/wesmart-garbage-card.js
+config/www/wesmart-cards/wesmart-chart-card.js
+config/www/wesmart-cards/wesmart-energy-flow-card.js
+config/www/wesmart-cards/wesmart-media-player-card.js
+config/www/wesmart-cards/wesmart-weather-card.js
+config/www/wesmart-cards/wesmart-person-card.js
+config/www/wesmart-cards/wesmart-scene-interpolator-card.js
 ```
 
 ### 2. Aggiungi le risorse
@@ -66,26 +62,24 @@ In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi una v
 
 | URL | Tipo |
 |-----|------|
-| `/local/wesmart-light-card.js` | Modulo JavaScript |
-| `/local/wesmart-lights-card.js` | Modulo JavaScript |
-| `/local/wesmart-lights-expand-card.js` | Modulo JavaScript |
-| `/local/wesmart-climate-card.js` | Modulo JavaScript |
-| `/local/wesmart-climate-compact-card.js` | Modulo JavaScript |
-| `/local/wesmart-sensors-card.js` | Modulo JavaScript |
-| `/local/wesmart-doors-card.js` | Modulo JavaScript |
-| `/local/wesmart-history-card.js` | Modulo JavaScript |
-| `/local/wesmart-buttons-bar-card.js` | Modulo JavaScript |
-| `/local/wesmart-buttons-grid-card.js` | Modulo JavaScript |
-| `/local/wesmart-battery-card.js` | Modulo JavaScript |
-| `/local/wesmart-switches-card.js` | Modulo JavaScript |
-| `/local/wesmart-clock-card.js` | Modulo JavaScript |
-| `/local/wesmart-garbage-card.js` | Modulo JavaScript |
-| `/local/wesmart-chart-card.js` | Modulo JavaScript |
-| `/local/wesmart-energy-flow-card.js` | Modulo JavaScript |
-| `/local/wesmart-media-player-card.js` | Modulo JavaScript |
-| `/local/wesmart-weather-card.js` | Modulo JavaScript |
-| `/local/wesmart-person-card.js` | Modulo JavaScript |
-| `/local/wesmart-scene-interpolator-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-light-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-climate-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-climate-compact-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-sensors-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-doors-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-history-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-buttons-bar-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-buttons-grid-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-battery-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-switches-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-clock-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-garbage-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-chart-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-energy-flow-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-media-player-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-weather-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-person-card.js` | Modulo JavaScript |
+| `/local/wesmart-cards/wesmart-scene-interpolator-card.js` | Modulo JavaScript |
 
 ### 3. Ricarica
 
@@ -145,42 +139,47 @@ Nessun build step. Nessuna dipendenza. Vanilla JS puro.
 
 ---
 
-## WeSmart Light Card
+## WeSmart Light Card (3-in-1 Unified Suite)
 
-Entità luce singola con controlli completi. — **v1.3.0**
+Un unico file (`cards/Light/wesmart-light-card.js` — **v2.1.0**) e un'unica card che integra **3 modalità** (`card_type: single | list | expand`) selezionabili direttamente dall'**Editor Visuale (GUI)** in stile *Bubble Card*.
 
 ```yaml
 type: custom:wesmart-light-card
+card_type: single # 'single' | 'list' | 'expand'
 entity: light.living_room
+color: '#D97757'
 ```
 
-**Opzioni:**
+**Opzioni Globali & Modalità `single`:**
 
 | Opzione | Tipo | Default | Descrizione |
 |---------|------|---------|-------------|
-| `entity` | string | — | **Obbligatorio.** Entità `light.*` |
+| `card_type` | string | `'single'` | `single` (1 luce) \| `list` (lista compatta) \| `expand` (lista con slider inline) |
+| `entity` | string | — | **Obbligatorio in `single`.** Entità `light.*` |
 | `name` | string | auto | Sovrascrittura nome visualizzato |
 | `icon` | string | auto | Sovrascrittura icona (mdi:*) |
+| `color` | string | `'#D97757'` | Colore primario HEX per il motore **InfiniteColor** |
 | `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
 | `show_brightness` | boolean | `true` | Slider luminosità |
 | `show_color_temp` | boolean | `true` | Slider Kelvin/CT (solo per luci che la supportano) |
 | `show_color` | boolean | `true` | Slider tonalità (hue) per luci a colori |
 | `collapse_when_off` | boolean | `false` | Nasconde i controlli da spenta; si apre automaticamente all'accensione |
+| `dynamic_light_color` | boolean | `false` | Adatta l'accento al colore reale RGB della luce accesa |
+| `show_footer` | boolean | `true` | Mostra o nasconde il footer informativo |
 
-**Funzionalità:** toggle · slider luminosità · slider Kelvin/CT · slider tonalità hue · collasso automatico con animazione · pulse glow quando accesa · overlay non disponibile
+**Funzionalità:** Editor Visuale GUI con selettore `card_type` · toggle · slider luminosità · slider Kelvin/CT · slider tonalità hue · collasso automatico con animazione · pulse glow quando accesa · overlay non disponibile.
 
-**Rileva automaticamente** le capacità da `supported_color_modes`. Supporta attributi Kelvin moderni (`color_temp_kelvin`, `min_color_temp_kelvin`, `max_color_temp_kelvin`) di HA 2022.9+ e legacy mireds. Lo slider hue è minimal, stesso stile degli altri slider.
-
-**Temi:** `dark` · `light` · `auto`
+**Rileva automaticamente** le capacità da `supported_color_modes`. Supporta attributi Kelvin moderni (`color_temp_kelvin`, `min_color_temp_kelvin`, `max_color_temp_kelvin`) di HA 2022.9+ e legacy mireds.
 
 ---
 
-## WeSmart Lights Card
+### Modalità `list` (`card_type: list` o alias `custom:wesmart-lights-card`)
 
-Più entità luce in una lista compatta con toggle individuali.
+Più entità luce in una lista compatta con toggle individuali e Master Toggle.
 
 ```yaml
-type: custom:wesmart-lights-card
+type: custom:wesmart-light-card
+card_type: list
 title: Soggiorno
 theme: dark
 entities:
@@ -190,32 +189,15 @@ entities:
     icon: mdi:floor-lamp
 ```
 
-**Opzioni:**
-
-| Opzione | Tipo | Default | Descrizione |
-|---------|------|---------|-------------|
-| `title` | string | `'Lights'` | Intestazione card |
-| `icon` | string | `mdi:lightbulb-group` | Icona header |
-| `theme` | string | `'dark'` | `dark` \| `light` \| `auto` |
-| `entities` | list | — | **Obbligatorio.** Lista entità luce |
-
-**Campi elemento entità:** `entity` (req) · `name` · `icon`
-
-**Funzionalità:** toggle master · toggle per riga · testo stato (luminosità + CT) · sottotitolo "N di M accese" · tap riga → More Info · oscuramento non disponibile
-
-**Temi:**
-- `dark` — carbone caldo (default)
-- `light` — crema calda `#FFFEFA`
-- `auto` — segue `prefers-color-scheme` di sistema
-
 ---
 
-## WeSmart Lights Expand Card
+### Modalità `expand` (`card_type: expand` o alias `custom:wesmart-lights-expand-card`)
 
-Stesso layout a lista della WeSmart Lights Card, ma cliccando una riga si **espande un pannello inline** con slider animati di luminosità e temperatura colore — senza lasciare il dashboard.
+Stesso layout a lista della modalità `list`, ma cliccando una riga si **espande un pannello inline** con slider animati di luminosità e temperatura colore — senza lasciare il dashboard.
 
 ```yaml
-type: custom:wesmart-lights-expand-card
+type: custom:wesmart-light-card
+card_type: expand
 title: Soggiorno
 theme: dark
 entities:
