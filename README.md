@@ -60,7 +60,7 @@ La suite comprende **17 categorie** e oltre **20 card**:
 
 | Card | Cartella | Tag YAML Principale | Alias Retrocompatibile | Entità / Tipo |
 |------|----------|---------------------|------------------------|---------------|
-| **✨ WeSmart Card (All-in-One)** | [`WeSmart-Card/`](WeSmart-Card/) | `wesmart-card` | — | **All-in-One con Visual Editor GUI** (`card_type: light \| lights \| lights-expand` + prossime card) |
+| **✨ WeSmart Card (All-in-One)** | [`WeSmart-Card/`](WeSmart-Card/) | `wesmart-card` | — | **All-in-One con Visual Editor GUI** (`card_type: light \| lights \| lights-expand \| chart \| history` + prossime card) |
 | **Battery** | [`cards/Battery/`](cards/Battery/) | `wesmart-battery-card` | `wesmart-battery-status-card`, `wesmart-infinite-battery-card` | `sensor.*` (batterie) |
 | **Buttons Bar** | [`cards/Buttons/`](cards/Buttons/) | `wesmart-buttons-bar-card` | `wesmart-infinite-buttons-bar-card` | qualsiasi / service |
 | **Buttons Grid** | [`cards/Buttons/`](cards/Buttons/) | `wesmart-buttons-grid-card` | `wesmart-infinite-buttons-grid-card` | qualsiasi / service |

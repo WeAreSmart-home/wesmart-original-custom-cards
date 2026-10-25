@@ -5,21 +5,28 @@
  *   - 'light'         (alias 'single') : Single light entity card with brightness, Kelvin/CT, and hue RGB slider
  *   - 'lights'        (alias 'list')   : Multi-entity compact light list with master & per-row toggles
  *   - 'lights-expand' (alias 'expand') : Multi-entity light list with animated inline brightness & CT sliders
- *   (Modular registry ready for Climate, Sensors, Doors, Switches, Buttons, etc.)
+ *   - 'chart'                          : Interactive single/multi-entity chart with drag-to-zoom, tooltip & time pills
+ *   - 'history'                        : Multi-entity history card with per-row SVG line chart or binary timeline bar
  * Infinite Color Engine: full palette derived from a single base color (#D97757 default).
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 
 (() => {
   'use strict';
 
-  const CARD_VERSION = '1.0.0';
+  const CARD_VERSION = '1.1.0';
+
+  const HOURS_OPTIONS = [1, 6, 24, 168];
+  const HOURS_LABELS  = { 1: '1h', 6: '6h', 24: '24h', 168: '7d' };
+  const HOURS_NAMES   = { 1: '1 ora', 6: '6 ore', 24: '24 ore', 168: '7 giorni' };
 
   // ─── Modular Card Type Registry (Extensible for Climate, Sensors, Doors, etc.) ─
   const CARD_TYPES = [
-    { id: 'light',         mode: 'single', category: 'Lights', icon: 'mdi:lightbulb-on',         name: 'Light',         sub: '1 Luce · Slider completi' },
-    { id: 'lights',        mode: 'list',   category: 'Lights', icon: 'mdi:format-list-bulleted', name: 'Lights',        sub: 'Multi-luce · Toggle rapidi' },
-    { id: 'lights-expand', mode: 'expand', category: 'Lights', icon: 'mdi:tune-vertical',        name: 'Lights Expand', sub: 'Multi-luce · Slider inline' },
+    { id: 'light',         mode: 'single',  category: 'Lights', icon: 'mdi:lightbulb-on',         name: 'Light',         sub: '1 Luce · Slider completi' },
+    { id: 'lights',        mode: 'list',    category: 'Lights', icon: 'mdi:format-list-bulleted', name: 'Lights',        sub: 'Multi-luce · Toggle rapidi' },
+    { id: 'lights-expand', mode: 'expand',  category: 'Lights', icon: 'mdi:tune-vertical',        name: 'Lights Expand', sub: 'Multi-luce · Slider inline' },
+    { id: 'chart',         mode: 'chart',   category: 'Graphs', icon: 'mdi:chart-areaspline',     name: 'Chart',         sub: 'Grafico Zoom & Tooltip' },
+    { id: 'history',       mode: 'history', category: 'Graphs', icon: 'mdi:chart-timeline',       name: 'History',       sub: 'Storico per ogni riga' },
   ];
 
   function resolveModeFromType(cardType) {
@@ -28,12 +35,16 @@
     if (t === 'light' || t === 'single') return 'single';
     if (t === 'lights' || t === 'list') return 'list';
     if (t === 'lights-expand' || t === 'lights_expand' || t === 'expand') return 'expand';
+    if (t === 'chart' || t === 'graph') return 'chart';
+    if (t === 'history') return 'history';
     return null;
   }
 
   function modeToCanonicalType(mode) {
     if (mode === 'list') return 'lights';
     if (mode === 'expand') return 'lights-expand';
+    if (mode === 'chart') return 'chart';
+    if (mode === 'history') return 'history';
     return 'light';
   }
 
@@ -502,6 +513,94 @@
 
   .unavailable-overlay span { font-size: 13px; color: var(--text-muted); font-weight: 500; }
   .unavailable-overlay ha-icon { color: var(--text-dim); --mdc-icon-size: 28px; }
+
+  /* ── Chart & History Modes ── */
+  .loader {
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transition: opacity 0.3s; z-index: 5;
+  }
+  .loader.active { opacity: 1; }
+  .time-pills {
+    display: flex; gap: 3px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px;
+  }
+  .time-pill {
+    padding: 4px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 500;
+    border: none; cursor: pointer; background: transparent;
+    color: var(--text-muted); transition: var(--transition);
+  }
+  .time-pill.active { background: var(--accent); color: #fff; }
+  .time-pill:not(.active):hover { background: var(--row-hover); color: var(--text); }
+  .chart-section { padding: 4px 0 8px; }
+  .zoom-reset {
+    display: none; margin: 0 0 10px; padding: 3px 12px;
+    background: var(--accent-soft); border: 1px solid var(--accent);
+    border-radius: 8px; color: var(--accent); font-size: 11px; font-weight: 500;
+    cursor: pointer; transition: var(--transition);
+  }
+  .zoom-reset.visible { display: inline-flex; align-items: center; gap: 4px; }
+  .zoom-reset:hover { background: var(--accent); color: #fff; }
+  .chart-layout { display: flex; gap: 6px; align-items: stretch; }
+  .y-axis {
+    width: 44px; flex-shrink: 0; display: flex; flex-direction: column;
+    justify-content: space-between; padding-bottom: 22px;
+  }
+  .y-label { font-size: 10px; color: var(--text-dim); text-align: right; line-height: 1; }
+  .chart-area { flex: 1; position: relative; cursor: crosshair; touch-action: pan-y; }
+  .chart-svg { display: block; width: 100%; }
+  .tooltip-box {
+    position: absolute; top: 4px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 10px; font-size: 11px; color: var(--text);
+    pointer-events: none; opacity: 0; transition: opacity 0.12s; white-space: nowrap; z-index: 10;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  }
+  .tt-time { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+  .tt-row { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .tt-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .time-axis { display: flex; justify-content: space-between; margin-top: 5px; }
+  .mode-chart .time-axis { margin-left: 50px; }
+  .time-axis span { font-size: 10px; color: var(--text-dim); }
+  .no-data { font-size: 12px; color: var(--text-dim); text-align: center; padding: 20px 0; }
+  .tl-group { position: relative; }
+  .tl-wrap { margin-bottom: 10px; }
+  .tl-wrap:last-child { margin-bottom: 0; }
+  .tl-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .timeline-bar {
+    width: 100%; height: 10px; background: var(--surface); border-radius: 5px;
+    position: relative; overflow: hidden; border: 1px solid var(--border);
+  }
+  .tl-seg, .seg { position: absolute; top: 0; bottom: 0; }
+  .seg-on { background: var(--accent); }
+  .seg-off { background: transparent; }
+  .legend { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 4px; }
+  .legend-row {
+    display: flex; align-items: center; gap: 10px; padding: 8px 6px;
+    border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; border-radius: 8px;
+  }
+  .legend-row:last-child { border-bottom: none; }
+  .legend-row:hover { background: var(--row-hover); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .legend-name { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .legend-state, .hist-state {
+    font-size: 11px; font-weight: 500; color: var(--text-muted); background: var(--surface);
+    border: 1px solid var(--border); padding: 2px 8px; border-radius: 6px; white-space: nowrap;
+  }
+  .hist-state.state-on { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+  .legend-stat, .hist-stat { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+  .hist-row {
+    padding: 12px 4px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s;
+  }
+  .hist-row:last-child { border-bottom: none; }
+  .hist-row:hover { background: var(--row-hover); }
+  .hist-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .hist-icon-wrap {
+    width: 32px; height: 32px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .hist-icon-wrap ha-icon { --mdc-icon-size: 16px; color: var(--text-muted); }
+  .linechart { width: 100%; }
+  .linechart svg { display: block; overflow: visible; }
   `;
 
   // ─── Unified All-in-One Custom Element (WeSmartCard) ─────────────────────────
@@ -521,6 +620,11 @@
       this._palette    = null;
       this._mqHandler  = null;
       this._forcedMode = null; // Used by legacy tag aliases
+      this._history    = {};
+      this._hours      = 24;
+      this._zoomRange  = null;
+      this._uid        = Math.random().toString(36).slice(2, 8);
+      this._lastHistKey = '';
     }
 
     static getConfigElement() {
@@ -559,7 +663,7 @@
       this._config = {
         entity:              '',
         name:                null,
-        title:               'Lights',
+        title:               null,
         icon:                null,
         color:               '#D97757',
         theme:               'dark',
@@ -569,22 +673,44 @@
         collapse_when_off:   false,
         dynamic_light_color: false,
         show_footer:         true,
+        hours:               24,
+        height:              100,
+        show_grid:           false,
+        zoom:                true,
         entities:            [],
         ...config,
       };
-      const rawEntities = Array.isArray(this._config.entities) ? this._config.entities : [];
-      this._entities = rawEntities.map(e => typeof e === 'string' ? { entity: e } : e).filter(e => e && e.entity);
+      this._hours = Number(this._config.hours) || 24;
+      const rawEntities = Array.isArray(this._config.entities) && this._config.entities.length > 0
+        ? this._config.entities
+        : (this._config.entity ? [{ entity: this._config.entity, name: this._config.name, icon: this._config.icon }] : []);
+      this._entities = rawEntities.map(e => typeof e === 'string' ? { entity: e } : { ...e }).filter(e => e && e.entity);
       this._applyPalette();
       this._render();
+      if (this._hass && (this._mode === 'chart' || this._mode === 'history')) {
+        this._fetchHistory();
+      }
     }
 
     set hass(hass) {
+      const first = !this._hass;
       this._hass = hass;
       this._updateState();
+      if (this._mode === 'chart' || this._mode === 'history') {
+        const histKey = `${this._mode}:${this._hours}:${this._entities.map(e => e.entity).join(',')}`;
+        if (first || histKey !== this._lastHistKey) {
+          this._lastHistKey = histKey;
+          this._fetchHistory();
+        }
+      }
     }
 
     getCardSize() {
-      return this._mode === 'single' ? 3 : 1 + Math.ceil((this._entities.length * 52 + 100) / 50);
+      const m = this._mode;
+      if (m === 'single')  return 3;
+      if (m === 'chart')   return 4 + Math.ceil(this._entities.length * 0.7);
+      if (m === 'history') return 2 + Math.ceil(this._entities.length * 1.5);
+      return 1 + Math.ceil((this._entities.length * 52 + 100) / 50);
     }
 
     disconnectedCallback() {
@@ -738,10 +864,18 @@
         this._card.innerHTML = this._getListHTML();
         shadow.appendChild(this._card);
         this._bindListEvents();
-      } else {
+      } else if (mode === 'expand') {
         this._card.innerHTML = this._getExpandHTML();
         shadow.appendChild(this._card);
         this._bindExpandEvents();
+      } else if (mode === 'chart') {
+        this._card.innerHTML = this._getChartHTML();
+        shadow.appendChild(this._card);
+        this._bindChartEvents();
+      } else if (mode === 'history') {
+        this._card.innerHTML = this._getHistoryHTML();
+        shadow.appendChild(this._card);
+        this._bindHistoryEvents();
       }
 
       this._updateState();
@@ -1369,14 +1503,678 @@
       this._hass.callService('light', 'turn_on', params);
     }
 
+    // ── 4. CHART & 5. HISTORY MODES HTML & LOGIC ────────────────────────────────
+
+    _entityColor(i) {
+      const baseColor = /^#[0-9A-Fa-f]{6}$/.test(this._config.color) ? this._config.color : '#D97757';
+      const { h, s } = this._hexToHsl(baseColor);
+      const hue = (h + i * 137.508) % 360;
+      const sat = this._clamp(s, 55, 82);
+      const isDark = this._config.theme === 'auto'
+        ? !window.matchMedia('(prefers-color-scheme: light)').matches
+        : this._config.theme !== 'light';
+      const lig = isDark ? 62 : 48;
+      return this._hsl(hue, sat, lig);
+    }
+
+    _getChartHTML() {
+      const c = this._config;
+      const n = this._entities.length;
+      const title = c.title || 'Grafico';
+      const icon  = c.icon  || 'mdi:chart-areaspline';
+
+      const pillsHTML = HOURS_OPTIONS.map(h =>
+        `<button class="time-pill${h === this._hours ? ' active' : ''}" data-hours="${h}">${HOURS_LABELS[h]}</button>`
+      ).join('');
+
+      const legendHTML = this._entities.map((cfg, i) => {
+        const color = this._entityColor(i);
+        const name  = cfg.name || this._friendlyName(cfg.entity);
+        return `<div class="legend-row" data-index="${i}">
+          <span class="legend-dot" style="background:${color}"></span>
+          <span class="legend-name">${name}</span>
+          <span class="legend-state" id="ls-${i}">—</span>
+          <span class="legend-stat"  id="lx-${i}"></span>
+        </div>`;
+      }).join('');
+
+      return `
+        <div class="loader" id="loader"></div>
+        <div class="header">
+          <div class="header-left">
+            <div class="header-icon-wrap"><ha-icon icon="${icon}"></ha-icon></div>
+            <div class="header-titles">
+              <div class="header-title">${title}</div>
+              <div class="header-sub" id="sub">Ultimi ${HOURS_NAMES[this._hours] ?? this._hours + 'h'}</div>
+            </div>
+          </div>
+          <div class="time-pills">${pillsHTML}</div>
+        </div>
+        <div class="separator"></div>
+        <div class="chart-section">
+          <button class="zoom-reset" id="zreset">↺ Reset zoom</button>
+          <div id="chart-container"><div class="no-data">Caricamento…</div></div>
+        </div>
+        <div class="legend" id="legend">${legendHTML}</div>
+        <div class="footer" style="${c.show_footer === false ? 'display:none' : ''}">
+          <div class="footer-info">
+            <ha-icon icon="mdi:chart-line"></ha-icon>
+            <span>${n} entit${n === 1 ? 'à' : 'à'}</span>
+          </div>
+          <div class="brand-mark">${this._brandSVG()}<span>WeSmart</span></div>
+        </div>`;
+    }
+
+    _getHistoryHTML() {
+      const c = this._config;
+      const n = this._entities.length;
+      const title = c.title || 'History';
+      const icon  = c.icon  || 'mdi:chart-timeline';
+
+      const pillsHTML = HOURS_OPTIONS.map(h =>
+        `<button class="time-pill${h === this._hours ? ' active' : ''}" data-hours="${h}">${HOURS_LABELS[h]}</button>`
+      ).join('');
+
+      const rowsHTML = this._entities.map((cfg, i) => {
+        const name = cfg.name || this._friendlyName(cfg.entity);
+        const entIcon = cfg.icon || this._iconForEntity(cfg.entity);
+        return `
+          <div class="hist-row" data-index="${i}">
+            <div class="hist-meta">
+              <div class="hist-icon-wrap">
+                <ha-icon id="hicon-${i}" icon="${entIcon}"></ha-icon>
+              </div>
+              <span class="legend-name">${name}</span>
+              <span class="hist-state" id="hstate-${i}">—</span>
+              <span class="hist-stat"  id="hstat-${i}"></span>
+            </div>
+            <div id="hgraph-${i}">
+              <div class="no-data">Caricamento…</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      return `
+        <div class="loader" id="loader"></div>
+        <div class="header">
+          <div class="header-left">
+            <div class="header-icon-wrap"><ha-icon icon="${icon}"></ha-icon></div>
+            <div class="header-titles">
+              <div class="header-title">${title}</div>
+              <div class="header-sub" id="sub">Ultimi ${HOURS_NAMES[this._hours] ?? this._hours + 'h'}</div>
+            </div>
+          </div>
+          <div class="time-pills">${pillsHTML}</div>
+        </div>
+        <div class="separator"></div>
+        <div id="hist-list">${rowsHTML}</div>
+        <div class="footer" style="${c.show_footer === false ? 'display:none' : ''}">
+          <div class="footer-info">
+            <ha-icon icon="mdi:chart-timeline"></ha-icon>
+            <span>${n} entit${n === 1 ? 'à' : 'à'}</span>
+          </div>
+          <div class="brand-mark">${this._brandSVG()}<span>WeSmart</span></div>
+        </div>`;
+    }
+
+    _bindChartEvents() {
+      this._card.querySelectorAll('.time-pill').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          this._hours = parseInt(btn.dataset.hours, 10);
+          this._zoomRange = null;
+          this._card.querySelectorAll('.time-pill').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const sub = this._q('#sub');
+          if (sub) sub.textContent = `Ultimi ${HOURS_NAMES[this._hours] ?? this._hours + 'h'}`;
+          this._refreshZoomBtn();
+          this._fetchHistory();
+        });
+      });
+
+      this._q('#zreset')?.addEventListener('click', () => {
+        this._zoomRange = null;
+        this._refreshZoomBtn();
+        this._updateGraphs();
+      });
+
+      this._q('#legend')?.addEventListener('click', e => {
+        const row = e.target.closest('.legend-row');
+        if (!row) return;
+        const idx = parseInt(row.dataset.index, 10);
+        if (isNaN(idx)) return;
+        const entityId = this._entities[idx]?.entity;
+        if (entityId) {
+          this.dispatchEvent(new CustomEvent('hass-more-info', {
+            bubbles: true, composed: true, detail: { entityId }
+          }));
+        }
+      });
+    }
+
+    _bindHistoryEvents() {
+      this._card.querySelectorAll('.time-pill').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          this._hours = parseInt(btn.dataset.hours, 10);
+          this._card.querySelectorAll('.time-pill').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const sub = this._q('#sub');
+          if (sub) sub.textContent = `Ultimi ${HOURS_NAMES[this._hours] ?? this._hours + 'h'}`;
+          this._fetchHistory();
+        });
+      });
+
+      this._q('#hist-list')?.addEventListener('click', e => {
+        const row = e.target.closest('.hist-row');
+        if (!row) return;
+        const idx = parseInt(row.dataset.index, 10);
+        if (isNaN(idx)) return;
+        const entityId = this._entities[idx]?.entity;
+        if (entityId) {
+          this.dispatchEvent(new CustomEvent('hass-more-info', {
+            bubbles: true, composed: true, detail: { entityId }
+          }));
+        }
+      });
+    }
+
+    _refreshZoomBtn() {
+      const btn = this._q('#zreset');
+      if (btn) btn.className = `zoom-reset${this._zoomRange ? ' visible' : ''}`;
+    }
+
+    _winRange() {
+      if (this._zoomRange) return [this._zoomRange.start, this._zoomRange.end];
+      const now = Date.now();
+      return [now - this._hours * 3600000, now];
+    }
+
+    async _fetchHistory() {
+      if (!this._hass || !this._entities.length) return;
+      const loader = this._q('#loader');
+      if (loader) loader.classList.add('active');
+
+      const ids   = this._entities.map(e => e.entity).join(',');
+      const start = new Date(Date.now() - this._hours * 3600000).toISOString();
+      const end   = new Date().toISOString();
+      const path  = `history/period/${start}?filter_entity_id=${ids}&end_time=${end}&minimal_response=true&significant_changes_only=false`;
+
+      try {
+        const data = await this._hass.callApi('GET', path);
+        this._history = {};
+        if (Array.isArray(data)) {
+          data.forEach(arr => {
+            if (arr?.length > 0 && arr[0].entity_id) {
+              this._history[arr[0].entity_id] = arr;
+            }
+          });
+        }
+        this._updateGraphs();
+      } catch (err) {
+        console.error('[wesmart-card] history fetch error:', err);
+        const c = this._q('#chart-container');
+        if (c) c.innerHTML = '<div class="no-data">Errore nel caricamento dei dati</div>';
+      } finally {
+        if (loader) loader.classList.remove('active');
+      }
+    }
+
+    _updateGraphs() {
+      if (this._mode === 'chart') {
+        const container = this._q('#chart-container');
+        if (!container) return;
+        const histories = this._entities.map(cfg => this._history[cfg.entity] || []);
+        const allBinary = histories.every(h => this._isBinary(h));
+
+        if (allBinary) {
+          container.innerHTML = this._renderChartTimelines(histories);
+          this._bindChartInteraction(container.querySelector('.chart-area'), []);
+        } else {
+          container.innerHTML = this._renderChartLines(histories);
+          const pts = histories.map(h => this._isBinary(h) ? [] : this._toPoints(h));
+          this._bindChartInteraction(container.querySelector('.chart-area'), pts);
+        }
+
+        histories.forEach((h, i) => {
+          const el = this._q(`#lx-${i}`);
+          if (el) el.textContent = this._isBinary(h) ? this._binaryStat(h) : this._numericStat(h, this._entities[i].entity);
+        });
+      } else if (this._mode === 'history') {
+        this._entities.forEach((cfg, i) => {
+          const history   = this._history[cfg.entity] || [];
+          const container = this._q(`#hgraph-${i}`);
+          const statEl    = this._q(`#hstat-${i}`);
+          if (!container) return;
+
+          if (this._isBinary(history)) {
+            container.innerHTML = this._renderHistoryTimeline(history);
+            if (statEl) statEl.textContent = this._binaryStat(history);
+          } else {
+            container.innerHTML = this._renderHistoryLineChart(history, cfg.entity);
+            if (statEl) statEl.textContent = this._numericStat(history, cfg.entity);
+          }
+        });
+      }
+    }
+
+    _toPoints(history) {
+      const [ws, we] = this._winRange();
+      return (history || [])
+        .filter(h => h.state !== 'unavailable' && h.state !== 'unknown' && !isNaN(parseFloat(h.state)))
+        .map(h => ({ t: new Date(h.last_changed).getTime(), v: parseFloat(h.state) }))
+        .filter(p => p.t >= ws - 3600000 && p.t <= we + 60000);
+    }
+
+    _renderChartTimelines(histories) {
+      const W        = 400;
+      const [ws, we] = this._winRange();
+      const dur      = we - ws;
+
+      const barsHTML = histories.map((h, i) => {
+        const color = this._entityColor(i);
+        const name  = this._entities[i].name || this._friendlyName(this._entities[i].entity);
+        const valid = (h || []).filter(x => x.state !== 'unavailable' && x.state !== 'unknown');
+        const segs  = valid.map((item, j) => {
+          const t0 = Math.max(new Date(item.last_changed).getTime(), ws);
+          const t1 = j < valid.length - 1 ? new Date(valid[j + 1].last_changed).getTime() : we;
+          if (t1 <= ws || t0 >= we) return '';
+          const x = ((t0 - ws) / dur * 100).toFixed(2);
+          const w = ((Math.min(t1, we) - t0) / dur * 100).toFixed(2);
+          return this._isOnState(item.state)
+            ? `<div class="tl-seg" style="left:${x}%;width:${Math.max(parseFloat(w), 0.3)}%;background:${color}"></div>`
+            : '';
+        }).join('');
+
+        return `<div class="tl-wrap">
+          <div class="tl-label">${name}</div>
+          <div class="timeline-bar">${segs || ''}</div>
+        </div>`;
+      }).join('');
+
+      const svgOverlay = `<svg class="chart-svg" viewBox="0 0 ${W} 100" preserveAspectRatio="none"
+        style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+        <line class="tt-line" x1="0" y1="0" x2="0" y2="100" stroke="rgba(255,255,255,0.25)" stroke-width="1" opacity="0"/>
+        <rect class="zr-rect" x="0" y="0" width="0" height="100" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.2)" stroke-width="1" opacity="0" rx="2"/>
+      </svg>`;
+
+      return `
+        <div class="chart-area" style="position:relative;padding:4px 0">
+          ${svgOverlay}
+          <div class="tl-group" style="position:relative;z-index:1">${barsHTML}</div>
+          <div class="tooltip-box"></div>
+        </div>
+        ${this._timeAxisHTML()}`;
+    }
+
+    _renderChartLines(histories) {
+      const W   = 400;
+      const H   = Number(this._config.height) || 100;
+      const pad = 5;
+      const uid = this._uid;
+      const [ws, we] = this._winRange();
+      const rangeT = we - ws;
+
+      const toX = t => ((t - ws) / rangeT * W).toFixed(1);
+      const toY = (v, minV, rv) => (H - ((v - minV) / rv) * (H - pad * 2) - pad).toFixed(1);
+
+      const defs  = [];
+      const areas = [];
+      const lines = [];
+      let yMin = null, yMax = null, yUnit = '';
+
+      histories.forEach((h, i) => {
+        if (this._isBinary(h)) return;
+        const pts = this._toPoints(h);
+        if (pts.length < 2) return;
+
+        const color  = this._entityColor(i);
+        const vals   = pts.map(p => p.v);
+        const minV   = Math.min(...vals);
+        const maxV   = Math.max(...vals);
+        const rangeV = maxV - minV || 1;
+
+        if (yMin === null) {
+          yMin  = minV;
+          yMax  = maxV;
+          yUnit = this._hass?.states[this._entities[i].entity]?.attributes?.unit_of_measurement ?? '';
+        }
+
+        const linePts = pts.map((p, j) => `${j === 0 ? 'M' : 'L'}${toX(p.t)},${toY(p.v, minV, rangeV)}`).join(' ');
+        const areaPts = `${linePts} L${toX(pts[pts.length - 1].t)},${H} L${toX(pts[0].t)},${H} Z`;
+        const gid     = `wicg-${uid}-${i}`;
+
+        defs.push(`<linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="${color}" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0.02"/>
+        </linearGradient>`);
+        areas.push(`<path d="${areaPts}" fill="url(#${gid})"/>`);
+        lines.push(`<path d="${linePts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>`);
+      });
+
+      if (!areas.length) {
+        return `<div class="no-data">Nessun dato nel periodo selezionato</div>`;
+      }
+
+      const gridHTML = this._config.show_grid ? [0.25, 0.5, 0.75].map(f => {
+        const y = (f * (H - pad * 2) + pad).toFixed(1);
+        return `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+      }).join('') : '';
+
+      const ttColor = this._palette?.textDim ?? 'rgba(255,255,255,0.28)';
+      const zrFill  = this._palette?.rowHover ?? 'rgba(255,255,255,0.06)';
+
+      const yLabels = yMin !== null ? `
+        <div class="y-axis">
+          <span class="y-label">${yMax.toFixed(1)} ${yUnit}</span>
+          <span class="y-label">${yMin.toFixed(1)} ${yUnit}</span>
+        </div>` : '<div class="y-axis"></div>';
+
+      return `
+        <div class="chart-layout">
+          ${yLabels}
+          <div class="chart-area">
+            <svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:${H}px">
+              <defs>${defs.join('')}</defs>
+              ${gridHTML}
+              ${areas.join('')}
+              ${lines.join('')}
+              <line class="tt-line" x1="0" y1="0" x2="0" y2="${H}" stroke="${ttColor}" stroke-width="1" opacity="0" stroke-dasharray="3 3"/>
+              <rect class="zr-rect" x="0" y="0" width="0" height="${H}" fill="${zrFill}" stroke="rgba(255,255,255,0.18)" stroke-width="1" opacity="0" rx="2"/>
+            </svg>
+            <div class="tooltip-box"></div>
+          </div>
+        </div>
+        ${this._timeAxisHTML()}`;
+    }
+
+    _bindChartInteraction(chartArea, allEntityPoints) {
+      if (!chartArea) return;
+      const svg    = chartArea.querySelector('svg');
+      const ttLine = svg?.querySelector('.tt-line');
+      const zrRect = svg?.querySelector('.zr-rect');
+      const ttBox  = chartArea.querySelector('.tooltip-box');
+      if (!svg || !ttLine || !ttBox) return;
+
+      const W = 400;
+      let dragging  = false;
+      let dragStart = 0;
+
+      const pctOf = e => {
+        const r = chartArea.getBoundingClientRect();
+        return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      };
+
+      chartArea.addEventListener('pointermove', e => {
+        const pct  = pctOf(e);
+        const svgX = (pct * W).toFixed(1);
+        ttLine.setAttribute('x1', svgX);
+        ttLine.setAttribute('x2', svgX);
+        ttLine.setAttribute('opacity', '1');
+
+        if (dragging && zrRect) {
+          const minX = Math.min(dragStart, pct) * W;
+          const wX   = Math.abs(pct - dragStart) * W;
+          zrRect.setAttribute('x', minX.toFixed(1));
+          zrRect.setAttribute('width', wX.toFixed(1));
+        }
+        if (!dragging) this._showTooltip(ttBox, pct, allEntityPoints);
+      });
+
+      chartArea.addEventListener('pointerleave', () => {
+        ttLine.setAttribute('opacity', '0');
+        ttBox.style.opacity = '0';
+        if (!dragging && zrRect) zrRect.setAttribute('width', '0');
+      });
+
+      if (this._config.zoom === false) return;
+
+      chartArea.addEventListener('pointerdown', e => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        if (chartArea.setPointerCapture) chartArea.setPointerCapture(e.pointerId);
+        dragStart = pctOf(e);
+        dragging  = true;
+        if (zrRect) {
+          zrRect.setAttribute('x', (dragStart * W).toFixed(1));
+          zrRect.setAttribute('width', '0');
+          zrRect.setAttribute('opacity', '1');
+        }
+        ttBox.style.opacity = '0';
+      });
+
+      chartArea.addEventListener('pointerup', e => {
+        if (!dragging) return;
+        dragging = false;
+        const endPct = pctOf(e);
+        if (zrRect) { zrRect.setAttribute('opacity', '0'); zrRect.setAttribute('width', '0'); }
+        const minPct = Math.min(dragStart, endPct);
+        const maxPct = Math.max(dragStart, endPct);
+        if (maxPct - minPct < 0.04) return;
+        const [ws, we] = this._winRange();
+        const dur = we - ws;
+        this._zoomRange = { start: ws + minPct * dur, end: ws + maxPct * dur };
+        this._refreshZoomBtn();
+        this._updateGraphs();
+      });
+
+      chartArea.addEventListener('dblclick', () => {
+        this._zoomRange = null;
+        this._refreshZoomBtn();
+        this._updateGraphs();
+      });
+    }
+
+    _showTooltip(ttBox, pct, allEntityPoints) {
+      if (!ttBox || !allEntityPoints.some(p => p?.length)) { ttBox.style.opacity = '0'; return; }
+      const [ws, we] = this._winRange();
+      const t = ws + pct * (we - ws);
+
+      const rows = allEntityPoints.map((pts, i) => {
+        if (!pts?.length) return null;
+        let near = pts[0], minD = Infinity;
+        for (const p of pts) { const d = Math.abs(p.t - t); if (d < minD) { minD = d; near = p; } }
+        return { near, i };
+      }).filter(Boolean);
+
+      if (!rows.length) { ttBox.style.opacity = '0'; return; }
+
+      const d   = new Date(t);
+      const dur = we - ws;
+      const lbl = dur <= 172800000
+        ? d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0')
+        : d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
+
+      const rowsHTML = rows.map(({ near, i }) => {
+        const cfg  = this._entities[i];
+        const col  = this._entityColor(i);
+        const name = cfg.name || this._friendlyName(cfg.entity);
+        const unit = this._hass?.states[cfg.entity]?.attributes?.unit_of_measurement ?? '';
+        return `<div class="tt-row">
+          <span class="tt-dot" style="background:${col}"></span>
+          <span style="color:var(--text-muted);font-size:10px;max-width:80px;overflow:hidden;text-overflow:ellipsis">${name}</span>
+          <span style="font-weight:600;margin-left:auto">${near.v.toFixed(1)} ${unit}</span>
+        </div>`;
+      }).join('');
+
+      ttBox.innerHTML = `<div class="tt-time">${lbl}</div>${rowsHTML}`;
+      ttBox.style.opacity = '1';
+      ttBox.style.left = pct > 0.65
+        ? `calc(${pct * 100}% - ${(ttBox.offsetWidth || 120) + 14}px)`
+        : `calc(${pct * 100}% + 12px)`;
+    }
+
+    _renderHistoryTimeline(history) {
+      const now   = Date.now();
+      const start = now - this._hours * 3600000;
+      const range = now - start;
+      const valid = (history || []).filter(h => h.state !== 'unavailable' && h.state !== 'unknown');
+
+      const segsHTML = valid.map((item, i) => {
+        const tStart = Math.max(new Date(item.last_changed).getTime(), start);
+        const tEnd   = i < valid.length - 1 ? new Date(valid[i + 1].last_changed).getTime() : now;
+        if (tEnd <= start || tStart >= now) return '';
+        const xPct = ((tStart - start) / range) * 100;
+        const wPct = ((Math.min(tEnd, now) - tStart) / range) * 100;
+        const cls  = this._isOnState(item.state) ? 'seg-on' : 'seg-off';
+        return `<div class="seg ${cls}" style="left:${xPct.toFixed(2)}%;width:${Math.max(wPct, 0.3).toFixed(2)}%"></div>`;
+      }).join('');
+
+      if (!segsHTML.trim()) return `<div class="no-data">Nessun dato nel periodo selezionato</div>`;
+      return `<div class="timeline-bar">${segsHTML}</div>${this._timeAxisHTML()}`;
+    }
+
+    _renderHistoryLineChart(history, entityId) {
+      const now   = Date.now();
+      const start = now - this._hours * 3600000;
+      const points = (history || [])
+        .filter(h => h.state !== 'unavailable' && h.state !== 'unknown' && !isNaN(parseFloat(h.state)))
+        .map(h => ({ t: new Date(h.last_changed).getTime(), v: parseFloat(h.state) }))
+        .filter(p => p.t >= start);
+
+      if (points.length < 2) return `<div class="no-data">Nessun dato nel periodo selezionato</div>`;
+
+      const W = 400, H = 60, pad = 4;
+      const minV   = Math.min(...points.map(p => p.v));
+      const maxV   = Math.max(...points.map(p => p.v));
+      const rangeV = maxV - minV || 1;
+      const rangeT = now - start;
+
+      const toX = t => ((t - start) / rangeT * W).toFixed(1);
+      const toY = v => (H - ((v - minV) / rangeV) * (H - pad * 2) - pad).toFixed(1);
+
+      const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${toX(p.t)},${toY(p.v)}`).join(' ');
+      const areaPath = `${linePath} L${toX(points[points.length - 1].t)},${H} L${toX(points[0].t)},${H} Z`;
+      const gradId   = `wic-${this._uid}-${entityId.replace(/\W/g, '-')}`;
+      const accent   = this._palette?.accent ?? '#D97757';
+
+      return `
+        <div class="linechart">
+          <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:60px">
+            <defs>
+              <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="${accent}" stop-opacity="0.38"/>
+                <stop offset="100%" stop-color="${accent}" stop-opacity="0.02"/>
+              </linearGradient>
+            </defs>
+            <path d="${areaPath}" fill="url(#${gradId})"/>
+            <path d="${linePath}" fill="none" stroke="${accent}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+          </svg>
+        </div>
+        ${this._timeAxisHTML()}`;
+    }
+
+    _timeAxisHTML() {
+      const [ws, we] = this._mode === 'chart' ? this._winRange() : [Date.now() - this._hours * 3600000, Date.now()];
+      const dur   = we - ws;
+      const hours = dur / 3600000;
+      const steps = hours <= 3 ? 3 : hours <= 24 ? 4 : 5;
+      const labels = Array.from({ length: steps + 1 }, (_, i) => {
+        const t = new Date(ws + (i / steps) * dur);
+        return hours <= 48
+          ? t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0')
+          : t.toLocaleDateString([], { weekday: 'short', day: 'numeric' });
+      });
+      return `<div class="time-axis">${labels.map(l => `<span>${l}</span>`).join('')}</div>`;
+    }
+
+    _isBinary(h) {
+      if (!h?.length) return true;
+      const valid = h.map(x => x.state).filter(s => s !== 'unavailable' && s !== 'unknown');
+      return !valid.length || valid.some(s => isNaN(parseFloat(s)));
+    }
+
+    _isOnState(s) {
+      return ['on', 'open', 'detected', 'unlocked', 'wet', 'active', 'home', 'playing'].includes(s);
+    }
+
+    _formatEntityState(obj) {
+      if (!obj) return '—';
+      const { state: s, attributes: a } = obj;
+      if (s === 'unavailable') return 'N/D';
+      if (s === 'unknown')     return '?';
+      const num = parseFloat(s);
+      if (!isNaN(num) && a?.unit_of_measurement) return `${num.toFixed(1)} ${a.unit_of_measurement}`;
+      const map = { on: 'On', off: 'Off', open: 'Aperto', closed: 'Chiuso', detected: 'Rilevato', clear: 'Libero', locked: 'Bloccato', unlocked: 'Aperto' };
+      return map[s] ?? s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
+    _friendlyName(id) {
+      if (!id) return '';
+      return this._hass?.states[id]?.attributes?.friendly_name ?? (id.split('.')[1] || id).replace(/_/g, ' ');
+    }
+
+    _iconForEntity(entityId) {
+      const domain = entityId?.split('.')[0] ?? '';
+      const map = {
+        light: 'mdi:lightbulb', switch: 'mdi:toggle-switch', sensor: 'mdi:chart-line',
+        binary_sensor: 'mdi:motion-sensor', climate: 'mdi:thermometer', cover: 'mdi:garage',
+        fan: 'mdi:fan', media_player: 'mdi:cast', input_boolean: 'mdi:toggle-switch',
+      };
+      return map[domain] ?? 'mdi:chart-line';
+    }
+
+    _binaryStat(h) {
+      if (!h?.length) return '';
+      const [ws, we] = this._mode === 'chart' ? this._winRange() : [Date.now() - this._hours * 3600000, Date.now()];
+      const dur = we - ws;
+      let on = 0;
+      const valid = h.filter(x => x.state !== 'unavailable' && x.state !== 'unknown');
+      for (let i = 0; i < valid.length; i++) {
+        const t0 = Math.max(new Date(valid[i].last_changed).getTime(), ws);
+        const t1 = i < valid.length - 1 ? new Date(valid[i + 1].last_changed).getTime() : we;
+        if (this._isOnState(valid[i].state) && t1 > ws) on += Math.min(t1, we) - t0;
+      }
+      return `Attivo ${Math.round(on / dur * 100)}%`;
+    }
+
+    _numericStat(h, entityId) {
+      if (!h?.length) return '';
+      const vals = h
+        .filter(x => x.state !== 'unavailable' && x.state !== 'unknown' && !isNaN(parseFloat(x.state)))
+        .map(x => parseFloat(x.state));
+      if (!vals.length) return '';
+      const unit = this._hass?.states[entityId]?.attributes?.unit_of_measurement ?? '';
+      return `${Math.min(...vals).toFixed(1)} – ${Math.max(...vals).toFixed(1)} ${unit}`.trim();
+    }
+
+    _updateChartState() {
+      if (!this._hass || !this._card) return;
+      this._entities.forEach((cfg, i) => {
+        const el = this._q(`#ls-${i}`);
+        if (el) el.textContent = this._formatEntityState(this._hass.states[cfg.entity]);
+      });
+    }
+
+    _updateHistoryState() {
+      if (!this._hass || !this._card) return;
+      this._entities.forEach((cfg, i) => {
+        const stateObj = this._hass.states[cfg.entity];
+        const stateEl  = this._q(`#hstate-${i}`);
+        const iconEl   = this._q(`#hicon-${i}`);
+        if (!stateEl) return;
+        if (!stateObj) {
+          stateEl.textContent = 'N/D';
+          stateEl.className   = 'hist-state';
+          return;
+        }
+        const isOn = this._isOnState(stateObj.state);
+        stateEl.textContent = this._formatEntityState(stateObj);
+        stateEl.className   = `hist-state${isOn ? ' state-on' : ''}`;
+        if (iconEl) iconEl.style.color = isOn ? 'var(--accent)' : '';
+      });
+    }
+
     // ── Shared State Update & Helpers ───────────────────────────────────────────
 
     _updateState() {
       if (!this._card) return;
       const mode = this._mode;
-      if (mode === 'single')      this._updateSingleState();
-      else if (mode === 'list')   this._updateListState();
-      else                        this._updateExpandState();
+      if (mode === 'single')       this._updateSingleState();
+      else if (mode === 'list')    this._updateListState();
+      else if (mode === 'expand')  this._updateExpandState();
+      else if (mode === 'chart')   this._updateChartState();
+      else if (mode === 'history') this._updateHistoryState();
     }
 
     _bindHuePicker() {
@@ -1683,7 +2481,7 @@
       this._config = {
         entity:              '',
         name:                '',
-        title:               'Lights',
+        title:               '',
         icon:                '',
         color:               '#D97757',
         theme:               'dark',
@@ -1693,6 +2491,10 @@
         collapse_when_off:   false,
         dynamic_light_color: false,
         show_footer:         true,
+        hours:               24,
+        height:              100,
+        show_grid:           false,
+        zoom:                true,
         entities:            [],
         ...config,
       };
@@ -1752,7 +2554,7 @@
         <div class="section open" id="sec-entity">
           <div class="section-header" data-sec="entity">
             <div class="section-title">
-              <ha-icon icon="mdi:lightbulb"></ha-icon>
+              <ha-icon icon="mdi:lightbulb" id="sec-entity-icon"></ha-icon>
               <span id="sec-entity-title">1. Entità & Identità</span>
             </div>
             <ha-icon class="chevron" icon="mdi:chevron-down"></ha-icon>
@@ -1763,15 +2565,15 @@
               <ha-form id="ha-single-form"></ha-form>
             </div>
 
-            <!-- Blocco Multi (List / Expand) -->
+            <!-- Blocco Multi (List / Expand / Chart / History) -->
             <div id="pane-multi" style="display:none; flex-direction:column; gap:16px">
               <ha-form id="ha-multi-header-form"></ha-form>
               <div>
-                <div class="field-label">Elenco Luci Configurate</div>
+                <div class="field-label" id="list-label">Elenco Entità Configurate</div>
                 <div class="entity-list" id="entity-list"></div>
               </div>
               <div>
-                <div class="field-label">➕ Aggiungi Luce alla Lista</div>
+                <div class="field-label" id="add-label">➕ Aggiungi Entità alla Lista</div>
                 <ha-form id="ha-add-entity-form"></ha-form>
               </div>
             </div>
@@ -1879,6 +2681,50 @@
               </div>
             </div>
 
+            <!-- Controlli per Grafici (Chart / History) -->
+            <div id="controls-graph-only" style="display:none; flex-direction:column; gap:14px">
+              <div>
+                <div class="field-label">Intervallo Temporale Predefinito (hours)</div>
+                <div class="theme-pills" style="grid-template-columns:repeat(4,1fr)">
+                  ${HOURS_OPTIONS.map(h => `
+                    <button type="button" class="theme-pill hours-pill" data-hours="${h}">${HOURS_LABELS[h]}</button>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div id="controls-chart-only" style="display:none; flex-direction:column; gap:8px">
+                <div>
+                  <div class="field-label" style="display:flex;justify-content:space-between">
+                    <span>Altezza Area Grafico (px)</span>
+                    <span id="height-val-lbl" style="color:#D97757">100px</span>
+                  </div>
+                  <input type="range" id="chart-height-range" min="60" max="220" step="10" value="100" style="width:100%;accent-color:#D97757">
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <span class="toggle-title">Mostra Griglia Orizzontale</span>
+                    <span class="toggle-desc">Linee guida orizzontali dietro il grafico</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" data-toggle="show_grid">
+                    <span class="slider-tog"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <span class="toggle-title">Abilita Drag-to-Zoom</span>
+                    <span class="toggle-desc">Seleziona un intervallo col mouse/touch per ingrandire</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" data-toggle="zoom">
+                    <span class="slider-tog"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <div class="toggle-row">
               <div class="toggle-info">
                 <span class="toggle-title">Mostra Footer WeSmart</span>
@@ -1900,7 +2746,7 @@
     _bindEditorEvents() {
       const shadow = this.shadowRoot;
 
-      // Mode switching (Light / Lights / Lights Expand) with smart entity migration
+      // Mode switching with smart entity migration
       shadow.querySelectorAll('.type-card-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const targetMode = btn.dataset.mode;
@@ -1923,8 +2769,10 @@
               if (this._config.entity) {
                 patch.entities = [this._config.entity];
               } else if (this._hass) {
-                const lights = Object.keys(this._hass.states).filter(k => k.startsWith('light.')).slice(0, 3);
-                if (lights.length) patch.entities = lights;
+                const prefix = (targetMode === 'chart' || targetMode === 'history') ? 'sensor.' : 'light.';
+                let picks = Object.keys(this._hass.states).filter(k => k.startsWith(prefix)).slice(0, 2);
+                if (!picks.length) picks = Object.keys(this._hass.states).filter(k => k.startsWith('light.')).slice(0, 2);
+                if (picks.length) patch.entities = picks;
               }
             }
           }
@@ -1968,21 +2816,18 @@
           { name: 'title', required: false, selector: { text: {} } },
           { name: 'icon',  required: false, selector: { icon: { placeholder: 'mdi:lightbulb-group' } } },
         ];
-        multiHdrForm.computeLabel = (s) => s.name === 'title' ? 'Titolo Gruppo Luci' : 'Icona Header Gruppo';
+        multiHdrForm.computeLabel = (s) => s.name === 'title' ? 'Titolo Card' : 'Icona Header';
         multiHdrForm.addEventListener('value-changed', (ev) => {
           ev.stopPropagation();
           const v = ev.detail.value || {};
-          this._updateConfig({ title: v.title || 'Lights', icon: v.icon || null });
+          this._updateConfig({ title: v.title || null, icon: v.icon || null });
         });
       }
 
       // Multi mode Add Entity HA Form
       const addForm = shadow.querySelector('#ha-add-entity-form');
       if (addForm) {
-        addForm.schema = [
-          { name: 'new_entity', required: false, selector: { entity: { domain: 'light' } } },
-        ];
-        addForm.computeLabel = () => 'Cerca e seleziona un\'entità light.* da aggiungere';
+        addForm.computeLabel = () => 'Cerca e seleziona un\'entità da aggiungere';
         addForm.data = { new_entity: '' };
         addForm.addEventListener('value-changed', (ev) => {
           ev.stopPropagation();
@@ -1998,8 +2843,27 @@
         });
       }
 
-      // Theme pills
-      shadow.querySelectorAll('.theme-pill').forEach(btn => {
+      // Hours pills (Chart / History)
+      shadow.querySelectorAll('.hours-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          this._updateConfig({ hours: parseInt(btn.dataset.hours, 10) });
+        });
+      });
+
+      // Chart height range
+      const heightRange = shadow.querySelector('#chart-height-range');
+      if (heightRange) {
+        heightRange.addEventListener('input', (e) => {
+          const lbl = shadow.querySelector('#height-val-lbl');
+          if (lbl) lbl.textContent = `${e.target.value}px`;
+        });
+        heightRange.addEventListener('change', (e) => {
+          this._updateConfig({ height: parseInt(e.target.value, 10) });
+        });
+      }
+
+      // Theme pills (exclude .hours-pill)
+      shadow.querySelectorAll('.theme-pill:not(.hours-pill)').forEach(btn => {
         btn.addEventListener('click', () => this._updateConfig({ theme: btn.dataset.theme }));
       });
 
@@ -2036,7 +2900,7 @@
       const items = this._getNormalizedEntities();
 
       if (!items.length) {
-        listEl.innerHTML = `<div style="font-size:12px;color:var(--secondary-text-color,#A09080)">Nessuna luce nella lista. Seleziona un'entità qui sotto per aggiungerla.</div>`;
+        listEl.innerHTML = `<div style="font-size:12px;color:var(--secondary-text-color,#A09080)">Nessuna entità nella lista. Seleziona un'entità qui sotto per aggiungerla.</div>`;
         return;
       }
 
@@ -2053,7 +2917,7 @@
           </div>
           <div class="entity-item-details">
             <input type="text" class="mini-input" data-field="name" data-idx="${idx}" placeholder="Nome custom" value="${item.name || ''}">
-            <input type="text" class="mini-input" data-field="icon" data-idx="${idx}" placeholder="Icona (es. mdi:lamp)" value="${item.icon || ''}">
+            <input type="text" class="mini-input" data-field="icon" data-idx="${idx}" placeholder="Icona (es. mdi:chart-line)" value="${item.icon || ''}">
           </div>
         </div>
       `).join('');
@@ -2096,32 +2960,47 @@
 
     _syncUI() {
       if (!this._rendered) return;
-      const shadow = this.shadowRoot;
-      const c      = this._config;
-      const mode   = this._getActiveMode();
+      const shadow   = this.shadowRoot;
+      const c        = this._config;
+      const mode     = this._getActiveMode();
       const isSingle = mode === 'single';
+      const isGraph  = mode === 'chart' || mode === 'history';
+      const isChart  = mode === 'chart';
 
       // Sync Card Type Buttons
       shadow.querySelectorAll('.type-card-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === mode);
       });
 
-      // Toggle Single vs Multi panes
+      // Toggle Single vs Multi vs Graph panes
       const paneSingle         = shadow.querySelector('#pane-single');
       const paneMulti          = shadow.querySelector('#pane-multi');
       const secEntityTitle     = shadow.querySelector('#sec-entity-title');
+      const secEntityIcon      = shadow.querySelector('#sec-entity-icon');
       const rowDynColor        = shadow.querySelector('#row-dyn-color');
       const controlsSingleOnly = shadow.querySelector('#controls-single-only');
+      const controlsGraphOnly  = shadow.querySelector('#controls-graph-only');
+      const controlsChartOnly  = shadow.querySelector('#controls-chart-only');
 
       if (paneSingle) paneSingle.style.display = isSingle ? 'block' : 'none';
       if (paneMulti)  paneMulti.style.display  = isSingle ? 'none'  : 'flex';
+      if (secEntityIcon) {
+        secEntityIcon.setAttribute('icon', isGraph ? 'mdi:chart-areaspline' : 'mdi:lightbulb');
+      }
       if (secEntityTitle) {
-        secEntityTitle.textContent = isSingle
-          ? '1. Entità & Identità (Luce Singola)'
-          : `1. Gruppo & Lista Luci (${mode === 'expand' ? 'Lights Expand' : 'Lights Lista'})`;
+        const modeLabels = {
+          single:  '1. Entità & Identità (Luce Singola)',
+          list:    '1. Gruppo & Lista Luci (Lights)',
+          expand:  '1. Gruppo & Lista Luci (Lights Expand)',
+          chart:   '1. Titolo & Entità del Grafico (Chart)',
+          history: '1. Titolo & Entità dello Storico (History)',
+        };
+        secEntityTitle.textContent = modeLabels[mode] || '1. Entità & Identità';
       }
       if (rowDynColor)        rowDynColor.style.display        = isSingle ? 'flex'  : 'none';
       if (controlsSingleOnly) controlsSingleOnly.style.display = isSingle ? 'block' : 'none';
+      if (controlsGraphOnly)  controlsGraphOnly.style.display  = isGraph  ? 'flex'  : 'none';
+      if (controlsChartOnly)  controlsChartOnly.style.display  = isChart  ? 'flex'  : 'none';
 
       // Sync Forms
       const singleForm = shadow.querySelector('#ha-single-form');
@@ -2133,17 +3012,38 @@
       const multiHdrForm = shadow.querySelector('#ha-multi-header-form');
       if (multiHdrForm) {
         if (this._hass) multiHdrForm.hass = this._hass;
-        multiHdrForm.data = { title: c.title || 'Lights', icon: c.icon || '' };
+        const defaultTitle = isChart ? 'Grafico' : mode === 'history' ? 'History' : 'Lights';
+        multiHdrForm.data = { title: c.title || defaultTitle, icon: c.icon || '' };
       }
 
       const addForm = shadow.querySelector('#ha-add-entity-form');
-      if (addForm && this._hass) addForm.hass = this._hass;
+      if (addForm) {
+        if (this._hass) addForm.hass = this._hass;
+        addForm.schema = [
+          {
+            name: 'new_entity',
+            required: false,
+            selector: isGraph ? { entity: {} } : { entity: { domain: 'light' } },
+          },
+        ];
+      }
 
       if (!isSingle) this._renderEntityList();
 
+      // Sync Graph Controls
+      const curHours = Number(c.hours) || 24;
+      shadow.querySelectorAll('.hours-pill').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.hours, 10) === curHours);
+      });
+      const heightRange = shadow.querySelector('#chart-height-range');
+      const heightLbl   = shadow.querySelector('#height-val-lbl');
+      const curHeight   = Number(c.height) || 100;
+      if (heightRange) heightRange.value = curHeight;
+      if (heightLbl)   heightLbl.textContent = `${curHeight}px`;
+
       // Sync Theme
       const curTheme = c.theme || 'dark';
-      shadow.querySelectorAll('.theme-pill').forEach(btn => {
+      shadow.querySelectorAll('.theme-pill:not(.hours-pill)').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === curTheme);
       });
 
@@ -2160,7 +3060,8 @@
       // Sync Toggles
       shadow.querySelectorAll('input[data-toggle]').forEach(chk => {
         const key = chk.dataset.toggle;
-        chk.checked = c[key] !== undefined ? Boolean(c[key]) : true;
+        const def = (key === 'collapse_when_off' || key === 'dynamic_light_color' || key === 'show_grid') ? false : true;
+        chk.checked = c[key] !== undefined ? Boolean(c[key]) : def;
       });
     }
 
