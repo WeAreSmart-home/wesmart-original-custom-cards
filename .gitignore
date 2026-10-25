@@ -2,9 +2,13 @@
 .DS_Store
 Thumbs.db
 
-# Project Management / AI
+# Project Management / AI (Local Only — Never push online)
 CLAUDE.md
 .claude/
+GEMINI.md
+.gemini/
+TODO.md
+ISTRUZIONI.md
 
 # Temporary / OS
 .AppleDouble

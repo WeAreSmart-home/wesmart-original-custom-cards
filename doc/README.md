@@ -2,8 +2,9 @@
 
 Una collezione unificata di card personalizzate per il Dashboard di Home Assistant, con motore cromatico dinamico e stile **WeSmart**: tema scuro carbone caldo, accento arancione (o a scelta libera), tipografia minimale.
 
-> **🚀 Nuovo Passo Evolutivo — [`WeSmart-Card` (`wesmart-card.js`)](../WeSmart-Card/README.md)**:  
-> Abbiamo avviato la transizione verso un'unica suite **All-in-One con configurazione grafica (Visual Editor UI)** in stile *Bubble Card*. Il goal è portare progressivamente tutte le card WeSmart dentro [`WeSmart-Card/wesmart-card.js`](../WeSmart-Card/wesmart-card.js), migliorarle e aggiungerne di nuove. Attualmente sono già integrati i moduli **Light**, **Lights**, **Lights Expand**, **Chart** e **History**.
+> **Nuovo Passo Evolutivo / Next Evolutionary Step — [`WeSmart-Card` (`wesmart-card.js`)](../WeSmart-Card/README.md)**:  
+> - **IT**: Abbiamo avviato la transizione verso un'unica suite **All-in-One con configurazione grafica (Visual Editor UI)** in stile *Bubble Card*. L'obiettivo è portare progressivamente tutte le card WeSmart dentro [`WeSmart-Card/wesmart-card.js`](../WeSmart-Card/wesmart-card.js), migliorarle e aggiungerne di nuove. Attualmente sono già integrati i moduli **Light**, **Lights**, **Lights Expand**, **Chart** e **History**.  
+> - **EN**: We have started transitioning toward a single **All-in-One suite with a graphical Visual Editor UI** (*Bubble Card* style). The goal is to progressively migrate all WeSmart cards into [`WeSmart-Card/wesmart-card.js`](../WeSmart-Card/wesmart-card.js), improve them, and add new ones. Currently, **Light**, **Lights**, **Lights Expand**, **Chart**, and **History** are already integrated. See the bilingual documentation in [`WeSmart-Card/README.md`](../WeSmart-Card/README.md) and [`WeSmart-Card/DOCUMENTATION.md`](../WeSmart-Card/DOCUMENTATION.md).
 
 ---
 
@@ -11,7 +12,7 @@ Una collezione unificata di card personalizzate per il Dashboard di Home Assista
 
 | Card | File | Tipo entità | Tema |
 |------|------|-------------|-------|
-| [**✨ WeSmart Card (All-in-One)**](../WeSmart-Card/README.md) | `WeSmart-Card/wesmart-card.js` | All-in-One (`light`, `lights`, `lights-expand`, `chart`, `history` + Visual Editor) | Dark / Light / Auto |
+| [**WeSmart Card (All-in-One)**](../WeSmart-Card/README.md) | `WeSmart-Card/wesmart-card.js` | All-in-One (`light`, `lights`, `lights-expand`, `chart`, `history` + Visual Editor) | Dark / Light / Auto |
 | [WeSmart Light Card](#wesmart-light-card) | `cards/Light/wesmart-light-card.js` | `light.*` | Dark / Light / Auto |
 | [WeSmart Lights Card](#wesmart-lights-card) | `cards/Lights/wesmart-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
 | [WeSmart Lights Expand Card](#wesmart-lights-expand-card) | `cards/Lights/wesmart-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
