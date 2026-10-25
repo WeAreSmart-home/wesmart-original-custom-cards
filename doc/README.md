@@ -1,6 +1,6 @@
 # WeSmart Custom Cards — Home Assistant
 
-Una collezione di card personalizzate per il Dashboard di Home Assistant, ispirate all'estetica **Anthropic WeSmart AI**: tema scuro carbone caldo, accento arancione, tipografia minimale.
+Una collezione unificata di card personalizzate per il Dashboard di Home Assistant, con motore cromatico dinamico e stile **WeSmart**: tema scuro carbone caldo, accento arancione (o a scelta libera), tipografia minimale.
 
 ---
 
@@ -8,25 +8,26 @@ Una collezione di card personalizzate per il Dashboard di Home Assistant, ispira
 
 | Card | File | Tipo entità | Tema |
 |------|------|-------------|-------|
-| [WeSmart Light Card](#wesmart-light-card) | `Light/wesmart-light-card.js` | `light.*` | Dark / Light / Auto |
-| [WeSmart Lights Card](#wesmart-lights-card) | `Lights/wesmart-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
-| [WeSmart Lights Expand Card](#wesmart-lights-expand-card) | `Lights/wesmart-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
-| [WeSmart Climate Card](#wesmart-climate-card) | `Climate/wesmart-climate-card.js` | `climate.*` | Dark / Light / Auto |
-| [WeSmart Climate Compact Card](#wesmart-climate-compact-card) | `Climate/wesmart-climate-compact-card.js` | `climate.*` (multi) | Dark / Light / Auto |
-| [WeSmart Sensors Card](#wesmart-sensors-card) | `Sensors/wesmart-sensors-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
-| [WeSmart Doors Card](#wesmart-doors-card) | `Doors/wesmart-doors-card.js` | `binary_sensor.*` (multi) | Dark / Light / Auto |
-| [WeSmart History Card](#wesmart-history-card) | `History/wesmart-history-card.js` | qualsiasi (multi) | Dark / Light / Auto |
-| [WeSmart Buttons Bar Card](#wesmart-buttons-bar-card) | `Buttons/wesmart-buttons-bar-card.js` | qualsiasi / service | Dark / Light / Auto |
-| [WeSmart Buttons Grid Card](#wesmart-buttons-grid-card) | `Buttons/wesmart-buttons-grid-card.js` | qualsiasi / service | Dark / Light / Auto |
-| [WeSmart Battery Status Card](#wesmart-battery-status-card) | `Battery/wesmart-battery-status-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
-| [WeSmart Switches Card](#wesmart-switches-card) | `Switches/wesmart-switches-card.js` | `switch.*` (multi) | Dark / Light / Auto |
-| [WeSmart Clock Card](#wesmart-clock-card) | `Clock/wesmart-clock-card.js` | qualsiasi (max 3 extra) | Dark / Light / Auto |
-| [**WeSmart Energy Flow Card**](#wesmart-energy-flow-card) | `Energy/wesmart-energy-flow-card.js` | `sensor.*` (power/energy) | Dark / Light / Auto |
-| [**WeSmart Media Player Card**](#wesmart-media-player-card) | `MediaPlayer/wesmart-media-player-card.js` | `media_player.*` | Dark / Light / Auto |
-| [**WeSmart Weather Card**](#wesmart-weather-card) | `Weather/wesmart-weather-card.js` | `weather.*` | Dark / Light / Auto |
-| [**WeSmart Chart Card**](#wesmart-chart-card) | `Chart/wesmart-chart-card.js` | qualsiasi / multi | Dark / Light / Auto |
-| [**WeSmart Person Card**](#wesmart-person-card) | `Person/wesmart-person-card.js` | `person.*` (multi) | Dark / Light / Auto |
-| [**WeSmart Scene Interpolator Card**](#wesmart-scene-interpolator-card) ⚠️ | `SceneInterpolator/wesmart-scene-interpolator-card.js` | `light.*` | Dark (fixed) |
+| [WeSmart Light Card](#wesmart-light-card) | `cards/Light/wesmart-light-card.js` | `light.*` | Dark / Light / Auto |
+| [WeSmart Lights Card](#wesmart-lights-card) | `cards/Lights/wesmart-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
+| [WeSmart Lights Expand Card](#wesmart-lights-expand-card) | `cards/Lights/wesmart-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
+| [WeSmart Climate Card](#wesmart-climate-card) | `cards/Climate/wesmart-climate-card.js` | `climate.*` | Dark / Light / Auto |
+| [WeSmart Climate Compact Card](#wesmart-climate-compact-card) | `cards/Climate/wesmart-climate-compact-card.js` | `climate.*` (multi) | Dark / Light / Auto |
+| [WeSmart Sensors Card](#wesmart-sensors-card) | `cards/Sensors/wesmart-sensors-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
+| [WeSmart Doors Card](#wesmart-doors-card) | `cards/Doors/wesmart-doors-card.js` | `binary_sensor.*` (multi) | Dark / Light / Auto |
+| [WeSmart History Card](#wesmart-history-card) | `cards/History/wesmart-history-card.js` | qualsiasi (multi) | Dark / Light / Auto |
+| [WeSmart Buttons Bar Card](#wesmart-buttons-bar-card) | `cards/Buttons/wesmart-buttons-bar-card.js` | qualsiasi / service | Dark / Light / Auto |
+| [WeSmart Buttons Grid Card](#wesmart-buttons-grid-card) | `cards/Buttons/wesmart-buttons-grid-card.js` | qualsiasi / service | Dark / Light / Auto |
+| [WeSmart Battery Card](#wesmart-battery-status-card) | `cards/Battery/wesmart-battery-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
+| [WeSmart Switches Card](#wesmart-switches-card) | `cards/Switches/wesmart-switches-card.js` | `switch.*` (multi) | Dark / Light / Auto |
+| [WeSmart Clock Card](#wesmart-clock-card) | `cards/Clock/wesmart-clock-card.js` | qualsiasi (max 3 extra) | Dark / Light / Auto |
+| [**WeSmart Garbage Card**](#wesmart-garbage-card) | `cards/Garbage/wesmart-garbage-card.js` | raccolta differenziata | Dark / Light / Auto |
+| [**WeSmart Energy Flow Card**](#wesmart-energy-flow-card) | `cards/Energy/wesmart-energy-flow-card.js` | `sensor.*` (power/energy) | Dark / Light / Auto |
+| [**WeSmart Media Player Card**](#wesmart-media-player-card) | `cards/MediaPlayer/wesmart-media-player-card.js` | `media_player.*` | Dark / Light / Auto |
+| [**WeSmart Weather Card**](#wesmart-weather-card) | `cards/Weather/wesmart-weather-card.js` | `weather.*` | Dark / Light / Auto |
+| [**WeSmart Chart Card**](#wesmart-chart-card) | `cards/Chart/wesmart-chart-card.js` | qualsiasi / multi | Dark / Light / Auto |
+| [**WeSmart Person Card**](#wesmart-person-card) | `cards/Person/wesmart-person-card.js` | `person.*` (multi) | Dark / Light / Auto |
+| [**WeSmart Scene Interpolator Card**](#wesmart-scene-interpolator-card) ⚠️ | `cards/SceneInterpolator/wesmart-scene-interpolator-card.js` | `light.*` | Dark (fixed) |
 
 ---
 
@@ -34,7 +35,7 @@ Una collezione di card personalizzate per il Dashboard di Home Assistant, ispira
 
 ### 1. Copia i file
 
-Copia il file `.js` di ogni card che vuoi usare in `config/www/`:
+Copia il file `.js` di ogni card che vuoi usare (dalla cartella `cards/`) in `config/www/`:
 
 ```
 config/www/wesmart-light-card.js
@@ -47,9 +48,10 @@ config/www/wesmart-doors-card.js
 config/www/wesmart-history-card.js
 config/www/wesmart-buttons-bar-card.js
 config/www/wesmart-buttons-grid-card.js
-config/www/wesmart-battery-status-card.js
+config/www/wesmart-battery-card.js
 config/www/wesmart-switches-card.js
 config/www/wesmart-clock-card.js
+config/www/wesmart-garbage-card.js
 config/www/wesmart-chart-card.js
 config/www/wesmart-energy-flow-card.js
 config/www/wesmart-media-player-card.js
@@ -74,9 +76,10 @@ In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi una v
 | `/local/wesmart-history-card.js` | Modulo JavaScript |
 | `/local/wesmart-buttons-bar-card.js` | Modulo JavaScript |
 | `/local/wesmart-buttons-grid-card.js` | Modulo JavaScript |
-| `/local/wesmart-battery-status-card.js` | Modulo JavaScript |
+| `/local/wesmart-battery-card.js` | Modulo JavaScript |
 | `/local/wesmart-switches-card.js` | Modulo JavaScript |
 | `/local/wesmart-clock-card.js` | Modulo JavaScript |
+| `/local/wesmart-garbage-card.js` | Modulo JavaScript |
 | `/local/wesmart-chart-card.js` | Modulo JavaScript |
 | `/local/wesmart-energy-flow-card.js` | Modulo JavaScript |
 | `/local/wesmart-media-player-card.js` | Modulo JavaScript |
@@ -956,7 +959,7 @@ custom card home assistant/
 ├── doc/
 │   └── README.md                              ← questo file
 │
-├── WeSmart-Original/                          ← card standard (palette fissa)
+├── cards/                                     ← suite unificata (motore dinamico nativo)
 │   ├── Light/wesmart-light-card.js
 │   ├── Lights/wesmart-lights-card.js + wesmart-lights-expand-card.js
 │   ├── Climate/wesmart-climate-card.js + wesmart-climate-compact-card.js
@@ -964,12 +967,15 @@ custom card home assistant/
 │   ├── Doors/wesmart-doors-card.js
 │   ├── History/wesmart-history-card.js
 │   ├── Buttons/wesmart-buttons-bar-card.js + wesmart-buttons-grid-card.js
-│   ├── Battery/wesmart-battery-status-card.js
+│   ├── Battery/wesmart-battery-card.js
 │   ├── Switches/wesmart-switches-card.js
 │   ├── Clock/wesmart-clock-card.js
+│   ├── Garbage/wesmart-garbage-card.js
 │   ├── Chart/wesmart-chart-card.js
 │   ├── Energy/wesmart-energy-flow-card.js
 │   ├── MediaPlayer/wesmart-media-player-card.js
+│   ├── Person/wesmart-person-card.js
+│   ├── SceneInterpolator/wesmart-scene-interpolator-card.js
 │   └── Weather/wesmart-weather-card.js
 ```
 
@@ -1678,44 +1684,61 @@ custom card home assistant/
 ├── doc/
 │   └── README.md                              ← this file
 │
-├── WeSmart-Original/                          ← standard cards (fixed palette)
-│   ├── Light/
-│   │   ├── wesmart-light-card.js
-│   │   └── README.md
-│   ├── Lights/
-│   │   ├── wesmart-lights-card.js             ← list with toggles
-│   │   ├── wesmart-lights-expand-card.js      ← list with animated inline sliders
-│   │   └── README.md
-│   ├── Climate/
-│   │   ├── wesmart-climate-card.js
-│   │   ├── wesmart-climate-compact-card.js
-│   │   └── README.md
-│   ├── Sensors/
-│   │   ├── wesmart-sensors-card.js
-│   │   └── README.md
-│   ├── Doors/
-│   │   ├── wesmart-doors-card.js
-│   │   └── README.md
-│   ├── History/
-│   │   ├── wesmart-history-card.js
-│   │   └── README.md
-│   ├── Buttons/
-│   │   ├── wesmart-buttons-bar-card.js        ← compact horizontal button bar
-│   │   ├── wesmart-buttons-grid-card.js       ← square auto-grid of buttons
-│   │   └── README.md
-│   ├── Battery/
-│   │   ├── wesmart-battery-status-card.js     ← multi-entity battery monitor
-│   │   └── README.md
-│   ├── Switches/
-│   │   ├── wesmart-switches-card.js           ← multi-entity toggle card
-│   │   └── README.md
-│   ├── Clock/
-│   │   ├── wesmart-clock-card.js              ← ambient clock + bottom/sidebar extras
-│   │   └── README.md
-│   └── Energy/
-│       └── wesmart-energy-flow-card.js        ← real-time energy flow diagram
-│
-└── WeSmart-Original/
+└── cards/                                     ← unified suite (native dynamic color engine)
+    ├── Battery/
+    │   ├── wesmart-battery-card.js            ← multi-entity battery monitor
+    │   └── README.md
+    ├── Buttons/
+    │   ├── wesmart-buttons-bar-card.js        ← compact horizontal button bar
+    │   ├── wesmart-buttons-grid-card.js       ← square auto-grid of buttons
+    │   └── README.md
+    ├── Chart/
+    │   ├── wesmart-chart-card.js
+    │   └── README.md
+    ├── Climate/
+    │   ├── wesmart-climate-card.js
+    │   ├── wesmart-climate-compact-card.js
+    │   └── README.md
+    ├── Clock/
+    │   ├── wesmart-clock-card.js              ← ambient clock + bottom/sidebar extras
+    │   └── README.md
+    ├── Doors/
+    │   ├── wesmart-doors-card.js
+    │   └── README.md
+    ├── Energy/
+    │   ├── wesmart-energy-flow-card.js        ← real-time energy flow diagram
+    │   └── README.md
+    ├── Garbage/
+    │   ├── wesmart-garbage-card.js
+    │   └── README.md
+    ├── History/
+    │   ├── wesmart-history-card.js
+    │   └── README.md
+    ├── Light/
+    │   ├── wesmart-light-card.js
+    │   └── README.md
+    ├── Lights/
+    │   ├── wesmart-lights-card.js             ← list with toggles
+    │   ├── wesmart-lights-expand-card.js      ← list with animated inline sliders
+    │   └── README.md
+    ├── MediaPlayer/
+    │   ├── wesmart-media-player-card.js
+    │   └── README.md
+    ├── Person/
+    │   ├── wesmart-person-card.js
+    │   └── README.md
+    ├── SceneInterpolator/
+    │   ├── wesmart-scene-interpolator-card.js
+    │   └── README.md
+    ├── Sensors/
+    │   ├── wesmart-sensors-card.js
+    │   └── README.md
+    ├── Switches/
+    │   ├── wesmart-switches-card.js           ← multi-entity toggle card
+    │   └── README.md
+    └── Weather/
+        ├── wesmart-weather-card.js
+        └── README.md
 ```
 
 ---

@@ -1,404 +1,134 @@
 # WeSmart Custom Cards — Home Assistant
 
-> 🎉 **What's New:** Introducing the **WeSmart Garbage Solution**! A unified system with a backend component for real persistence and a frontend card for visual scheduling. [Read the full guide here ↗](WeSmart-Labs/wesmart_garbage/README.md)
+Una collezione unificata e completa di custom Lovelace card per Home Assistant, ispirate all'estetica **WeSmart AI**: tema scuro carbone caldo, accenti vivaci, tipografia minimale e motore cromatico dinamico nativo.
+
+**Nessun build step. Nessuna dipendenza. 100% Pure Vanilla JS.**
 
 ---
 
-### About the Founder & Vision
+### Fondatore e Visione / Founder & Vision
 
-Hi! I'm **Massimo Di Vona** (formerly known as *Max Novadi*), founder of [Wearesmart.it](https://www.wearesmart.it).
+**Italiano:**  
+Ciao! Sono **Massimo Di Vona** (precedentemente noto come *Max Novadi*), fondatore di [Wearesmart.it](https://www.wearesmart.it).  
+Questo progetto nasce come un punto di riferimento per la community di Home Assistant. La mia visione è quella di unire la passione per la domotica con la potenza delle moderne **Intelligenze Artificiali** (*Gemini* e *Claude Code*). L'obiettivo è creare una suite completa di card eleganti, reattive e modulari, capaci di adattarsi perfettamente a qualsiasi tema. Tutte le card ora integrano nativamente il **motore cromatico dinamico (InfiniteColor)**: con il colore di default mantengono l'iconico stile WeSmart (carbone e arancione `#D97757`), ma permettono a ciascun utente di trasformarle istantaneamente in qualunque palette cromatica desiderata con un solo parametro YAML.
 
-This project started as an experiment for the Home Assistant community. My vision is to combine a passion for home automation with the power of modern **Artificial Intelligence** (like *Gemini* and *Claude Code*). The goal is to create a collection of specific, aesthetically pleasing, and functional cards, born from human-AI collaboration to meet real user needs in real-time.
-
-Both the **WeSmart Original** and **InfiniteColor** collections are constantly evolving: I use AI not only to write clean code but to push the boundaries of design and logic on Lovelace, creating "smart" and ever-improving cards.
-
----
-
-### Fondatore e Visione
-
-Ciao! Sono **Massimo Di Vona** (precedentemente noto come *Max Novadi*), fondatore di [Wearesmart.it](https://www.wearesmart.it).
-
-Questo progetto nasce come un esperimento per la community di Home Assistant. La mia visione è quella di unire la passione per la domotica con la potenza delle nuove **Intelligenze Artificiali** (come *Gemini* e *Claude Code*). L'obiettivo è creare una collezione di card specifiche, esteticamente curate e funzionali, nate dalla collaborazione uomo-AI per rispondere alle reali necessità degli utenti in tempo reale.
-
-Sia la collezione **WeSmart Original** che la **InfiniteColor** sono in continua evoluzione: uso l'IA non solo per scrivere codice pulito, ma per spingere i confini del design e della logica su Lovelace, creando card "intelligenti" e sempre migliori.
+**English:**  
+Hi! I'm **Massimo Di Vona** (formerly known as *Max Novadi*), founder of [Wearesmart.it](https://www.wearesmart.it).  
+This project was born for the Home Assistant community, merging passion for smart homes with modern AI capabilities. All cards now natively feature the **Dynamic Color Engine**: by default, they preserve the signature WeSmart warm charcoal & orange (`#D97757`) look, while allowing you to tint them into any color palette via a single YAML hex parameter.
 
 ---
 
-A collection of custom Lovelace cards for Home Assistant, inspired by the **WeSmart AI** aesthetic: warm charcoal dark theme, orange accent, minimal typography. No build step. No dependencies. Pure vanilla JS.
+## 📢 Novità & Riorganizzazione 2.0
+
+> [!IMPORTANT]
+> **Suite Unificata (Original + InfiniteColor):**  
+> Le collezioni *WeSmart Original* e *WeSmart InfiniteColor* sono state unificate nella cartella [`cards/`](cards/).  
+> Grazie al motore dinamico nativo, ogni card riproduce lo stile originale WeSmart per impostazione predefinita ed è compatibile sia con `type: custom:wesmart-[nome]-card` che con `type: custom:wesmart-infinite-[nome]-card` (nessuna rottura delle dashboard esistenti).
+
+> [!NOTE]
+> **⚗️ WeSmart Labs Ufficialmente Chiuso:**  
+> Il laboratorio sperimentale dei Labs è giunto al termine.
+> - **WeSmart Garbage Solution**: ha completato con successo la fase di incubazione ed è ora una card ufficiale integrata in [`cards/Garbage/`](cards/Garbage/) e disponibile anche come repository standalone ([wesmart-garbage-card](https://github.com/WeAreSmart-home/wesmart-garbage-card) + [wesmart-garbage backend](https://github.com/WeAreSmart-home/wesmart-garbage)).
+> - **Prototipi Layout** (*Home Panel, Clean Panel, Surface, Cross Pad*): sono stati ritirati dal branch attivo e archiviati nella cronologia Git del progetto.
 
 ---
 
-## Collections
+## 🎨 Il Motore Cromatico Dinamico
 
-| | Collection | Cards | Status |
-|---|---|---|---|
-| ◆ | **WeSmart InfiniteColor** | 15 | Production-ready |
-| ■ | **WeSmart Original** | 19 | Production-ready |
-| ⚗️ | **WeSmart Labs** | 6 | Experimental |
-| 🗑️ | **WeSmart Garbage** | 1 + Backend | **New: Unified Solution** |
+Ogni card genera automaticamente l'intera palette di colori (sfondo, superfici, testi a contrasto, ombre, bordi e grafici) a partire da un singolo colore esadecimale (`color: '#HEX'`):
 
----
+```yaml
+color: '#D97757'  ──→  accento arancione classico WeSmart (default)
+color: '#60B4D8'  ──→  blu fresco (ideale per climate/temperature)
+color: '#7EC8A0'  ──→  verde salvia (ideale per porte/sicurezza)
+color: '#A78BFA'  ──→  viola/indaco (ideale per scene e automazioni)
+color: '#F59E0B'  ──→  ambra/oro (ideale per sensori ed energia)
+```
 
-## 🗑️ WeSmart Garbage Solution
-
-The first **Unified Solution** in the WeSmart ecosystem. It bridges the gap between Lovelace and the Home Assistant backend.
-
-![WeSmart Garbage UI](asset/images/wesmart-garbage.png)
-
-*   **Real Persistence**: A Python custom component that saves your schedule to HA storage.
-*   **Visual Programming**: Configure your weekly garbage calendar directly from the card.
-*   **InfiniteColor Engine**: Beautiful, dynamic UI that matches your dashboard theme.
-
-[**Get started with WeSmart Garbage →**](WeSmart-Labs/wesmart_garbage/README.md)
+Tutte le card supportano i temi `dark`, `light` e `auto` (segue in tempo reale il tema del sistema operativo via `prefers-color-scheme`).
 
 ---
 
-## 📚 Full Documentation & Card Reference
+## 📦 Catalogo Completo delle Card
 
-To learn how to configure each specific card, discover all available YAML options, and see detailed examples, please refer to the dedicated comprehensive documentation pages:
+La suite comprende **17 categorie** e oltre **20 card**:
 
-- **[◆ WeSmart InfiniteColor Documentation ↗](WeSmart-InfiniteColor/README.md)**: Full reference for the dynamic HSL palette cards (including the new Garbage Card).
-- **[■ WeSmart Original Documentation ↗](doc/README.md)**: Comprehensive guide for all standard fixed-palette cards (Chart, Weather, Energy Flow, etc.).
-- **[⚗️ WeSmart Labs Documentation ↗](WeSmart-Labs/README.md)**: Details on the experimental cardless layouts.
+| Card | Cartella | Tag YAML Principale | Alias Retrocompatibile | Entità / Tipo |
+|------|----------|---------------------|------------------------|---------------|
+| **Battery** | [`cards/Battery/`](cards/Battery/) | `wesmart-battery-card` | `wesmart-battery-status-card`, `wesmart-infinite-battery-card` | `sensor.*` (batterie) |
+| **Buttons Bar** | [`cards/Buttons/`](cards/Buttons/) | `wesmart-buttons-bar-card` | `wesmart-infinite-buttons-bar-card` | qualsiasi / service |
+| **Buttons Grid** | [`cards/Buttons/`](cards/Buttons/) | `wesmart-buttons-grid-card` | `wesmart-infinite-buttons-grid-card` | qualsiasi / service |
+| **Chart** | [`cards/Chart/`](cards/Chart/) | `wesmart-chart-card` | `wesmart-infinite-chart-card` | qualsiasi sensore / multi |
+| **Climate** | [`cards/Climate/`](cards/Climate/) | `wesmart-climate-card` | `wesmart-infinite-climate-card` | `climate.*` (singolo) |
+| **Climate Compact** | [`cards/Climate/`](cards/Climate/) | `wesmart-climate-compact-card` | `wesmart-infinite-climate-compact-card` | `climate.*` (multi-zona) |
+| **Clock** | [`cards/Clock/`](cards/Clock/) | `wesmart-clock-card` | `wesmart-infinite-clock-card` | orologio + fino a 3 entità |
+| **Doors** | [`cards/Doors/`](cards/Doors/) | `wesmart-doors-card` | `wesmart-infinite-doors-card` | `binary_sensor.*` (porte/finestre) |
+| **Energy Flow** | [`cards/Energy/`](cards/Energy/) | `wesmart-energy-flow-card` | `wesmart-infinite-energy-flow-card` | `sensor.*` (potenza/energia) |
+| **Garbage** | [`cards/Garbage/`](cards/Garbage/) | `wesmart-garbage-card` | `wesmart-infinite-garbage-card` | calendario raccolta differenziata |
+| **History** | [`cards/History/`](cards/History/) | `wesmart-history-card` | `wesmart-infinite-history-card`, `wesmart-infinite-color-card` | qualsiasi entità / cronologia |
+| **Light** | [`cards/Light/`](cards/Light/) | `wesmart-light-card` | `wesmart-infinite-light-card` | `light.*` (singola, dimmer, rgb) |
+| **Lights** | [`cards/Lights/`](cards/Lights/) | `wesmart-lights-card` | `wesmart-infinite-lights-card` | `light.*` (lista compatta) |
+| **Lights Expand** | [`cards/Lights/`](cards/Lights/) | `wesmart-lights-expand-card` | `wesmart-infinite-lights-expand-card` | `light.*` (con slider integrati) |
+| **Media Player** | [`cards/MediaPlayer/`](cards/MediaPlayer/) | `wesmart-media-player-card` | `wesmart-infinite-media-player-card` | `media_player.*` |
+| **Person** | [`cards/Person/`](cards/Person/) | `wesmart-person-card` | `wesmart-infinite-person-card` | `person.*` (presenza e zone) |
+| **Scene Interpolator** | [`cards/SceneInterpolator/`](cards/SceneInterpolator/) | `wesmart-scene-interpolator-card` | `wesmart-infinite-scene-interpolator-card` | `light.*` (morphing 2D 4 scene) |
+| **Sensors** | [`cards/Sensors/`](cards/Sensors/) | `wesmart-sensors-card` | `wesmart-infinite-sensors-card` | `sensor.*` (multi-sensore) |
+| **Switches** | [`cards/Switches/`](cards/Switches/) | `wesmart-switches-card` | `wesmart-infinite-switches-card` | `switch.*` (multi-interruttore) |
+| **Weather** | [`cards/Weather/`](cards/Weather/) | `wesmart-weather-card` | `wesmart-infinite-weather-card` | `weather.*` (meteo e previsioni) |
 
 ---
 
-## Preview
+## 🚀 Installazione Rapida
+
+### 1. Copia i file JavaScript
+Copia i file `.js` delle card desiderate (dalla cartella [`cards/`](cards/)) all'interno della cartella `config/www/` del tuo Home Assistant:
+```
+config/www/wesmart-light-card.js
+config/www/wesmart-climate-card.js
+config/www/wesmart-garbage-card.js
+config/www/wesmart-chart-card.js
+...
+```
+
+### 2. Aggiungi le Risorse in Lovelace
+In Home Assistant vai su **Impostazioni → Dashboard → Risorse** (in alto a destra nei tre puntini) e aggiungi una risorsa per ciascun file:
+- **URL**: `/local/wesmart-light-card.js`
+- **Tipo**: `Modulo JavaScript`
+
+### 3. Ricarica la Dashboard
+Esegui un hard refresh del browser:
+- `Cmd + Shift + R` (macOS)
+- `Ctrl + Shift + R` (Windows / Linux)
+
+---
+
+## 🖼️ Anteprime Grafiche
 
 ![Garbage Card](asset/images/garbage.png)
 ![Lights Cards](asset/images/lights-cards.webp)
-![Sensors](asset/images/sensor.webp)
+![Sensors Card](asset/images/sensor.webp)
 ![Climate Cards](asset/images/climate-e-compact-cards.webp)
-
----
-
-## Installation
-
-### 1. Copy files
-Copy the `.js` file of each card you want into `config/www/`.
-
-### 2. Add resources
-In Home Assistant → **Settings → Dashboards → Resources**, add one entry per file:
-- **URL**: `/local/wesmart-light-card.js` (adjust filename)
-- **Type**: `JavaScript module`
-
-### 3. Reload
-Hard refresh: `Cmd+Shift+R` (macOS) · `Ctrl+Shift+R` (Windows/Linux)
-
----
-
----
-
-## ◆ WeSmart InfiniteColor
-
-A chromatic engine that generates a complete visual palette from a single hex color defined in YAML. Every background, surface, text shade, accent, shadow, and multi-entity line color is automatically derived — no hardcoded values anywhere.
-
-```yaml
-color: '#60B4D8'  ──→  accent, accent-soft
-                  ──→  bg, surface, border
-                  ──→  text, text-muted, text-dim
-                  ──→  shadow, row-hover, pill-bg
-```
-
-Themes `dark`, `light`, and `auto` (follows OS `prefers-color-scheme` in real time) are supported by every card.
-
-![Clock and Light InfiniteColor](asset/images/clock-e-light-cards-infinite.png)
-![History Card — Blue Theme](asset/images/history-cards-blue.png)
-
-<details>
-<summary>More InfiniteColor previews</summary>
-
-![History Card — Yellow Dark](asset/images/history-cards-yellow-dark.png)
-![History Card — Yellow Light](asset/images/history-cards-yellow-light.png)
-
-</details>
-
-Pick any hex color and all InfiniteColor cards instantly adapt:
-
-| Input color | Palette |
-|---|---|
-| `'#D97757'` | Orange/charcoal — WeSmart default |
-| `'#60B4D8'` | Cool blue — ideal for climate/temperature |
-| `'#7CB87A'` | Green — ideal for doors/security |
-| `'#A78BFA'` | Purple — ideal for scenes/automations |
-| `'#F59E0B'` | Amber/gold — ideal for sensors/battery |
-| `'#EC4899'` | Pink |
-| `'#14B8A6'` | Teal/seafoam |
-
-### InfiniteColor Highlights
-
-**Infinite Garbage Card** — Self-contained waste collection calendar. No sensors required. Shows today's pickups in an illuminated Hero section and upcoming ones in an orderly list below.
-
-![Garbage Card](asset/images/garbage.png)
-
-```yaml
-type: custom:wesmart-infinite-garbage-card
-title: Waste Schedule
-color: '#A09080'
-theme: auto
-schedule:
-  - name: Organic
-    icon: mdi:leaf
-    waste_color: '#8B4513'
-    days: [1, 4]
-```
-
-### Cards
-
-| Card | YAML Tag | Entities |
-|------|----------|---------|
-| Infinite Garbage | `wesmart-infinite-garbage-card` | autonomous (YAML schedule) |
-| Infinite Chart | `wesmart-infinite-chart-card` | any (single or multi) |
-| History | `wesmart-infinite-history-card` | any (multi) |
-| Lights | `wesmart-infinite-lights-card` | `light.*` (multi) |
-| Lights Expand | `wesmart-infinite-lights-expand-card` | `light.*` (multi, expandable) |
-| Light | `wesmart-infinite-light-card` | `light.*` (single) |
-| Climate | `wesmart-infinite-climate-card` | `climate.*` (single) |
-| Climate Compact | `wesmart-infinite-climate-compact-card` | `climate.*` (multi) |
-| Sensors | `wesmart-infinite-sensors-card` | `sensor.*` (multi) |
-| Doors | `wesmart-infinite-doors-card` | `binary_sensor.*` (multi) |
-| Switches | `wesmart-infinite-switches-card` | `switch.*` (multi) |
-| Battery | `wesmart-infinite-battery-card` | `sensor.*` battery (multi) |
-| Buttons Bar | `wesmart-infinite-buttons-bar-card` | any / service |
-| Buttons Grid | `wesmart-infinite-buttons-grid-card` | any / service |
-| Clock | `wesmart-infinite-clock-card` | any (max 3 extras) |
-
-**→ [Full InfiniteColor documentation](WeSmart-InfiniteColor/README.md)**
-
----
-
----
-
-## ■ WeSmart Original
-
-Fixed warm charcoal palette (`#D97757` accent). 20 cards.
-
-| Token | Dark | Light |
-|-------|------|-------|
-| Background | `#292524` | `#FFFEFA` |
-| Surface | `#332E2A` | `#F5F0EB` |
-| Accent | `#D97757` | `#D97757` |
-| Border | `rgba(255,255,255,0.08)` | `rgba(28,25,23,0.09)` |
-
-### Cards
-
-| Card | YAML Tag | Entities |
-|------|----------|---------|
-| Chart | `wesmart-chart-card` | any (single or multi) |
-| History | `wesmart-history-card` | any (multi) |
-| Light | `wesmart-light-card` | `light.*` (single) |
-| Lights | `wesmart-lights-card` | `light.*` (multi) |
-| Lights Expand | `wesmart-lights-expand-card` | `light.*` (multi, expandable) |
-| Climate | `wesmart-climate-card` | `climate.*` (single) |
-| Climate Compact | `wesmart-climate-compact-card` | `climate.*` (multi) |
-| Sensors | `wesmart-sensors-card` | `sensor.*` (multi) |
-| Doors | `wesmart-doors-card` | `binary_sensor.*` (multi) |
-| Switches | `wesmart-switches-card` | `switch.*` (multi) |
-| Battery Status | `wesmart-battery-status-card` | `sensor.*` battery (multi) |
-| Buttons Bar | `wesmart-buttons-bar-card` | any / service |
-| Buttons Grid | `wesmart-buttons-grid-card` | any / service |
-| Clock | `wesmart-clock-card` | any (max 3 extras) |
-| Weather | `wesmart-weather-card` | `weather.*` |
-| Energy Flow | `wesmart-energy-flow-card` | `sensor.*` power/energy |
-| Media Player | `wesmart-media-player-card` | `media_player.*` |
-| Person | `wesmart-person-card` | `person.*` (multi) |
-| Scene Interpolator ⚠️ | `wesmart-scene-interpolator-card` | `light.*` (single or group) |
-
-### Highlights
-
-**Chart Card** — Single or multi-entity chart with drag-to-zoom, tooltip hover, and time range pills. Auto-detects line/area for numeric sensors, timeline bars for binary sensors.
-
-![Chart Preview](asset/images/graph.png)
-
-```yaml
-type: custom:wesmart-chart-card
-title: Temperature
-color: '#D97757'
-theme: dark
-hours: 24
-entities:
-  - entity: sensor.temperatura_soggiorno
-    name: Living Room
-  - entity: sensor.temperatura_cucina
-    name: Kitchen
-```
-
-**Weather Card** — Current conditions, hourly or daily forecast strip, stats bar. Fetches forecasts via WebSocket API (HA 2023.9+).
-
+![Chart Card](asset/images/graph.png)
 ![Weather Card](asset/images/meteo-card.png)
-![Weather Forecast](asset/images/meteo-forecast.png)
-
-**Energy Flow Card** — Real-time energy flow: grid, solar, battery, home consumption. All source nodes optional except `home_power`.
-
-![Energy Flow](asset/images/energy-card.png)
-
-**Media Player Card** — Blurred album art background, animated progress bar, full transport controls, volume slider, source selector.
-
-![Media Player](asset/images/media-player-cards.png)
-
-**Lights / Lights Expand** — Compact light list; the Expand variant shows inline brightness + CT sliders per row.
-
-![Lights](asset/images/lights-cards.webp)
-
-**Climate / Climate Compact** — Target temperature, HVAC modes, fan speed. Compact version lists multiple thermostats.
-
-![Climate](asset/images/climate-e-compact-cards.webp)
-
-**Sensors & Doors** — Environmental sensors with alert thresholds; binary sensors with colored status pills.
-
-![Sensors](asset/images/sensor.webp)
-![Doors](asset/images/doors.webp)
-
-**Battery Status** — Circular SVG rings or linear bars, color-coded: green · amber warning · orange critical.
-
-![Battery](asset/images/battery-cards.webp)
-
-**Buttons Bar & Grid** — Quick-access buttons for lights, scenes, switches, service calls.
-
-![Buttons](asset/images/bar-e-grid-button-cards.webp)
-
-**Switches** — Toggle list with icon + ON/OFF pill. Icon click toggles, row click opens More Info.
-
-![Switches](asset/images/switches-cards.webp)
-
-**Clock Card** — Ambient clock with entity info in bottom bar or sidebar (up to 3 extra entities).
-
-![Clock](asset/images/clock-card.webp)
-
-**Person Card** — Presence tracking list: avatars (entity_picture or fallback icon), status dot (Home / Zone / Away), optional linked battery sensor per person. Themes: `dark` · `light` · `auto`.
-
-```yaml
-type: custom:wesmart-person-card
-title: Family
-theme: dark
-entities:
-  - entity: person.massimo
-    battery_entity: sensor.massimo_iphone_battery_level
-  - entity: person.giulia
-```
-
-**Scene Interpolator** ⚠️ *Early development* — XY pad for smooth bilinear interpolation between 4 lighting scenes (brightness + color temperature). Drag the thumb to blend atmospheres in real time. Supports single lights and groups; auto-detects color temp capability and clamps to entity range.
-
-```yaml
-type: custom:wesmart-scene-interpolator-card
-entity: light.gruppo_salotto
-corners:
-  top_left:    { name: "Mattina",    brightness: 80, color_temp: 200 }
-  top_right:   { name: "Pomeriggio", brightness: 60, color_temp: 300 }
-  bottom_left: { name: "Sera",       brightness: 40, color_temp: 400 }
-  bottom_right: { name: "Notte",     brightness: 10, color_temp: 500 }
-```
-
-> ⚠️ Scene Interpolator is in early development. YAML config and behavior may change without notice. Not recommended for production dashboards.
+![Energy Flow Card](asset/images/energy-card.png)
+![Media Player Card](asset/images/media-player-cards.png)
 
 ---
 
----
+## 🏗️ Architettura & Standard
 
-## ⚗️ WeSmart Labs
-
-> **EXPERIMENTAL — Do not use in production.**
-> May contain bugs, incomplete features, and breaking YAML changes without notice. No backwards compatibility guaranteed.
-
-Proofs of concept exploring new layout patterns beyond the standard card metaphor.
-
-**→ [Full Labs documentation](WeSmart-Labs/README.md)**
-
-### Cards
-
-| Card | YAML Tag | Status |
-|------|----------|--------|
-| Home Panel | `wesmart-labs-home-panel` | ⚗️ Experimental |
-| Clean Panel | `wesmart-labs-clean-panel` | ⚗️ Experimental |
-| Surface | `wesmart-labs-surface` | ⚗️ Experimental |
-| Cross Pad | `wesmart-labs-cross-pad` | ⚗️ Experimental |
-| Energy Card ⚠️ | `wesmart-labs-energy-card` | ⚗️ Experimental |
-
-> ⚠️ **Energy Card** is in early development. Non finita, non usare. YAML config and behavior may change.
-
-**Home Panel** — Dense tablet dashboard: weather + presence, KPI tiles, light controls, climate + security, system updates + AI tasks.
-
-![Home Panel](asset/images/labs/labs-home-panel.png)
-
-**Clean Panel** — Refined overview inspired by Claude AI light aesthetic. Weather and climate side by side, interactive light rows with brightness bar.
-
-**Surface** — The cardless dashboard. Content floats directly on the background. No card container, no border.
-
-![Surface](asset/images/labs/labs-surface.png)
-
-**Cross Pad** — Transparent button pad. A single cross divides space into four pressable quadrants. No card shell.
-
-**Energy Card** — Advanced energy dashboard with live flow, usage gauge, and device list.
+Tutte le card sono sviluppate secondo i migliori standard web moderni:
+- **Web Components**: ogni card estende `HTMLElement` ed è registrata tramite `customElements.define`.
+- **Shadow DOM**: stili CSS completamente isolati e protetti tramite `attachShadow({ mode: 'open' })`.
+- **Zero Dipendenze**: nessun framework pesante (React, Vue, Lit), nessun transpiler, nessun bundler.
+- **Supporto Editor**: compatibilità con l'editor visuale di Lovelace e configurazione manuale YAML avanzata.
 
 ---
 
-## Project Structure
+## 📖 Documentazione Dettagliata
 
-```
-.
-├── WeSmart-Original/        # Fixed palette — 19 cards
-│   ├── Light/               # Single light card
-│   ├── Lights/              # Lights list + Lights Expand
-│   ├── Climate/             # Climate + Climate Compact
-│   ├── Sensors/             # Sensors card
-│   ├── Doors/               # Doors card
-│   ├── Switches/            # Switches card
-│   ├── Buttons/             # Bar + Grid button cards
-│   ├── Battery/             # Battery status card
-│   ├── Clock/               # Clock card
-│   ├── History/             # History graph card
-│   ├── Weather/             # Weather card
-│   ├── Energy/              # Energy flow card
-│   ├── MediaPlayer/         # Media player card
-│   ├── Chart/               # Chart card
-│   ├── Person/              # Person presence card
-│   └── SceneInterpolator/   # ⚠️ XY pad scene blending (early dev)
-│
-├── WeSmart-InfiniteColor/   # Dynamic HSL color engine — 15 cards
-│   ├── Light/ Lights/       # Light cards
-│   ├── Climate/             # Climate cards
-│   ├── Sensors/ Doors/      # Sensor cards
-│   ├── Switches/ Battery/   # Switch + battery cards
-│   ├── Garbage/             # Autonomous garbage calendar
-│   ├── Buttons/             # Bar + Grid button cards
-│   ├── Clock/ History/      # Clock + history cards
-│   └── Chart/               # Infinite Chart card
-│
-├── WeSmart-Labs/            # ⚗️ Experimental — 5 cards
-│   ├── wesmart-labs-home-panel.js
-│   ├── wesmart-labs-clean-panel.js
-│   ├── wesmart-labs-surface.js
-│   ├── wesmart-labs-cross-pad.js
-│   └── wesmart-labs-energy-card.js
-│
-├── asset/
-│   ├── images/              # Preview screenshots
-│   └── video/               # Demo videos
-│
-└── doc/
-    └── README.md            # Full technical documentation
-```
+Per la guida completa a ciascuna opzione di configurazione YAML, visualizza la documentazione tecnica in [`doc/README.md`](doc/README.md) o entra nella singola cartella in [`cards/`](cards/).
 
 ---
 
-## Architecture
-
-All cards follow the same pattern — no build step, no dependencies:
-
-```
-Single JS file (IIFE)
-  └─ class extends HTMLElement
-      ├─ attachShadow({ mode: 'open' })   → isolated DOM + styles
-      ├─ setConfig(config)                → parse YAML, call _render()
-      ├─ set hass(hass)                   → receive state updates, call _updateState()
-      ├─ _render()                        → inject <style> + HTML into shadow DOM
-      ├─ _updateState()                   → update DOM from hass.states
-      └─ _bindEvents()                    → add click/pointer listeners
-
-customElements.define('wesmart-*-card', ...)
-window.customCards.push({ type, name, description })
-```
-
----
-
-*Inspired by the WeSmart AI aesthetic.*
+*Creato con passione da [Massimo Di Vona](https://www.wearesmart.it) & potenziato dall'Intelligenza Artificiale.*
