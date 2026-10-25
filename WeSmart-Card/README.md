@@ -1,12 +1,23 @@
 # WeSmart Card (`wesmart-card.js` v1.1.0) — All-in-One Modular Suite
 
-**`WeSmart-Card`** è il nuovo sistema **All-in-One** per Home Assistant ispirato al paradigma *Bubble Card*: **un solo file `.js` da installare** (`wesmart-card.js`) e **una sola card da aggiungere** (`custom:wesmart-card`), con una **finestra di configurazione visuale (GUI)** da cui selezionare il tipo di card (`card_type`), le entità e la palette **InfiniteColor**.
+**`WeSmart-Card`** rappresenta **il passo evolutivo successivo** rispetto alle card singole WeSmart: un nuovo sistema **All-in-One** per Home Assistant pensato per migliorare, unificare e ottimizzare l'esperienza d'uso grazie a **un solo file `.js` da installare** (`wesmart-card.js`) e a una **finestra di configurazione grafica dedicata (Visual Editor GUI)** in stile *Bubble Card*.
+
+![WeSmart Card All-in-One Visual Configurator](./assets/wesmart-card-configurator.png)
 
 ---
 
-## ✨ Tipi di Card Disponibili (`card_type`)
+## 🎯 Visione & Goal del Progetto
 
-Nella versione **v1.1.0**, il selettore visuale in cima all'editor include **5 tipologie**:
+Dopo aver consolidato il catalogo delle card standalone (in `cards/`) e il motore cromatico **InfiniteColor**, l'obiettivo di **`WeSmart-Card`** è:
+1. **Zero YAML obbligatorio**: configurare qualsiasi card, entità, comportamento e palette cromatica direttamente dall'**interfaccia visuale di Home Assistant** con anteprima in tempo reale.
+2. **Un solo file, tutte le card**: eliminare la necessità di caricare decine di risorse separate in Lovelace; basta registrare `wesmart-card.js` e scegliere il **Tipo di Card (`card_type`)** in cima al configuratore.
+3. **Migrazione, Ottimizzazione & Nuove Card**: il **goal finale** è portare progressivamente **tutte le card WeSmart** dentro questa nuova architettura All-in-One, migliorandone prestazioni, animazioni e opzioni di personalizzazione, oltre ad **aggiungere nuove tipologie di card** inedite.
+
+---
+
+## ✨ Tipi di Card Già Integrati (`card_type` — v1.1.0)
+
+Appena aggiungi **WeSmart Card (All-in-One)** nella tua dashboard, in cima alla finestra di configurazione puoi selezionare con un clic tra **5 tipologie**:
 
 | `card_type` | Icona | Nome | Descrizione |
 |---|---|---|---|
@@ -16,7 +27,22 @@ Nella versione **v1.1.0**, il selettore visuale in cima all'editor include **5 t
 | **`chart`** | 📈 | **Chart (Grafico)** | Grafico interattivo per **1 o più entità sovrapposte** (sensori numerici o binari) con **Drag-to-Zoom**, **Tooltip hover**, pill temporali (`1h` / `6h` / `24h` / `7d`), altezza regolabile e griglia. |
 | **`history`** | 📊 | **History (Storico)** | Lista storica **multi-entità** dove **ogni riga ha il proprio mini-grafico dedicato** (curva SVG con `min – max` per sensori numerici, barra timeline con `Attivo X%` per entità binarie). |
 
-> 🔜 **Prossimi Moduli pronti per l'integrazione in `wesmart-card.js`**: `climate`, `climate-compact`, `sensors`, `doors`, `switches`, `buttons-bar`, `buttons-grid`, `media-player`, `weather`, `energy-flow`.
+---
+
+## 🗺️ Roadmap di Migrazione verso `WeSmart-Card`
+
+| Modulo / Famiglia | Stato in `wesmart-card.js` | Caratteristiche nella Nuova Versione GUI |
+|---|---|---|
+| 💡 **Light (Singola)** | ✅ **Disponibile (`v1.0+`)** | Selettore entità nativo, toggle slider Luminosità/Kelvin/RGB, colore dinamico RGB |
+| 📋 **Lights (Lista)** | ✅ **Disponibile (`v1.0+`)** | Gestore lista interattivo (riordino `↑`/`↓`, nome/icona per riga `⚙️`, Master Toggle) |
+| 🎚 **Lights Expand** | ✅ **Disponibile (`v1.0+`)** | Fisarmonica inline animata Luminosità + Kelvin per ogni riga |
+| 📈 **Chart (Grafico)** | ✅ **Disponibile (`v1.1+`)** | Qualsiasi sensore, Drag-to-Zoom, Tooltip, selettore `1h/6h/24h/7d`, slider altezza e griglia |
+| 📊 **History (Storico)** | ✅ **Disponibile (`v1.1+`)** | Mini-grafico linea o barra timeline per riga con statistiche `min–max` / `Attivo %` |
+| 🌡️ **Climate & Compact** | 🔜 *In arrivo* | Termostato singolo e multi-zona con configurazione visuale HVAC e step temperatura |
+| 📟 **Sensors & Battery** | 🔜 *In arrivo* | Soglie alert visuali, display lineare/circolare/icona da GUI |
+| 🚪 **Doors & Switches** | 🔜 *In arrivo* | Sensori porte/finestre e interruttori multi-entità con icone dinamiche |
+| 🔘 **Buttons Bar & Grid** | 🔜 *In arrivo* | Creazione visuale di pulsanti rapidi, scene e chiamate servizio |
+| ⚡ **Energy, Weather & Media** | 🔜 *In arrivo* | Flussi energetici, meteo e media player configurabili interamente da interfaccia |
 
 ---
 
@@ -47,6 +73,8 @@ Vai su **Impostazioni → Dashboard → ⋮ (in alto a destra) → Risorse → +
 ---
 
 ## ⚙️ Esempi YAML (Opzionali)
+
+Anche se tutta la configurazione avviene tramite l'Editor Visuale GUI, puoi sempre visualizzare o modificare il codice YAML:
 
 ### 1. Luce Singola (`card_type: light`)
 ```yaml
@@ -107,7 +135,7 @@ entities:
   - entity: sensor.temperatura_soggiorno
     name: Soggiorno
   - entity: sensor.temperatura_camera
-    name: Camera
+    name: Camera da letto
 ```
 
 ### 5. Storico Multi-Riga (`card_type: history`)

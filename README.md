@@ -18,12 +18,23 @@ This project was born for the Home Assistant community, merging passion for smar
 
 ---
 
-## 📢 Novità & Riorganizzazione 2.0
+## 🚀 Il Passo Successivo: `WeSmart-Card` (All-in-One Studio con Configurazione Grafica UI)
 
 > [!TIP]
-> **✨ NUOVA: `WeSmart-Card` (`wesmart-card.js` — All-in-One con Editor Visuale GUI)**  
-> Nella nuova cartella dedicata **[`WeSmart-Card/`](WeSmart-Card/)** trovi la nuova generazione **All-in-One in stile Bubble Card**: **un solo file `.js`** (`wesmart-card.js`) e **una sola card** (`custom:wesmart-card`) da cui scegliere direttamente dall'interfaccia grafica il **Tipo di Card (`card_type`)** (a partire dal pilota *Light*, *Lights* e *Lights Expand*, con estensione progressiva a tutte le altre categorie!).  
-> 👉 **[Vai alla Guida & Documentazione di `WeSmart-Card/`](WeSmart-Card/README.md)**
+> **✨ Nuova Generazione All-in-One (`WeSmart-Card/wesmart-card.js` — `v1.1.0`)**  
+> **[`WeSmart-Card/`](WeSmart-Card/)** rappresenta **il passo evolutivo successivo** rispetto alle card precedenti. L'obiettivo è migliorare e ottimizzare l'esperienza d'uso introducendo una **UI di configurazione grafica dedicata (Visual Editor)** in stile *Bubble Card*, racchiusa in **un unico file `.js`** (`wesmart-card.js`, tag `custom:wesmart-card`).
+>
+> **🎯 Il Goal del Progetto:**  
+> Portare progressivamente **tutte le card del catalogo WeSmart** dentro questa nuova versione All-in-One dotata di configuratore grafico, migliorarle, ottimizzarle e — dove possibile — **aggiungerne di nuove**.
+>
+> - **Moduli già attivi nel configuratore (`v1.1.0`)**: 💡 **Light (Singola)** · 📋 **Lights (Lista)** · 🎚 **Lights Expand (Slider Inline)** · 📈 **Chart (Grafico con Zoom & Tooltip)** · 📊 **History (Storico per riga)**
+> - 👉 **[Vai alla Guida Completa di `WeSmart-Card/`](WeSmart-Card/README.md)** · **[Documentazione Tecnica](WeSmart-Card/DOCUMENTATION.md)**
+
+![WeSmart Card All-in-One Visual Configurator](WeSmart-Card/assets/wesmart-card-configurator.png)
+
+---
+
+## 📢 Novità & Riorganizzazione 2.0
 
 > [!IMPORTANT]
 > **Suite Unificata (Original + InfiniteColor):**  

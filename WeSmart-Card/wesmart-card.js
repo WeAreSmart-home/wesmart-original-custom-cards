@@ -2530,7 +2530,7 @@
       container.innerHTML = `
         <div class="editor-banner">
           <div class="banner-title">
-            <ha-icon icon="mdi:view-dashboard-Edit-outline" style="color:#D97757"></ha-icon>
+            <ha-icon icon="mdi:view-dashboard-edit-outline" style="color:#D97757"></ha-icon>
             <span>WeSmart Card — All-in-One Studio</span>
           </div>
           <span class="banner-badge">v${CARD_VERSION}</span>

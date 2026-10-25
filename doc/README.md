@@ -2,13 +2,16 @@
 
 Una collezione unificata di card personalizzate per il Dashboard di Home Assistant, con motore cromatico dinamico e stile **WeSmart**: tema scuro carbone caldo, accento arancione (o a scelta libera), tipografia minimale.
 
+> **🚀 Nuovo Passo Evolutivo — [`WeSmart-Card` (`wesmart-card.js`)](../WeSmart-Card/README.md)**:  
+> Abbiamo avviato la transizione verso un'unica suite **All-in-One con configurazione grafica (Visual Editor UI)** in stile *Bubble Card*. Il goal è portare progressivamente tutte le card WeSmart dentro [`WeSmart-Card/wesmart-card.js`](../WeSmart-Card/wesmart-card.js), migliorarle e aggiungerne di nuove. Attualmente sono già integrati i moduli **Light**, **Lights**, **Lights Expand**, **Chart** e **History**.
+
 ---
 
 ## Card
 
 | Card | File | Tipo entità | Tema |
 |------|------|-------------|-------|
-| [**✨ WeSmart Card (All-in-One)**](../WeSmart-Card/README.md) | `WeSmart-Card/wesmart-card.js` | `light.*` (All-in-One Visual Editor) | Dark / Light / Auto |
+| [**✨ WeSmart Card (All-in-One)**](../WeSmart-Card/README.md) | `WeSmart-Card/wesmart-card.js` | All-in-One (`light`, `lights`, `lights-expand`, `chart`, `history` + Visual Editor) | Dark / Light / Auto |
 | [WeSmart Light Card](#wesmart-light-card) | `cards/Light/wesmart-light-card.js` | `light.*` | Dark / Light / Auto |
 | [WeSmart Lights Card](#wesmart-lights-card) | `cards/Lights/wesmart-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
 | [WeSmart Lights Expand Card](#wesmart-lights-expand-card) | `cards/Lights/wesmart-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |

@@ -1,6 +1,10 @@
 # WeSmart Card (`wesmart-card.js` v1.1.0) — Documentazione Tecnica & Architettura All-in-One
 
-Questa guida documenta nel dettaglio l'architettura modulare di **`WeSmart-Card/wesmart-card.js`** (`type: custom:wesmart-card`), progettata sul modello di *Bubble Card*: un **unico file JavaScript** che espone **un'unica card** nel selettore di Home Assistant e permette di scegliere e configurare ogni tipologia di card (`card_type`) tramite il **Visual Editor GUI** integrato (`<wesmart-card-editor>`).
+Questa guida documenta nel dettaglio l'architettura modulare di **`WeSmart-Card/wesmart-card.js`** (`type: custom:wesmart-card`), che rappresenta il **passo evolutivo successivo** rispetto alle card standalone precedenti: un **unico file JavaScript** che espone **un'unica card** nel selettore di Home Assistant e permette di scegliere, ottimizzare e configurare ogni tipologia di card (`card_type`) tramite il **Visual Editor GUI** integrato (`<wesmart-card-editor>`).
+
+> **Obiettivo del Progetto**: Portare progressivamente tutte le card del catalogo WeSmart dentro questa nuova architettura All-in-One con configurazione grafica, migliorandole e aggiungendone di nuove.
+
+![WeSmart Card All-in-One Visual Configurator](./assets/wesmart-card-configurator.png)
 
 ---
 
