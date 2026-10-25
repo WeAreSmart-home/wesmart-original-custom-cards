@@ -20,6 +20,11 @@ This project was born for the Home Assistant community, merging passion for smar
 
 ## 📢 Novità & Riorganizzazione 2.0
 
+> [!TIP]
+> **✨ NUOVA: `WeSmart-Card` (`wesmart-card.js` — All-in-One con Editor Visuale GUI)**  
+> Nella nuova cartella dedicata **[`WeSmart-Card/`](WeSmart-Card/)** trovi la nuova generazione **All-in-One in stile Bubble Card**: **un solo file `.js`** (`wesmart-card.js`) e **una sola card** (`custom:wesmart-card`) da cui scegliere direttamente dall'interfaccia grafica il **Tipo di Card (`card_type`)** (a partire dal pilota *Light*, *Lights* e *Lights Expand*, con estensione progressiva a tutte le altre categorie!).  
+> 👉 **[Vai alla Guida & Documentazione di `WeSmart-Card/`](WeSmart-Card/README.md)**
+
 > [!IMPORTANT]
 > **Suite Unificata (Original + InfiniteColor):**  
 > Le collezioni *WeSmart Original* e *WeSmart InfiniteColor* sono state unificate nella cartella [`cards/`](cards/).  
@@ -55,6 +60,7 @@ La suite comprende **17 categorie** e oltre **20 card**:
 
 | Card | Cartella | Tag YAML Principale | Alias Retrocompatibile | Entità / Tipo |
 |------|----------|---------------------|------------------------|---------------|
+| **✨ WeSmart Card (All-in-One)** | [`WeSmart-Card/`](WeSmart-Card/) | `wesmart-card` | — | **All-in-One con Visual Editor GUI** (`card_type: light \| lights \| lights-expand` + prossime card) |
 | **Battery** | [`cards/Battery/`](cards/Battery/) | `wesmart-battery-card` | `wesmart-battery-status-card`, `wesmart-infinite-battery-card` | `sensor.*` (batterie) |
 | **Buttons Bar** | [`cards/Buttons/`](cards/Buttons/) | `wesmart-buttons-bar-card` | `wesmart-infinite-buttons-bar-card` | qualsiasi / service |
 | **Buttons Grid** | [`cards/Buttons/`](cards/Buttons/) | `wesmart-buttons-grid-card` | `wesmart-infinite-buttons-grid-card` | qualsiasi / service |
@@ -66,7 +72,9 @@ La suite comprende **17 categorie** e oltre **20 card**:
 | **Energy Flow** | [`cards/Energy/`](cards/Energy/) | `wesmart-energy-flow-card` | `wesmart-infinite-energy-flow-card` | `sensor.*` (potenza/energia) |
 | **Garbage** | [`cards/Garbage/`](cards/Garbage/) | `wesmart-garbage-card` | `wesmart-infinite-garbage-card` | calendario raccolta differenziata |
 | **History** | [`cards/History/`](cards/History/) | `wesmart-history-card` | `wesmart-infinite-history-card`, `wesmart-infinite-color-card` | qualsiasi entità / cronologia |
-| **Light Suite ✨ v2.1 (3-in-1)** | [`cards/Light/`](cards/Light/) | `wesmart-light-card` | `wesmart-infinite-light-card`, `wesmart-lights-card`, `wesmart-lights-expand-card` | `light.*` (**Singola + Lista + Expand** selezionabili da **Visual Editor GUI**) |
+| **Light** | [`cards/Light/`](cards/Light/) | `wesmart-light-card` | `wesmart-infinite-light-card` | `light.*` (singola, dimmer, rgb) |
+| **Lights** | [`cards/Lights/`](cards/Lights/) | `wesmart-lights-card` | `wesmart-infinite-lights-card` | `light.*` (lista multi-luce) |
+| **Lights Expand** | [`cards/Lights/`](cards/Lights/) | `wesmart-lights-expand-card` | `wesmart-infinite-lights-expand-card` | `light.*` (lista espandibile con slider) |
 | **Media Player** | [`cards/MediaPlayer/`](cards/MediaPlayer/) | `wesmart-media-player-card` | `wesmart-infinite-media-player-card` | `media_player.*` |
 | **Person** | [`cards/Person/`](cards/Person/) | `wesmart-person-card` | `wesmart-infinite-person-card` | `person.*` (presenza e zone) |
 | **Scene Interpolator** | [`cards/SceneInterpolator/`](cards/SceneInterpolator/) | `wesmart-scene-interpolator-card` | `wesmart-infinite-scene-interpolator-card` | `light.*` (morphing 2D 4 scene) |

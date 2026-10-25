@@ -1,137 +1,202 @@
-# WeSmart Light Card — 3-in-1 Unified Suite (`v2.1.0`)
+# WeSmart Light Card
 
-Un **unico file `.js`** (`wesmart-light-card.js`) e **un'unica card** nel selettore di Home Assistant che racchiude **3 modalità di visualizzazione** selezionabili direttamente dall'**Editor Visuale (GUI)** in stile *Bubble Card*, oltre al motore **InfiniteColor** integrato.
+Una card personalizzata per Home Assistant per entità luce, ispirata all'estetica **Anthropic WeSmart AI**.
 
----
+## Anteprima
 
-## ✨ Le 3 Modalità Integrate (`card_type`)
+Card scura con accenti arancioni caldi, animazioni fluide e un design minimale.
 
-Appena aggiungi **WeSmart Light Card (3-in-1)** nella dashboard di Home Assistant, in cima alla finestra di configurazione trovi il selettore visuale **Tipo di Card**:
+- Sfondo: carbone caldo scuro `#292524`
+- Accento: arancione Claude `#D97757`
+- Tipografia: sans-serif di sistema / Inter
+- Effetti glow quando la luce è accesa
 
-| Modalità (`card_type`) | Icona | Descrizione |
-|---|---|---|
-| **`single`** *(Default)* | 💡 **Singola** | Controllo dedicato per **1 luce** con slider interattivi trascinabili per **Luminosità (1–100%)**, **Temperatura Colore (Kelvin)** e **Colore RGB (Hue 0–360°)**. |
-| **`list`** | 📋 **Lista Compatta** | Lista **multi-luce** con **Master Toggle** nell'header (accende/spegne tutto il gruppo), toggle singoli per riga e apertura **More Info** al tap. |
-| **`expand`** | 🎚 **Lista Expand** | Lista **multi-luce espandibile a fisarmonica**: cliccando su una riga accesa si apre un pannello animato inline con gli slider di **Luminosità** e **Temperatura Colore** senza uscire dalla card. |
+## Funzionalità
 
-> **Passaggio intelligente tra modalità**: se passi da `single` a `list` o `expand` nell'Editor Visuale, la luce configurata viene automaticamente migrata nella lista `entities` (e viceversa).
+- Accendi/spegni (clic sul toggle o sull'icona)
+- Slider luminosità con anteprima in tempo reale
+- Slider temperatura colore Kelvin (supporto HA 2022.9+ e legacy mireds)
+- Slider tonalità (hue) minimal per luci a colori
+- Animazione di apertura/chiusura fluida dei controlli
+- Animazione pulse glow quando la luce è accesa
+- Overlay stato non disponibile
+- Responsive e touch-friendly
 
----
+## Installazione
 
-## 🖥 Editor Visuale GUI Integrato
+### Manuale
 
-Non serve scrivere YAML! Tutta la configurazione avviene tramite la finestra dedicata:
+1. Copia `wesmart-light-card.js` nella cartella config di Home Assistant:
+   ```
+   config/www/wesmart-light-card.js
+   ```
 
-1. **Selettore Tipo di Card (`single` / `list` / `expand`)** sempre visibile in alto.
-2. **Selettore Entità & Icone nativo HA (`<ha-form>`)** con ricerca istantanea delle luci (`domain: light`) e picker icone MDI.
-3. **Gestore Lista Luci Interattivo** (nelle modalità `list` ed `expand`):
-   - Aggiungi luci con `+ Aggiungi Luce`
-   - Riordina le righe con `↑` e `↓`
-   - Espandi `⚙️` per personalizzare **Nome** e **Icona** di ogni singola riga
-   - Rimuovi con `✕`
-4. **InfiniteColor Palette Studio**:
-   - **8 Preset rapidi** (*Claude Orange `#D97757`*, *Ocean Blue `#3B82F6`*, *Forest Green `#10B981`*, *Violet `#8B5CF6`*, *Rose `#EC4899`*, *Amber `#F59E0B`*, *Cyan `#06B6D4`*, *Slate `#64748B`*)
-   - **Color Picker nativo + input HEX** per generare la palette dinamica da qualsiasi colore
-   - **Selettore Tema** (`Dark`, `Light`, `Auto`)
-   - **Colore Dinamico Luce RGB** (`dynamic_light_color`): adatta l'accento della card al colore reale della lampadina RGB accesa.
+2. In Home Assistant → **Impostazioni → Dashboard → Risorse**, aggiungi:
+   ```
+   /local/wesmart-light-card.js   (modulo JavaScript)
+   ```
 
----
+3. Ricarica il browser (hard refresh: Cmd+Shift+R / Ctrl+Shift+R).
 
-## 📦 Installazione (Un solo file in una sottocartella ordinata)
+### HACS (se pubblicato)
 
-### 1. Copia il file in Home Assistant
-Crea una sottocartella ordinata `wesmart-cards` dentro `/config/www/` e copia **solo questo file**:
+1. HACS → Frontend → "+ Esplora e Scarica" → cerca **WeSmart Light Card**
+2. Scarica e aggiungi alle Risorse.
 
-```text
-/config/www/wesmart-cards/wesmart-light-card.js
-```
+## Configurazione
 
-### 2. Registra la Risorsa in Lovelace
-Vai in **Impostazioni → Dashboard → ⋮ (in alto a destra) → Risorse → Aggiungi risorsa**:
-
-- **URL:** `/local/wesmart-cards/wesmart-light-card.js?v=2.1.0`
-- **Tipo di risorsa:** `Modulo JavaScript`
-
-*(In alternativa, in `configuration.yaml`)*:
-```yaml
-lovelace:
-  resources:
-    - url: /local/wesmart-cards/wesmart-light-card.js?v=2.1.0
-      type: module
-```
-
-> **Nota importante:** in Home Assistant la cartella fisica `/config/www/` corrisponde sempre all'URL `/local/`.
-
----
-
-## 🚀 Utilizzo da Interfaccia (Consigliato)
-
-1. Apri la tua Dashboard → **Modifica Dashboard** → **+ Aggiungi Card**.
-2. Cerca **WeSmart Light Card (3-in-1)**.
-3. Scegli in alto tra **💡 Singola**, **📋 Lista Compatta** o **🎚 Lista Expand** e configura entità, controlli e colori con l'anteprima live!
-
----
-
-## ⚙️ Esempi YAML (Opzionali)
-
-### Modalità 1: Luce Singola (`card_type: single`)
 ```yaml
 type: custom:wesmart-light-card
-card_type: single
-entity: light.soggiorno
-name: Luce Soggiorno
-color: '#D97757'
-theme: dark
+entity: light.living_room
+```
+
+### Tutte le opzioni
+
+| Opzione | Tipo | Default | Descrizione |
+|---------|------|---------|-------------|
+| `entity` | string | — | **Obbligatorio.** Entità `light.*` |
+| `name` | string | auto | Sovrascrittura nome visualizzato |
+| `icon` | string | auto | Sovrascrittura icona (mdi:*) |
+| `show_brightness` | boolean | `true` | Mostra slider luminosità |
+| `show_color_temp` | boolean | `true` | Mostra slider Kelvin/temperatura colore (solo per luci che la supportano) |
+| `show_color` | boolean | `true` | Mostra slider tonalità (hue) per luci a colori |
+| `collapse_when_off` | boolean | `false` | Nasconde i controlli quando la luce è spenta; si apre automaticamente quando si accende |
+
+### Esempio con tutte le opzioni
+
+```yaml
+type: custom:wesmart-light-card
+entity: light.bedroom_lamp
+name: Lampada Camera
+icon: mdi:floor-lamp
 show_brightness: true
 show_color_temp: true
 show_color: true
-collapse_when_off: false
-dynamic_light_color: true
-show_footer: true
+collapse_when_off: true
 ```
 
-### Modalità 2: Lista Compatta (`card_type: list`)
-```yaml
-type: custom:wesmart-light-card
-card_type: list
-title: Luci Zona Giorno
-color: '#3B82F6'
-theme: dark
-dynamic_light_color: false
-show_footer: true
-entities:
-  - light.soggiorno
-  - entity: light.cucina
-    name: Isola Cucina
-    icon: mdi:TrackLight
-  - light.ingresso
-```
+## Modalità luce supportate
 
-### Modalità 3: Lista Espandibile (`card_type: expand`)
-```yaml
-type: custom:wesmart-light-card
-card_type: expand
-title: Luci Camere
-color: '#8B5CF6'
-theme: auto
-dynamic_light_color: true
-show_footer: true
-entities:
-  - entity: light.camera_matrimoniale
-    name: Camera Matrimoniale
-    icon: mdi:bed-king-outline
-  - entity: light.comodino_ sinistra
-    name: Comodino SX
-  - light.studio
-```
+La card rileva automaticamente le capacità tramite `supported_color_modes`.
+Lo slider Kelvin appare anche per luci che riportano `color_temp` come attributo (es. `rgbww` con bianco regolabile).
+Supporta gli attributi moderni di HA 2022.9+ (`color_temp_kelvin`, `min_color_temp_kelvin`, `max_color_temp_kelvin`) con fallback agli attributi legacy (`color_temp`, `min_mireds`, `max_mireds`).
+
+| Modalità | Luminosità | Kelvin/CT | Colore |
+|----------|:----------:|:---------:|:------:|
+| `onoff` | — | — | — |
+| `brightness` | ✓ | — | — |
+| `color_temp` | ✓ | ✓ | — |
+| `hs` | ✓ | — | ✓ |
+| `rgb` | ✓ | — | ✓ |
+| `rgbw` | ✓ | — | ✓ |
+| `rgbww` | ✓ | ✓* | ✓ |
+| `xy` | ✓ | — | ✓ |
+
+*\* Solo se la luce riporta gli attributi Kelvin (`color_temp_kelvin` / `min_color_temp_kelvin` / `max_color_temp_kelvin`) o legacy mireds.*
+
+## Selezione Colore (Hue Slider)
+
+Per le luci che supportano il colore, la card mostra uno **slider tonalità** minimal con gradiente arcobaleno — stesso stile degli altri slider. Trascinando il cursore si invia il colore come `hs_color` al servizio `light.turn_on`.
 
 ---
+---
 
-## 🔄 Retrocompatibilità Totale
+# WeSmart Light Card
 
-Il file `wesmart-light-card.js` registra automaticamente tutti i tag precedenti come alias:
-- `custom:wesmart-light-card` / `custom:wesmart-infinite-light-card`
-- `custom:wesmart-lights-card` / `custom:wesmart-infinite-lights-card` (forza automaticamente `card_type: list` se non specificato)
-- `custom:wesmart-lights-expand-card` / `custom:wesmart-infinite-lights-expand-card` (forza automaticamente `card_type: expand` se non specificato)
+A custom Home Assistant light entity card styled after the **Anthropic WeSmart AI** aesthetic.
 
-Per i dettagli tecnici sull'architettura dell'Editor Visuale (`getConfigElement()`, `<ha-form>`, eventi `config-changed`), consulta [`DOCUMENTATION.md`](./DOCUMENTATION.md).
+## Preview
+
+Dark card with warm orange accents, smooth animations, and a minimal Claude-inspired design.
+
+- Background: deep warm charcoal `#292524`
+- Accent: Claude orange `#D97757`
+- Typography: system sans-serif / Inter
+- Glow effects when the light is on
+
+## Features
+
+- Toggle on/off (click toggle or icon)
+- Brightness slider with live preview
+- Color temperature slider in Kelvin (HA 2022.9+ and legacy mireds support)
+- Minimal hue slider for color lights
+- Smooth open/close animation for the controls section
+- Pulse glow animation when light is on
+- Unavailable state overlay
+- Responsive and touch-friendly
+
+## Installation
+
+### Manual
+
+1. Copy `wesmart-light-card.js` to your Home Assistant config folder:
+   ```
+   config/www/wesmart-light-card.js
+   ```
+
+2. In Home Assistant → **Settings → Dashboards → Resources**, add:
+   ```
+   /local/wesmart-light-card.js   (JavaScript module)
+   ```
+
+3. Reload the browser (hard refresh: Cmd+Shift+R / Ctrl+Shift+R).
+
+### HACS (if published)
+
+1. HACS → Frontend → "+ Explore & Download" → search **WeSmart Light Card**
+2. Download and add to Resources.
+
+## Configuration
+
+```yaml
+type: custom:wesmart-light-card
+entity: light.living_room
+```
+
+### All options
+
+| Option             | Type    | Default | Description                         |
+|--------------------|---------|---------|-------------------------------------|
+| `entity`           | string  | —       | **Required.** `light.*` entity      |
+| `name`             | string  | auto    | Override display name               |
+| `icon`             | string  | auto    | Override icon (mdi:*)               |
+| `show_brightness`   | boolean | `true`  | Show brightness slider              |
+| `show_color_temp`   | boolean | `true`  | Show Kelvin/color temperature slider (only for lights that support it) |
+| `show_color`        | boolean | `true`  | Show hue slider for color lights    |
+| `collapse_when_off` | boolean | `false` | Hide controls when light is off; automatically expands when turned on |
+
+### Example with all options
+
+```yaml
+type: custom:wesmart-light-card
+entity: light.bedroom_lamp
+name: Bedroom Lamp
+icon: mdi:floor-lamp
+show_brightness: true
+show_color_temp: true
+show_color: true
+collapse_when_off: true
+```
+
+## Supported light modes
+
+The card auto-detects capabilities via `supported_color_modes`.
+The Kelvin slider also appears for lights that report `color_temp` as an attribute (e.g. `rgbww` with tunable white).
+Supports modern HA 2022.9+ attributes (`color_temp_kelvin`, `min_color_temp_kelvin`, `max_color_temp_kelvin`) with fallback to legacy (`color_temp`, `min_mireds`, `max_mireds`).
+
+| Mode         | Brightness | Kelvin/CT | Color |
+|--------------|:----------:|:---------:|:-----:|
+| `onoff`      | —          | —         | —     |
+| `brightness` | ✓          | —         | —     |
+| `color_temp` | ✓          | ✓         | —     |
+| `hs`         | ✓          | —         | ✓     |
+| `rgb`        | ✓          | —         | ✓     |
+| `rgbw`       | ✓          | —         | ✓     |
+| `rgbww`      | ✓          | ✓*        | ✓     |
+| `xy`         | ✓          | —         | ✓     |
+
+*\* Only if the light reports Kelvin attributes (`color_temp_kelvin` / `min_color_temp_kelvin` / `max_color_temp_kelvin`) or legacy mireds.*
+
+## Color Selection (Hue Slider)
+
+For lights that support color, the card shows a minimal **hue slider** with a rainbow gradient — same style as all other sliders. Dragging the thumb sends the color as `hs_color` via `light.turn_on`.

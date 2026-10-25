@@ -8,7 +8,10 @@ Una collezione unificata di card personalizzate per il Dashboard di Home Assista
 
 | Card | File | Tipo entità | Tema |
 |------|------|-------------|-------|
-| [WeSmart Light Card (3-in-1)](#wesmart-light-card) | `cards/Light/wesmart-light-card.js` | `light.*` (Singola / Lista / Expand) | Dark / Light / Auto |
+| [**✨ WeSmart Card (All-in-One)**](../WeSmart-Card/README.md) | `WeSmart-Card/wesmart-card.js` | `light.*` (All-in-One Visual Editor) | Dark / Light / Auto |
+| [WeSmart Light Card](#wesmart-light-card) | `cards/Light/wesmart-light-card.js` | `light.*` | Dark / Light / Auto |
+| [WeSmart Lights Card](#wesmart-lights-card) | `cards/Lights/wesmart-lights-card.js` | `light.*` (multi) | Dark / Light / Auto |
+| [WeSmart Lights Expand Card](#wesmart-lights-expand-card) | `cards/Lights/wesmart-lights-expand-card.js` | `light.*` (multi) | Dark / Light / Auto |
 | [WeSmart Climate Card](#wesmart-climate-card) | `cards/Climate/wesmart-climate-card.js` | `climate.*` | Dark / Light / Auto |
 | [WeSmart Climate Compact Card](#wesmart-climate-compact-card) | `cards/Climate/wesmart-climate-compact-card.js` | `climate.*` (multi) | Dark / Light / Auto |
 | [WeSmart Sensors Card](#wesmart-sensors-card) | `cards/Sensors/wesmart-sensors-card.js` | `sensor.*` (multi) | Dark / Light / Auto |
