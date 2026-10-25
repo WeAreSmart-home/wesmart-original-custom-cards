@@ -66,9 +66,9 @@ La suite comprende **17 categorie** e oltre **20 card**:
 | **Energy Flow** | [`cards/Energy/`](cards/Energy/) | `wesmart-energy-flow-card` | `wesmart-infinite-energy-flow-card` | `sensor.*` (potenza/energia) |
 | **Garbage** | [`cards/Garbage/`](cards/Garbage/) | `wesmart-garbage-card` | `wesmart-infinite-garbage-card` | calendario raccolta differenziata |
 | **History** | [`cards/History/`](cards/History/) | `wesmart-history-card` | `wesmart-infinite-history-card`, `wesmart-infinite-color-card` | qualsiasi entità / cronologia |
-| **Light** | [`cards/Light/`](cards/Light/) | `wesmart-light-card` | `wesmart-infinite-light-card` | `light.*` (singola, dimmer, rgb) |
-| **Lights** | [`cards/Lights/`](cards/Lights/) | `wesmart-lights-card` | `wesmart-infinite-lights-card` | `light.*` (lista compatta) |
-| **Lights Expand** | [`cards/Lights/`](cards/Lights/) | `wesmart-lights-expand-card` | `wesmart-infinite-lights-expand-card` | `light.*` (con slider integrati) |
+| **Light ✨ v2.0** | [`cards/Light/`](cards/Light/) | `wesmart-light-card` | `wesmart-infinite-light-card` | `light.*` (singola, dimmer, rgb + **Visual Editor GUI**) |
+| **Lights ✨ v2.0** | [`cards/Lights/`](cards/Lights/) | `wesmart-lights-card` | `wesmart-infinite-lights-card` | `light.*` (lista compatta + **Visual Editor GUI**) |
+| **Lights Expand ✨ v2.0** | [`cards/Lights/`](cards/Lights/) | `wesmart-lights-expand-card` | `wesmart-infinite-lights-expand-card` | `light.*` (slider inline + **Visual Editor GUI**) |
 | **Media Player** | [`cards/MediaPlayer/`](cards/MediaPlayer/) | `wesmart-media-player-card` | `wesmart-infinite-media-player-card` | `media_player.*` |
 | **Person** | [`cards/Person/`](cards/Person/) | `wesmart-person-card` | `wesmart-infinite-person-card` | `person.*` (presenza e zone) |
 | **Scene Interpolator** | [`cards/SceneInterpolator/`](cards/SceneInterpolator/) | `wesmart-scene-interpolator-card` | `wesmart-infinite-scene-interpolator-card` | `light.*` (morphing 2D 4 scene) |

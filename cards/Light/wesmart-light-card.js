@@ -1,13 +1,25 @@
 /**
- * WeSmart Infinite Light Card - Home Assistant Custom Card
+ * WeSmart Light Card - Home Assistant Custom Card
  * Single light entity card with brightness, Kelvin/CT, and hue color picker.
  * Infinite Color Engine: full palette derived from a single base color.
- * Version: 1.0.0
+ * Includes Bubble-style Visual Configurator (WeSmartLightCardEditor).
+ * Version: 2.0.0
  */
 
 (() => {
 
-  const CARD_VERSION = '1.0.0';
+  const CARD_VERSION = '2.0.0';
+
+  const PRESET_COLORS = [
+    { hex: '#D97757', name: 'WeSmart Orange (Default)' },
+    { hex: '#60B4D8', name: 'Ocean Blue' },
+    { hex: '#7EC8A0', name: 'Sage Green' },
+    { hex: '#A78BFA', name: 'Royal Purple' },
+    { hex: '#F59E0B', name: 'Warm Amber' },
+    { hex: '#EC4899', name: 'Rose Pink' },
+    { hex: '#14B8A6', name: 'Teal' },
+    { hex: '#A8A29E', name: 'Warm Stone' },
+  ];
 
   // ─── Styles ───────────────────────────────────────────────────────────────────
 
@@ -426,21 +438,40 @@
 
     // ── HA lifecycle ─────────────────────────────────────────────────────────────
 
-    static getStubConfig() {
-      return { entity: 'light.example', color: '#D97757' };
+    static getConfigElement() {
+      return document.createElement('wesmart-light-card-editor');
+    }
+
+    static getStubConfig(hass, entities) {
+      const allEntities = entities || Object.keys(hass?.states || {});
+      const firstLight = allEntities.find(e => e.startsWith('light.')) || 'light.example';
+      return {
+        entity:              firstLight,
+        color:               '#D97757',
+        theme:               'dark',
+        show_brightness:     true,
+        show_color_temp:     true,
+        show_color:          true,
+        collapse_when_off:   false,
+        dynamic_light_color: false,
+        show_footer:         true,
+      };
     }
 
     setConfig(config) {
-      if (!config.entity) throw new Error('entity is required');
+      if (!config) throw new Error('Invalid configuration');
       this._config = {
-        name:              null,
-        icon:              null,
-        color:             '#D97757',
-        show_brightness:   true,
-        show_color_temp:   true,
-        show_color:        true,
-        theme:             'dark',
-        collapse_when_off: false,
+        entity:              '',
+        name:                null,
+        icon:                null,
+        color:               '#D97757',
+        show_brightness:     true,
+        show_color_temp:     true,
+        show_color:          true,
+        theme:               'dark',
+        collapse_when_off:   false,
+        dynamic_light_color: false,
+        show_footer:         true,
         ...config,
       };
       this._applyPalette();
@@ -526,18 +557,30 @@
       }
     }
 
-    _applyPalette() {
+    _applyPalette(overrideAccentHex = null) {
       const isDark = this._config.theme === 'auto'
         ? !window.matchMedia('(prefers-color-scheme: light)').matches
         : this._config.theme !== 'light';
-      this._palette = this._buildPalette(this._config.color || '#D97757', isDark);
+      const baseColor = /^#[0-9A-Fa-f]{6}$/.test(this._config.color) ? this._config.color : '#D97757';
+      this._palette = this._buildPalette(baseColor, isDark);
       const p = this._palette;
       const s = this.style;
-      s.setProperty('--accent',           p.accent);
-      s.setProperty('--accent-soft',      p.accentSoft);
-      s.setProperty('--accent-glow',      p.accentGlow);
-      s.setProperty('--accent-glow-strong', p.accentGlowStrong);
-      s.setProperty('--accent-border',    p.accentBorder);
+
+      if (overrideAccentHex && /^#[0-9A-Fa-f]{6}$/.test(overrideAccentHex)) {
+        const dynP = this._buildPalette(overrideAccentHex, isDark);
+        s.setProperty('--accent',             dynP.accent);
+        s.setProperty('--accent-soft',        dynP.accentSoft);
+        s.setProperty('--accent-glow',        dynP.accentGlow);
+        s.setProperty('--accent-glow-strong', dynP.accentGlowStrong);
+        s.setProperty('--accent-border',      dynP.accentBorder);
+      } else {
+        s.setProperty('--accent',             p.accent);
+        s.setProperty('--accent-soft',        p.accentSoft);
+        s.setProperty('--accent-glow',        p.accentGlow);
+        s.setProperty('--accent-glow-strong', p.accentGlowStrong);
+        s.setProperty('--accent-border',      p.accentBorder);
+      }
+
       s.setProperty('--bg',               p.bg);
       s.setProperty('--surface',          p.surface);
       s.setProperty('--border',           p.border);
@@ -551,6 +594,11 @@
         this._mqHandler = () => this._applyPalette();
         window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', this._mqHandler);
       }
+    }
+
+    _rgbToHex(r, g, b) {
+      const toHex = (n) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0');
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
     }
 
     _brandSVG() {
@@ -643,7 +691,7 @@
         </div>
       </div>
 
-      <div class="footer">
+      <div class="footer" id="card-footer" style="${this._config.show_footer === false ? 'display:none' : ''}">
         <div class="footer-info" id="footer-info">
           <ha-icon icon="mdi:home"></ha-icon>
           <span id="footer-text">—</span>
@@ -661,20 +709,43 @@
     // ── State update ─────────────────────────────────────────────────────────────
 
     _updateState() {
-      if (!this._hass || !this._config.entity || !this._card) return;
+      if (!this._card) return;
+
+      if (!this._config.entity) {
+        this._q('#entity-name').textContent = 'Seleziona entità luce';
+        this._q('#state-text').textContent  = 'Configura dalla finestra editor';
+        this._q('#entity-icon').setAttribute('icon', 'mdi:lightbulb-question-outline');
+        this._q('#controls-wrapper')?.classList.add('collapsed');
+        return;
+      }
+
+      if (!this._hass) return;
 
       const stateObj = this._hass.states[this._config.entity];
-      if (!stateObj) return;
+      if (!stateObj) {
+        this._q('#entity-name').textContent = this._config.name || this._config.entity;
+        this._q('#state-text').textContent  = 'Entità non trovata';
+        return;
+      }
 
       const isOn      = stateObj.state === 'on';
       const isUnavail = stateObj.state === 'unavailable';
       const attrs     = stateObj.attributes || {};
       const name      = this._config.name || attrs.friendly_name || this._config.entity;
 
+      // Dynamic light color sync if enabled and RGB color is active
+      if (this._config.dynamic_light_color && isOn && Array.isArray(attrs.rgb_color) && attrs.rgb_color.length === 3) {
+        const dynHex = this._rgbToHex(...attrs.rgb_color);
+        this._applyPalette(dynHex);
+      } else {
+        this._applyPalette(null);
+      }
+
       this._card.classList.toggle('light-on', isOn && !isUnavail);
       this._q('#unavailable-overlay').style.display = isUnavail ? 'flex' : 'none';
 
-      this._q('#entity-icon').setAttribute('icon', isOn ? 'mdi:lightbulb' : 'mdi:lightbulb-outline');
+      const customIcon = this._config.icon || attrs.icon;
+      this._q('#entity-icon').setAttribute('icon', customIcon || (isOn ? 'mdi:lightbulb' : 'mdi:lightbulb-outline'));
       this._q('#entity-name').textContent = name;
 
       const stateLabel = isOn
@@ -937,22 +1008,593 @@
     }
   }
 
+  // ─── Visual Editor (Bubble Card Style) ────────────────────────────────────────
+
+  const editorStyles = `
+    :host {
+      display: block;
+      font-family: -apple-system, 'Söhne', 'Inter', BlinkMacSystemFont, sans-serif;
+      color: var(--primary-text-color, #F5F0EB);
+    }
+    * { box-sizing: border-box; }
+    .editor-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 4px 0 16px;
+    }
+    .editor-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(217, 119, 87, 0.16), rgba(217, 119, 87, 0.04));
+      border: 1px solid rgba(217, 119, 87, 0.28);
+    }
+    .banner-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--primary-text-color, #F5F0EB);
+    }
+    .banner-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: #D97757;
+      color: #fff;
+      letter-spacing: 0.04em;
+    }
+    .section {
+      border: 1px solid var(--divider-color, rgba(255, 255, 255, 0.1));
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--card-background-color, rgba(41, 37, 36, 0.5));
+      transition: border-color 0.2s ease;
+    }
+    .section.open {
+      border-color: rgba(217, 119, 87, 0.35);
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 16px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .section-header:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title ha-icon {
+      color: #D97757;
+      --mdc-icon-size: 20px;
+    }
+    .chevron {
+      transition: transform 0.25s ease;
+      color: var(--secondary-text-color, #A09080);
+      --mdc-icon-size: 20px;
+    }
+    .section.open .chevron {
+      transform: rotate(180deg);
+    }
+    .section-body {
+      display: none;
+      padding: 16px;
+      border-top: 1px solid var(--divider-color, rgba(255, 255, 255, 0.08));
+      flex-direction: column;
+      gap: 16px;
+    }
+    .section.open .section-body {
+      display: flex;
+    }
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--secondary-text-color, #A09080);
+      margin-bottom: 8px;
+    }
+    .theme-pills {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .theme-pill {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--divider-color, rgba(255, 255, 255, 0.12));
+      background: transparent;
+      color: var(--primary-text-color, #F5F0EB);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .theme-pill:hover {
+      border-color: rgba(217, 119, 87, 0.5);
+    }
+    .theme-pill.active {
+      background: rgba(217, 119, 87, 0.18);
+      border-color: #D97757;
+      color: #D97757;
+      font-weight: 600;
+    }
+    .swatches-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .swatch-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      padding: 0;
+    }
+    .swatch-btn:hover {
+      transform: scale(1.12);
+    }
+    .swatch-btn.active {
+      border-color: #ffffff;
+      box-shadow: 0 0 0 2px #D97757, 0 4px 12px rgba(0, 0, 0, 0.4);
+      transform: scale(1.1);
+    }
+    .custom-color-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .color-input-native {
+      width: 40px;
+      height: 36px;
+      padding: 2px;
+      border-radius: 8px;
+      border: 1px solid var(--divider-color, rgba(255, 255, 255, 0.15));
+      background: transparent;
+      cursor: pointer;
+    }
+    .color-input-hex {
+      flex: 1;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid var(--divider-color, rgba(255, 255, 255, 0.15));
+      background: rgba(0, 0, 0, 0.15);
+      color: var(--primary-text-color, #F5F0EB);
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--divider-color, rgba(255, 255, 255, 0.06));
+    }
+    .toggle-row:last-child {
+      border-bottom: none;
+    }
+    .toggle-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .toggle-title {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--primary-text-color, #F5F0EB);
+    }
+    .toggle-desc {
+      font-size: 11.5px;
+      color: var(--secondary-text-color, #A09080);
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider-tog {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: rgba(160, 144, 128, 0.3);
+      transition: 0.25s;
+      border-radius: 24px;
+    }
+    .slider-tog:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #fff;
+      transition: 0.25s;
+      border-radius: 50%;
+    }
+    input:checked + .slider-tog {
+      background-color: #D97757;
+    }
+    input:checked + .slider-tog:before {
+      transform: translateX(20px);
+    }
+  `;
+
+  class WeSmartLightCardEditor extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({ mode: 'open' });
+      this._config = {};
+      this._hass = null;
+      this._rendered = false;
+      this._openSections = { identity: true, theme: true, controls: false };
+    }
+
+    setConfig(config) {
+      this._config = {
+        entity:              '',
+        name:                '',
+        icon:                '',
+        color:               '#D97757',
+        theme:               'dark',
+        show_brightness:     true,
+        show_color_temp:     true,
+        show_color:          true,
+        collapse_when_off:   false,
+        dynamic_light_color: false,
+        show_footer:         true,
+        ...config,
+      };
+      if (!this._rendered) {
+        this._buildDOM();
+      }
+      this._syncUI();
+    }
+
+    set hass(hass) {
+      this._hass = hass;
+      if (!this._rendered) {
+        this._buildDOM();
+      }
+      const form = this.shadowRoot.querySelector('#ha-identity-form');
+      if (form) form.hass = hass;
+    }
+
+    _buildDOM() {
+      this._rendered = true;
+      const shadow = this.shadowRoot;
+      shadow.innerHTML = '';
+
+      const style = document.createElement('style');
+      style.textContent = editorStyles;
+      shadow.appendChild(style);
+
+      const container = document.createElement('div');
+      container.className = 'editor-container';
+      container.innerHTML = `
+        <div class="editor-banner">
+          <div class="banner-title">
+            <ha-icon icon="mdi:lightbulb-on-outline" style="color:#D97757"></ha-icon>
+            <span>WeSmart Light Configurator</span>
+          </div>
+          <span class="banner-badge">v${CARD_VERSION}</span>
+        </div>
+
+        <!-- 1. Entità & Identità -->
+        <div class="section open" id="sec-identity">
+          <div class="section-header" data-sec="identity">
+            <div class="section-title">
+              <ha-icon icon="mdi:lightbulb"></ha-icon>
+              <span>1. Entità & Identità</span>
+            </div>
+            <ha-icon class="chevron" icon="mdi:chevron-down"></ha-icon>
+          </div>
+          <div class="section-body">
+            <ha-form id="ha-identity-form"></ha-form>
+          </div>
+        </div>
+
+        <!-- 2. Aspetto & InfiniteColor -->
+        <div class="section open" id="sec-theme">
+          <div class="section-header" data-sec="theme">
+            <div class="section-title">
+              <ha-icon icon="mdi:palette"></ha-icon>
+              <span>2. Aspetto & Motore InfiniteColor</span>
+            </div>
+            <ha-icon class="chevron" icon="mdi:chevron-down"></ha-icon>
+          </div>
+          <div class="section-body">
+            <div>
+              <div class="field-label">Tema Superficie</div>
+              <div class="theme-pills">
+                <button type="button" class="theme-pill" data-theme="dark">🌙 Dark</button>
+                <button type="button" class="theme-pill" data-theme="light">☀️ Light</button>
+                <button type="button" class="theme-pill" data-theme="auto">🔄 Auto</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="field-label">Colore Accento (InfiniteColor Palette)</div>
+              <div class="swatches-grid" id="swatches-grid">
+                ${PRESET_COLORS.map(p => `
+                  <button type="button" class="swatch-btn" data-hex="${p.hex}" title="${p.name}" style="background:${p.hex}"></button>
+                `).join('')}
+              </div>
+              <div class="custom-color-row">
+                <input type="color" class="color-input-native" id="color-native" value="#D97757">
+                <input type="text" class="color-input-hex" id="color-hex" maxlength="7" placeholder="#D97757">
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-title">Colore dinamico dalla luce (RGB)</span>
+                <span class="toggle-desc">Quando accesa, adatta l'accento della card al colore reale della lampadina</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" data-toggle="dynamic_light_color">
+                <span class="slider-tog"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Controlli & Opzioni -->
+        <div class="section" id="sec-controls">
+          <div class="section-header" data-sec="controls">
+            <div class="section-title">
+              <ha-icon icon="mdi:tune-variant"></ha-icon>
+              <span>3. Controlli & Comportamento</span>
+            </div>
+            <ha-icon class="chevron" icon="mdi:chevron-down"></ha-icon>
+          </div>
+          <div class="section-body">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-title">Mostra Slider Luminosità</span>
+                <span class="toggle-desc">Barra di regolazione percentuale luminosità (0–100%)</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" data-toggle="show_brightness">
+                <span class="slider-tog"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-title">Mostra Temperatura Colore (Kelvin)</span>
+                <span class="toggle-desc">Slider bianco caldo/freddo (visibile se supportato dalla luce)</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" data-toggle="show_color_temp">
+                <span class="slider-tog"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-title">Mostra Selettore Colore (Hue RGB)</span>
+                <span class="toggle-desc">Slider arcobaleno per luci RGB/HS</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" data-toggle="show_color">
+                <span class="slider-tog"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-title">Comprimi quando spenta</span>
+                <span class="toggle-desc">Nasconde automaticamente gli slider quando la luce è OFF</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" data-toggle="collapse_when_off">
+                <span class="slider-tog"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-title">Mostra Footer WeSmart</span>
+                <span class="toggle-desc">Barra inferiore con identificativo entità e marchio WeSmart</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" data-toggle="show_footer">
+                <span class="slider-tog"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      `;
+
+      shadow.appendChild(container);
+      this._bindEditorEvents();
+    }
+
+    _bindEditorEvents() {
+      const shadow = this.shadowRoot;
+
+      // Accordion headers
+      shadow.querySelectorAll('.section-header').forEach(hdr => {
+        hdr.addEventListener('click', () => {
+          const secKey = hdr.dataset.sec;
+          this._openSections[secKey] = !this._openSections[secKey];
+          const secEl = shadow.querySelector(`#sec-${secKey}`);
+          if (secEl) secEl.classList.toggle('open', this._openSections[secKey]);
+        });
+      });
+
+      // Native HA Form for Entity, Name, Icon
+      const form = shadow.querySelector('#ha-identity-form');
+      if (form) {
+        form.schema = [
+          { name: 'entity', required: true, selector: { entity: { domain: 'light' } } },
+          { name: 'name',   required: false, selector: { text: {} } },
+          { name: 'icon',   required: false, selector: { icon: { placeholder: 'mdi:lightbulb' } } },
+        ];
+        form.computeLabel = (schema) => {
+          const labels = {
+            entity: 'Entità Luce (light.*)',
+            name:   'Nome Personalizzato (opzionale)',
+            icon:   'Icona Personalizzata (opzionale)',
+          };
+          return labels[schema.name] || schema.name;
+        };
+        form.addEventListener('value-changed', (ev) => {
+          ev.stopPropagation();
+          const newData = ev.detail.value || {};
+          this._updateConfig({
+            entity: newData.entity || '',
+            name:   newData.name   || null,
+            icon:   newData.icon   || null,
+          });
+        });
+      }
+
+      // Theme buttons
+      shadow.querySelectorAll('.theme-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          this._updateConfig({ theme: btn.dataset.theme });
+        });
+      });
+
+      // Swatches
+      shadow.querySelectorAll('.swatch-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          this._updateConfig({ color: btn.dataset.hex });
+        });
+      });
+
+      // Color inputs
+      const colorNative = shadow.querySelector('#color-native');
+      const colorHex    = shadow.querySelector('#color-hex');
+      if (colorNative) {
+        colorNative.addEventListener('input', (e) => {
+          this._updateConfig({ color: e.target.value.toUpperCase() });
+        });
+      }
+      if (colorHex) {
+        colorHex.addEventListener('change', (e) => {
+          let val = e.target.value.trim();
+          if (!val.startsWith('#')) val = '#' + val;
+          if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+            this._updateConfig({ color: val.toUpperCase() });
+          }
+        });
+      }
+
+      // Boolean toggles
+      shadow.querySelectorAll('input[data-toggle]').forEach(chk => {
+        chk.addEventListener('change', (e) => {
+          const key = chk.dataset.toggle;
+          this._updateConfig({ [key]: e.target.checked });
+        });
+      });
+    }
+
+    _syncUI() {
+      if (!this._rendered) return;
+      const shadow = this.shadowRoot;
+      const c = this._config;
+
+      // Sync HA Form
+      const form = shadow.querySelector('#ha-identity-form');
+      if (form) {
+        if (this._hass) form.hass = this._hass;
+        form.data = {
+          entity: c.entity || '',
+          name:   c.name   || '',
+          icon:   c.icon   || '',
+        };
+      }
+
+      // Sync Theme pills
+      const curTheme = c.theme || 'dark';
+      shadow.querySelectorAll('.theme-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === curTheme);
+      });
+
+      // Sync Color Swatches & Inputs
+      const curColor = (c.color || '#D97757').toUpperCase();
+      shadow.querySelectorAll('.swatch-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.hex.toUpperCase() === curColor);
+      });
+      const colorNative = shadow.querySelector('#color-native');
+      const colorHex    = shadow.querySelector('#color-hex');
+      if (colorNative && /^#[0-9A-Fa-f]{6}$/.test(curColor)) colorNative.value = curColor;
+      if (colorHex) colorHex.value = curColor;
+
+      // Sync Toggles
+      shadow.querySelectorAll('input[data-toggle]').forEach(chk => {
+        const key = chk.dataset.toggle;
+        chk.checked = c[key] !== undefined ? Boolean(c[key]) : true;
+      });
+    }
+
+    _updateConfig(patch) {
+      const next = { ...this._config, ...patch };
+      // Clean null/empty optional overrides so YAML stays clean
+      if (!next.name) delete next.name;
+      if (!next.icon) delete next.icon;
+      this._config = next;
+      this._syncUI();
+      this.dispatchEvent(new CustomEvent('config-changed', {
+        detail: { config: next },
+        bubbles: true,
+        composed: true,
+      }));
+    }
+  }
+
   // ─── Register ─────────────────────────────────────────────────────────────────
 
   const safeDefine = (tag, cls) => { if (!customElements.get(tag)) customElements.define(tag, cls); };
   safeDefine('wesmart-light-card', WeSmartInfiniteLightCard);
   safeDefine('wesmart-infinite-light-card', class extends WeSmartInfiniteLightCard {});
+  safeDefine('wesmart-light-card-editor', WeSmartLightCardEditor);
+  safeDefine('wesmart-infinite-light-card-editor', class extends WeSmartLightCardEditor {});
 
   window.customCards = window.customCards || [];
   window.customCards.push({
     type:        'wesmart-light-card',
     name:        'WeSmart Light Card',
-    description: 'Single light card with brightness, Kelvin/CT, and hue color picker. Infinite Color Engine.',
+    description: 'Single light card with brightness, Kelvin/CT, hue color picker, Infinite Color Engine & Visual Editor.',
     preview:     true,
   });
 
   console.info(
-    `%c WESMART INFINITE LIGHT CARD %c v${CARD_VERSION} `,
+    `%c WESMART LIGHT CARD %c v${CARD_VERSION} `,
     'background:#D97757;color:#fff;font-weight:700;padding:2px 6px;border-radius:4px 0 0 4px',
     'background:#1C1917;color:#D97757;font-weight:600;padding:2px 6px;border-radius:0 4px 4px 0'
   );
