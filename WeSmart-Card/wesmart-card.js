@@ -2894,12 +2894,12 @@
           </div>
         </div>
 
-        <!-- 2. Aspetto & InfiniteColor -->
+        <!-- 2. Aspetto, Stile & InfiniteColor -->
         <div class="section open" id="sec-theme">
           <div class="section-header" data-sec="theme">
             <div class="section-title">
               <ha-icon icon="mdi:palette"></ha-icon>
-              <span>2. Aspetto & Motore InfiniteColor</span>
+              <span>2. Aspetto, Stile & Motore InfiniteColor</span>
             </div>
             <ha-icon class="chevron" icon="mdi:chevron-down"></ha-icon>
           </div>
@@ -2926,6 +2926,56 @@
               </div>
             </div>
 
+            <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:14px;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#D97757">
+                <ha-icon icon="mdi:brush-variant" style="--mdc-icon-size:18px;color:#D97757"></ha-icon>
+                <span>STILE CARD: SFONDO, OPACITÀ & BORDI</span>
+              </div>
+
+              <div>
+                <div class="field-label" style="display:flex;justify-content:space-between;align-items:center">
+                  <span>Colore di Sfondo Card (bg_color)</span>
+                  <span id="bg-color-status" style="color:#D97757;text-transform:none;font-family:monospace">Default Tema</span>
+                </div>
+                <div class="swatches-grid" style="margin-bottom:8px">
+                  <button type="button" class="entity-auto-btn active" id="bg-auto-btn" title="Usa lo sfondo automatico del tema InfiniteColor">Auto (Default)</button>
+                  ${BG_PRESET_COLORS.map(p => `
+                    <button type="button" class="swatch-btn bg-swatch-btn" data-bg-hex="${p.hex}" title="${p.name} (${p.hex})" style="background:${p.hex};border-color:rgba(255,255,255,0.22)"></button>
+                  `).join('')}
+                </div>
+                <div class="custom-color-row">
+                  <input type="color" class="color-input-native" id="bg-color-native" value="#141210" title="Scegli colore di sfondo personalizzato">
+                  <input type="text" class="color-input-hex" id="bg-color-hex" maxlength="7" placeholder="Default tema (es. #0F172A)">
+                </div>
+              </div>
+
+              <div>
+                <div class="field-label" style="display:flex;justify-content:space-between;align-items:center">
+                  <span>Opacità Sfondo Card (bg_opacity)</span>
+                  <span id="bg-opacity-lbl" style="color:#D97757;text-transform:none">100% (Solido)</span>
+                </div>
+                <input type="range" id="bg-opacity-range" min="0" max="100" step="1" value="100" style="width:100%;accent-color:#D97757;margin-bottom:8px">
+                <div class="theme-pills" style="grid-template-columns:repeat(5,1fr)">
+                  <button type="button" class="theme-pill op-preset-pill" data-op="100" style="padding:7px 6px;font-size:12px">100%</button>
+                  <button type="button" class="theme-pill op-preset-pill" data-op="75"  style="padding:7px 6px;font-size:12px">75%</button>
+                  <button type="button" class="theme-pill op-preset-pill" data-op="50"  style="padding:7px 6px;font-size:12px">50%</button>
+                  <button type="button" class="theme-pill op-preset-pill" data-op="25"  style="padding:7px 6px;font-size:12px">25%</button>
+                  <button type="button" class="theme-pill op-preset-pill" data-op="0"   style="padding:7px 6px;font-size:12px" title="Trasparenza totale senza sfondo né bordi">0% Invisibile</button>
+                </div>
+              </div>
+
+              <div class="toggle-row" id="row-show-border">
+                <div class="toggle-info">
+                  <span class="toggle-title">Mostra Bordi e Ombra Card</span>
+                  <span class="toggle-desc" id="desc-show-border">Disattiva per rimuovere contorno e ombra (a opacità 0% vengono rimossi automaticamente)</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" data-toggle="show_border">
+                  <span class="slider-tog"></span>
+                </label>
+              </div>
+            </div>
+
             <div class="toggle-row" id="row-dyn-color">
               <div class="toggle-info">
                 <span class="toggle-title">Colore dinamico dalla luce (RGB)</span>
@@ -2939,67 +2989,12 @@
           </div>
         </div>
 
-        <!-- 3. Stile Card (Sfondo, Opacità & Trasparenza) -->
-        <div class="section open" id="sec-style">
-          <div class="section-header" data-sec="style">
-            <div class="section-title">
-              <ha-icon icon="mdi:brush-variant"></ha-icon>
-              <span>3. Stile (Sfondo, Opacità & Bordi)</span>
-            </div>
-            <ha-icon class="chevron" icon="mdi:chevron-down"></ha-icon>
-          </div>
-          <div class="section-body">
-            <div>
-              <div class="field-label" style="display:flex;justify-content:space-between;align-items:center">
-                <span>Colore di Sfondo Card (bg_color)</span>
-                <span id="bg-color-status" style="color:#D97757;text-transform:none;font-family:monospace">Default Tema</span>
-              </div>
-              <div class="swatches-grid" style="margin-bottom:8px">
-                <button type="button" class="entity-auto-btn active" id="bg-auto-btn" title="Usa lo sfondo automatico del tema InfiniteColor">Auto (Default)</button>
-                ${BG_PRESET_COLORS.map(p => `
-                  <button type="button" class="swatch-btn bg-swatch-btn" data-bg-hex="${p.hex}" title="${p.name} (${p.hex})" style="background:${p.hex};border-color:rgba(255,255,255,0.22)"></button>
-                `).join('')}
-              </div>
-              <div class="custom-color-row">
-                <input type="color" class="color-input-native" id="bg-color-native" value="#141210" title="Scegli colore di sfondo personalizzato">
-                <input type="text" class="color-input-hex" id="bg-color-hex" maxlength="7" placeholder="Default tema (es. #0F172A)">
-              </div>
-            </div>
-
-            <div>
-              <div class="field-label" style="display:flex;justify-content:space-between;align-items:center">
-                <span>Opacità Sfondo Card (bg_opacity)</span>
-                <span id="bg-opacity-lbl" style="color:#D97757;text-transform:none">100% (Solido)</span>
-              </div>
-              <input type="range" id="bg-opacity-range" min="0" max="100" step="1" value="100" style="width:100%;accent-color:#D97757;margin-bottom:8px">
-              <div class="theme-pills" style="grid-template-columns:repeat(5,1fr)">
-                <button type="button" class="theme-pill op-preset-pill" data-op="100" style="padding:7px 6px;font-size:12px">100%</button>
-                <button type="button" class="theme-pill op-preset-pill" data-op="75"  style="padding:7px 6px;font-size:12px">75%</button>
-                <button type="button" class="theme-pill op-preset-pill" data-op="50"  style="padding:7px 6px;font-size:12px">50%</button>
-                <button type="button" class="theme-pill op-preset-pill" data-op="25"  style="padding:7px 6px;font-size:12px">25%</button>
-                <button type="button" class="theme-pill op-preset-pill" data-op="0"   style="padding:7px 6px;font-size:12px" title="Trasparenza totale senza sfondo né bordi">0% Invisibile</button>
-              </div>
-            </div>
-
-            <div class="toggle-row" id="row-show-border">
-              <div class="toggle-info">
-                <span class="toggle-title">Mostra Bordi e Ombra Card</span>
-                <span class="toggle-desc" id="desc-show-border">Disattiva per rimuovere contorno e ombra (a opacità 0% vengono rimossi automaticamente)</span>
-              </div>
-              <label class="switch">
-                <input type="checkbox" data-toggle="show_border">
-                <span class="slider-tog"></span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. Controlli & Opzioni -->
+        <!-- 3. Controlli & Opzioni -->
         <div class="section" id="sec-controls">
           <div class="section-header" data-sec="controls">
             <div class="section-title">
               <ha-icon icon="mdi:tune-variant"></ha-icon>
-              <span>4. Controlli & Comportamento</span>
+              <span>3. Controlli & Comportamento</span>
             </div>
             <ha-icon class="chevron" icon="mdi:chevron-down"></ha-icon>
           </div>
@@ -3646,7 +3641,25 @@
 
   // ─── Register WeSmart Card (All-in-One) & Editor ──────────────────────────────
 
-  const safeDefine = (tag, cls) => { if (!customElements.get(tag)) customElements.define(tag, cls); };
+  const safeDefine = (tag, cls) => {
+    const existing = customElements.get(tag);
+    if (!existing) {
+      customElements.define(tag, cls);
+    } else {
+      Object.getOwnPropertyNames(cls.prototype).forEach(k => {
+        if (k !== 'constructor') {
+          const desc = Object.getOwnPropertyDescriptor(cls.prototype, k);
+          if (desc) Object.defineProperty(existing.prototype, k, desc);
+        }
+      });
+      Object.getOwnPropertyNames(cls).forEach(k => {
+        if (k !== 'length' && k !== 'name' && k !== 'prototype') {
+          const desc = Object.getOwnPropertyDescriptor(cls, k);
+          if (desc) Object.defineProperty(existing, k, desc);
+        }
+      });
+    }
+  };
 
   // Primary All-in-One Card & Editor
   safeDefine('wesmart-card', WeSmartCard);
