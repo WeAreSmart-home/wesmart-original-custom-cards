@@ -1,4 +1,4 @@
-# WeSmart Card (`wesmart-card.js` v1.1.0) — All-in-One Modular Suite
+# WeSmart Card (`wesmart-card.js` v1.2.0) — All-in-One Modular Suite
 
 **[Italiano](#italiano)** | **[English](#english)**
 
@@ -20,7 +20,7 @@ Dopo aver consolidato il catalogo delle card standalone (nella cartella `cards/`
 
 ---
 
-### Tipi di Card Integrati (`card_type` — v1.1.0)
+### Tipi di Card Integrati (`card_type` — v1.2.0)
 
 Appena aggiungi **WeSmart Card (All-in-One)** nella tua dashboard, in cima alla finestra di configurazione puoi selezionare tra **5 tipologie**:
 
@@ -29,8 +29,8 @@ Appena aggiungi **WeSmart Card (All-in-One)** nella tua dashboard, in cima alla 
 | **`light`** *(Default)* | **Light (Singola)** | Controllo completo per 1 luce con slider interattivi per Luminosità (1–100%), Temperatura Colore (Kelvin) e Colore RGB (Hue 0–360°). |
 | **`lights`** | **Lights (Lista)** | Lista multi-luce compatta con Master Toggle di gruppo nell'header, toggle singoli per riga e apertura dialogo *More Info* al tap. |
 | **`lights-expand`** | **Lights Expand** | Lista multi-luce espandibile a fisarmonica: cliccando su una riga accesa si apre un pannello animato inline con slider di Luminosità e Temperatura Colore. |
-| **`chart`** | **Chart (Grafico)** | Grafico interattivo per 1 o più entità sovrapposte (sensori numerici o binari) con Drag-to-Zoom, Tooltip hover, selettori temporali (`1h` / `6h` / `24h` / `7d`), altezza regolabile e griglia. |
-| **`history`** | **History (Storico)** | Lista storica multi-entità dove ogni riga ha il proprio mini-grafico dedicato (curva SVG con `min – max` per sensori numerici, barra timeline con `Attivo X%` per entità binarie). |
+| **`chart`** | **Chart (Grafico)** | Grafico interattivo per 1 o più entità sovrapposte con **scala Y condivisa reale** (`min / mid / max`), **colore personalizzabile per singola entità** (`Auto` o HEX/swatch da GUI), commutazione tra **Valori Puntuali (`raw`)** e **Media Ponderata (`avg`)**, Drag-to-Zoom, Tooltip hover e selettori `1h / 6h / 24h / 7d`. |
+| **`history`** | **History (Storico)** | Lista storica multi-entità dove ogni riga ha il proprio mini-grafico dedicato e colore personalizzabile (curva SVG con `Media · min–max` per sensori numerici, barra timeline con `Attivo X%` per entità binarie). |
 
 ---
 
@@ -41,8 +41,8 @@ Appena aggiungi **WeSmart Card (All-in-One)** nella tua dashboard, in cima alla 
 | **Light (Singola)** | Disponibile (`v1.0+`) | Selettore entità nativo, toggle slider Luminosità/Kelvin/RGB, colore dinamico RGB |
 | **Lights (Lista)** | Disponibile (`v1.0+`) | Gestore lista interattivo (riordino, nome/icona per riga, Master Toggle) |
 | **Lights Expand** | Disponibile (`v1.0+`) | Fisarmonica inline animata Luminosità + Kelvin per ogni riga |
-| **Chart (Grafico)** | Disponibile (`v1.1+`) | Qualsiasi sensore, Drag-to-Zoom, Tooltip, selettore `1h/6h/24h/7d`, slider altezza e griglia |
-| **History (Storico)** | Disponibile (`v1.1+`) | Mini-grafico linea o barra timeline per riga con statistiche `min–max` / `Attivo %` |
+| **Chart (Grafico)** | Disponibile (`v1.2+`) | Qualsiasi sensore, scala Y condivisa, calcolo Puntuali/Media, colore per entità da GUI, Drag-to-Zoom, Tooltip, `1h/6h/24h/7d` |
+| **History (Storico)** | Disponibile (`v1.2+`) | Mini-grafico linea o barra timeline per riga con colore per entità e statistiche `Media · min–max` / `Attivo %` |
 | **Climate & Compact** | In arrivo | Termostato singolo e multi-zona con configurazione visuale HVAC e step temperatura |
 | **Sensors & Battery** | In arrivo | Soglie alert visuali, display lineare/circolare/icona da GUI |
 | **Doors & Switches** | In arrivo | Sensori porte/finestre e interruttori multi-entità con icone dinamiche |
@@ -63,7 +63,7 @@ Dentro la cartella `/config/www/` di Home Assistant, crea la sottocartella `wesm
 #### 2. Aggiungi la Risorsa in Home Assistant
 Vai su **Impostazioni → Dashboard → Menu (in alto a destra) → Risorse → Aggiungi risorsa**:
 
-- **URL:** `/local/wesmart-cards/wesmart-card.js?v=1.1.0`
+- **URL:** `/local/wesmart-cards/wesmart-card.js?v=1.2.0`
 - **Tipo di risorsa:** `Modulo JavaScript`
 
 *(Nota: in Home Assistant la cartella fisica `/config/www/` corrisponde sempre all'indirizzo web `/local/`).*
@@ -91,7 +91,7 @@ After consolidating the standalone card catalog (in `cards/`) and the **Infinite
 
 ---
 
-### Integrated Card Types (`card_type` — v1.1.0)
+### Integrated Card Types (`card_type` — v1.2.0)
 
 When you add **WeSmart Card (All-in-One)** to your dashboard, the top selector in the configuration dialog lets you choose among **5 card types**:
 
@@ -100,8 +100,8 @@ When you add **WeSmart Card (All-in-One)** to your dashboard, the top selector i
 | **`light`** *(Default)* | **Light (Single)** | Full control for a single light entity with interactive sliders for Brightness (1–100%), Color Temperature (Kelvin), and RGB Color (Hue 0–360°). |
 | **`lights`** | **Lights (List)** | Compact multi-light list featuring a group Master Toggle in the header, individual row toggles, and *More Info* dialog on tap. |
 | **`lights-expand`** | **Lights Expand** | Expandable accordion multi-light list: clicking an active row expands an animated inline panel with Brightness and Color Temperature sliders. |
-| **`chart`** | **Chart** | Interactive chart for 1 or multiple overlaid entities (numeric or binary sensors) with Drag-to-Zoom, hover Tooltip, time range pills (`1h` / `6h` / `24h` / `7d`), adjustable height, and grid lines. |
-| **`history`** | **History** | Multi-entity history list where each row displays its own dedicated mini-graph (SVG area curve with `min – max` for numeric sensors, timeline bar with `Active X%` for binary entities). |
+| **`chart`** | **Chart** | Interactive chart for 1 or multiple overlaid entities featuring a **true shared Y-axis scale** (`min / mid / max`), **per-entity custom colors** (`Auto` or HEX/swatch picker in GUI), **Raw (`raw`) vs Time-Weighted Average (`avg`)** calculation modes, Drag-to-Zoom, hover Tooltip, and `1h / 6h / 24h / 7d` range pills. |
+| **`history`** | **History** | Multi-entity history list where each row displays its own dedicated mini-graph and custom color (SVG area curve with `Average · min–max` for numeric sensors, timeline bar with `Active X%` for binary entities). |
 
 ---
 
@@ -112,8 +112,8 @@ When you add **WeSmart Card (All-in-One)** to your dashboard, the top selector i
 | **Light (Single)** | Available (`v1.0+`) | Native entity picker, Brightness/Kelvin/RGB slider toggles, dynamic RGB light color |
 | **Lights (List)** | Available (`v1.0+`) | Interactive list manager (reorder, per-row custom name/icon, Master Toggle) |
 | **Lights Expand** | Available (`v1.0+`) | Animated inline Brightness + Kelvin accordion panel per row |
-| **Chart** | Available (`v1.1+`) | Any sensor domain, Drag-to-Zoom, Tooltip, `1h/6h/24h/7d` selector, height slider & grid |
-| **History** | Available (`v1.1+`) | Per-row SVG line chart or binary timeline bar with `min–max` / `Active %` stats |
+| **Chart** | Available (`v1.2+`) | Any sensor domain, shared Y-scale, Raw/Average calculation, per-entity color picker, Drag-to-Zoom, Tooltip, `1h/6h/24h/7d` |
+| **History** | Available (`v1.2+`) | Per-row SVG line chart or binary timeline bar with custom entity colors & `Avg · min–max` / `Active %` stats |
 | **Climate & Compact** | Upcoming | Single and multi-zone thermostat with visual HVAC and temperature step configuration |
 | **Sensors & Battery** | Upcoming | Visual alert thresholds, linear/circular/icon display modes from GUI |
 | **Doors & Switches** | Upcoming | Door/window binary sensors and multi-entity switches with dynamic icons |
@@ -134,7 +134,7 @@ Inside your Home Assistant `/config/www/` directory, create the `wesmart-cards` 
 #### 2. Register the Resource in Home Assistant
 Go to **Settings → Dashboards → Menu (top right) → Resources → Add resource**:
 
-- **URL:** `/local/wesmart-cards/wesmart-card.js?v=1.1.0`
+- **URL:** `/local/wesmart-cards/wesmart-card.js?v=1.2.0`
 - **Resource type:** `JavaScript Module`
 
 *(Note: in Home Assistant the physical folder `/config/www/` always maps to the `/local/` web URL).*

@@ -84,14 +84,30 @@
     .separator { height: 1px; background: var(--border); margin: 0 20px; }
 
     /* ── Chart section ─────────────────────────────────────────────── */
-    .chart-section { padding: 16px 20px 10px; }
+    .chart-section { padding: 12px 20px 10px; }
+    .chart-meta-bar {
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 8px; margin-bottom: 6px; flex-wrap: wrap;
+    }
+    .chart-meta-right { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+    .agg-pills {
+      display: inline-flex; gap: 2px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px; padding: 2px;
+    }
+    .agg-pill {
+      padding: 2px 8px; border-radius: 6px; font-size: 10.5px; font-weight: 500;
+      border: none; cursor: pointer; background: transparent;
+      color: var(--text-muted); transition: var(--transition);
+    }
+    .agg-pill.active { background: var(--accent); color: #fff; }
+    .agg-pill:not(.active):hover { background: var(--pill-bg); color: var(--text); }
 
     /* ── Zoom reset button ─────────────────────────────────────────── */
     .zoom-reset {
-      display: none; margin: 0 0 10px;
-      padding: 3px 12px;
+      display: none;
+      padding: 3px 10px;
       background: var(--accent-soft); border: 1px solid var(--accent);
-      border-radius: 8px; color: var(--accent); font-size: 11px; font-weight: 500;
+      border-radius: 8px; color: var(--accent); font-size: 10.5px; font-weight: 500;
       cursor: pointer; transition: var(--transition);
     }
     .zoom-reset.visible { display: inline-flex; align-items: center; gap: 4px; }
@@ -101,11 +117,12 @@
     .chart-layout { display: flex; gap: 6px; align-items: stretch; }
 
     .y-axis {
-      width: 44px; flex-shrink: 0;
+      width: 48px; flex-shrink: 0;
       display: flex; flex-direction: column; justify-content: space-between;
-      padding-bottom: 22px;
+      padding: 2px 0 22px;
     }
-    .y-label { font-size: 10px; color: var(--text-dim); text-align: right; line-height: 1; }
+    .y-label { font-size: 10px; color: var(--text-dim); text-align: right; line-height: 1; white-space: nowrap; }
+    .y-label-mid { opacity: 0.72; }
 
     /* ── Chart area (interaction target) ───────────────────────────── */
     .chart-area {
@@ -294,6 +311,10 @@
      * Entity 0 uses the base accent hue; subsequent entities step by the golden angle (≈137.5°).
      */
     _entityColor(i) {
+      const custom = this._entities[i]?.color;
+      if (custom && /^#[0-9A-Fa-f]{6}$/i.test(custom.trim())) {
+        return custom.trim();
+      }
       const { h, s } = this._hexToHsl(this._config.color);
       const hue = (h + i * 137.508) % 360;
       const sat = this._clamp(s, 55, 82);
@@ -301,28 +322,48 @@
       return this._hsl(hue, sat, lig);
     }
 
+    _getBucketInfo(durMs = null) {
+      const [ws, we] = this._winRange();
+      const dur = durMs ?? (we - ws);
+      const hours = dur / 3600000;
+      if (hours <= 2)  return { ms: 5 * 60000,   label: '5m' };
+      if (hours <= 8)  return { ms: 15 * 60000,  label: '15m' };
+      if (hours <= 36) return { ms: 30 * 60000,  label: '30m' };
+      return                  { ms: 180 * 60000, label: '3h' };
+    }
+
+    _getSubtitleText() {
+      const period = HOURS_NAMES[this._hours] ?? `${this._hours}h`;
+      const calc   = this._aggregation === 'avg'
+        ? `Media (${this._getBucketInfo().label})`
+        : 'Valori puntuali';
+      return `Ultimi ${period} · ${calc}`;
+    }
+
     // ── setConfig ─────────────────────────────────────────────────────────────
     setConfig(config) {
       const raw = config.entities
         ? config.entities.map(e => typeof e === 'string' ? { entity: e } : { ...e })
         : config.entity
-          ? [{ entity: config.entity, name: config.name }]
+          ? [{ entity: config.entity, name: config.name, color: config.entity_color }]
           : null;
       if (!raw?.length) throw new Error('wesmart-infinite-chart-card: "entity" or "entities" is required');
 
       this._config = {
-        title:     config.title     ?? 'Grafico',
-        icon:      config.icon      ?? 'mdi:chart-line',
-        theme:     config.theme     ?? 'dark',
-        color:     config.color     ?? '#D97757',
-        hours:     config.hours     ?? 24,
-        height:    config.height    ?? 100,
-        show_grid: config.show_grid ?? false,
-        zoom:      config.zoom      !== false,
-        entities:  raw,
+        title:       config.title       ?? 'Grafico',
+        icon:        config.icon        ?? 'mdi:chart-line',
+        theme:       config.theme       ?? 'dark',
+        color:       config.color       ?? '#D97757',
+        hours:       config.hours       ?? 24,
+        height:      config.height      ?? 100,
+        show_grid:   config.show_grid   ?? false,
+        zoom:        config.zoom        !== false,
+        aggregation: config.aggregation === 'avg' ? 'avg' : 'raw',
+        entities:    raw,
       };
-      this._hours    = this._config.hours;
-      this._entities = this._config.entities;
+      this._hours       = this._config.hours;
+      this._aggregation = this._config.aggregation;
+      this._entities    = this._config.entities;
 
       // Apply palette before render so CSS vars are ready
       this._applyPalette();
@@ -400,14 +441,25 @@
             <div class="header-icon-wrap"><ha-icon icon="${c.icon}"></ha-icon></div>
             <div>
               <div class="header-title">${c.title}</div>
-              <div class="header-subtitle" id="sub">Ultimi ${HOURS_NAMES[this._hours] ?? this._hours + 'h'}</div>
+              <div class="header-subtitle" id="sub">${this._getSubtitleText()}</div>
             </div>
           </div>
           <div class="time-pills">${pillsHTML}</div>
         </div>
         <div class="separator"></div>
         <div class="chart-section">
-          <button class="zoom-reset" id="zreset">↺ Reset zoom</button>
+          <div class="chart-meta-bar">
+            <div class="chart-meta-right">
+              <button class="zoom-reset" id="zreset">
+                <ha-icon icon="mdi:magnify-minus-outline" style="--mdc-icon-size:13px"></ha-icon>
+                <span>Reset zoom</span>
+              </button>
+              <div class="agg-pills">
+                <button class="agg-pill${this._aggregation !== 'avg' ? ' active' : ''}" data-agg="raw">Puntuali</button>
+                <button class="agg-pill${this._aggregation === 'avg' ? ' active' : ''}" data-agg="avg">Media</button>
+              </div>
+            </div>
+          </div>
           <div id="chart-container"><div class="no-data">Caricamento…</div></div>
         </div>
         <div class="legend" id="legend">${legendHTML}</div>
@@ -420,6 +472,14 @@
         </div>`;
     }
 
+    _syncCalcUI() {
+      const sub = this._q('#sub');
+      if (sub) sub.textContent = this._getSubtitleText();
+      this._card?.querySelectorAll('.agg-pill').forEach(b => {
+        b.classList.toggle('active', b.dataset.agg === this._aggregation);
+      });
+    }
+
     // ── Events ────────────────────────────────────────────────────────────────
     _bindEvents() {
       this._card.querySelectorAll('.time-pill').forEach(btn => {
@@ -429,15 +489,24 @@
           this._zoomRange = null;
           this._card.querySelectorAll('.time-pill').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          const sub = this._q('#sub');
-          if (sub) sub.textContent = `Ultimi ${HOURS_NAMES[this._hours] ?? this._hours + 'h'}`;
+          this._syncCalcUI();
           this._refreshZoomBtn();
           this._fetchHistory();
         });
       });
 
+      this._card.querySelectorAll('.agg-pill').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          this._aggregation = btn.dataset.agg === 'avg' ? 'avg' : 'raw';
+          this._syncCalcUI();
+          this._updateGraphs();
+        });
+      });
+
       this._q('#zreset')?.addEventListener('click', () => {
         this._zoomRange = null;
+        this._syncCalcUI();
         this._refreshZoomBtn();
         this._updateGraphs();
       });
@@ -552,6 +621,7 @@
 
       const rows = allEntityPoints.map((pts, i) => {
         if (!pts?.length) return null;
+        if (t < pts[0].t - 60000 || t > pts[pts.length - 1].t + 60000) return null;
         let near = pts[0], minD = Infinity;
         for (const p of pts) { const d = Math.abs(p.t - t); if (d < minD) { minD = d; near = p; } }
         return { near, i };
@@ -564,6 +634,7 @@
       const lbl = dur <= 172800000
         ? d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0')
         : d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
+      const modeTag = this._aggregation === 'avg' ? `Media ${this._getBucketInfo(dur).label}` : 'Puntuale';
 
       const rowsHTML = rows.map(({ near, i }) => {
         const cfg  = this._entities[i];
@@ -572,12 +643,12 @@
         const unit = this._hass?.states[cfg.entity]?.attributes?.unit_of_measurement ?? '';
         return `<div class="tt-row">
           <span class="tt-dot" style="background:${col}"></span>
-          <span style="color:var(--text-muted);font-size:10px;max-width:80px;overflow:hidden;text-overflow:ellipsis">${name}</span>
+          <span style="color:var(--text-muted);font-size:10px;max-width:85px;overflow:hidden;text-overflow:ellipsis">${name}</span>
           <span style="font-weight:600;margin-left:auto">${near.v.toFixed(1)} ${unit}</span>
         </div>`;
       }).join('');
 
-      ttBox.innerHTML = `<div class="tt-time">${lbl}</div>${rowsHTML}`;
+      ttBox.innerHTML = `<div class="tt-time">${lbl} · ${modeTag}</div>${rowsHTML}`;
       ttBox.style.opacity = '1';
       ttBox.style.left = pct > 0.65
         ? `calc(${pct * 100}% - ${(ttBox.offsetWidth || 120) + 14}px)`
@@ -616,6 +687,7 @@
 
     // ── Graph rendering ───────────────────────────────────────────────────────
     _updateGraphs() {
+      this._syncCalcUI();
       const container = this._q('#chart-container');
       if (!container) return;
 
@@ -627,19 +699,118 @@
         this._bindChartInteraction(container.querySelector('.chart-area'), []);
       } else {
         container.innerHTML = this._renderLineChart(histories);
-        const pts = histories.map(h => this._isBinary(h) ? [] : this._toPoints(h));
+        const pts = histories.map((h, i) => this._isBinary(h) ? [] : this._getSeriesPoints(h, this._entities[i]?.entity));
         this._bindChartInteraction(container.querySelector('.chart-area'), pts);
       }
 
       this._updateLegendStats(histories);
     }
 
-    _toPoints(history) {
-      const [ws, we] = this._winRange();
-      return (history || [])
+    _toRawPoints(history, entityId, wsOverride = null, weOverride = null) {
+      const [ws, we] = (wsOverride !== null && weOverride !== null)
+        ? [wsOverride, weOverride]
+        : this._winRange();
+
+      const all = (history || [])
         .filter(h => h.state !== 'unavailable' && h.state !== 'unknown' && !isNaN(parseFloat(h.state)))
-        .map(h => ({ t: new Date(h.last_changed).getTime(), v: parseFloat(h.state) }))
-        .filter(p => p.t >= ws - 3600000 && p.t <= we + 60000);
+        .map(h => ({ t: new Date(h.last_changed || h.last_updated).getTime(), v: parseFloat(h.state) }))
+        .filter(p => !isNaN(p.t))
+        .sort((a, b) => a.t - b.t);
+
+      if (!all.length) {
+        const curVal = parseFloat(this._hass?.states[entityId]?.state);
+        if (!isNaN(curVal)) {
+          return [{ t: ws, v: curVal }, { t: we, v: curVal }];
+        }
+        return [];
+      }
+
+      let beforeWs = null;
+      for (const p of all) {
+        if (p.t <= ws) beforeWs = p;
+        else break;
+      }
+
+      const inside = all.filter(p => p.t > ws && p.t <= we);
+      const pts = [];
+
+      if (beforeWs) {
+        pts.push({ t: ws, v: beforeWs.v });
+      }
+      for (const p of inside) {
+        pts.push({ t: p.t, v: p.v });
+      }
+
+      if (pts.length > 0) {
+        const last = pts[pts.length - 1];
+        if (last.t < we) {
+          pts.push({ t: we, v: last.v });
+        } else if (pts.length === 1) {
+          pts.unshift({ t: Math.max(ws, last.t - 60000), v: last.v });
+        }
+      }
+
+      return pts;
+    }
+
+    _timeWeightedAvg(rawPts, tA, tB) {
+      if (!rawPts?.length) return null;
+      let weightedSum = 0;
+      let totalDur = 0;
+      for (let i = 0; i < rawPts.length - 1; i++) {
+        const p0 = rawPts[i];
+        const p1 = rawPts[i + 1];
+        const s0 = Math.max(tA, p0.t);
+        const s1 = Math.min(tB, p1.t);
+        if (s1 > s0) {
+          const dt = s1 - s0;
+          weightedSum += p0.v * dt;
+          totalDur += dt;
+        }
+      }
+      if (totalDur > 0) return weightedSum / totalDur;
+      let near = rawPts[0], minD = Infinity;
+      const mid = (tA + tB) / 2;
+      for (const p of rawPts) {
+        const d = Math.abs(p.t - mid);
+        if (d < minD) { minD = d; near = p; }
+      }
+      return near.v;
+    }
+
+    _getSeriesPoints(history, entityId, wsOverride = null, weOverride = null) {
+      const raw = this._toRawPoints(history, entityId, wsOverride, weOverride);
+      if (this._aggregation !== 'avg' || raw.length < 2) return raw;
+
+      const tStart = raw[0].t;
+      const tEnd   = raw[raw.length - 1].t;
+      const span   = tEnd - tStart;
+      if (span <= 0) return raw;
+
+      const [ws, we] = (wsOverride !== null && weOverride !== null)
+        ? [wsOverride, weOverride]
+        : this._winRange();
+      const { ms: bucketMs } = this._getBucketInfo(we - ws);
+
+      const buckets = [];
+      let cur = tStart;
+      while (cur < tEnd) {
+        const next = Math.min(cur + bucketMs, tEnd);
+        const avg  = this._timeWeightedAvg(raw, cur, next);
+        if (avg !== null) {
+          const tPoint = cur === tStart ? tStart : (next === tEnd ? tEnd : Math.round((cur + next) / 2));
+          buckets.push({ t: tPoint, v: avg });
+        }
+        cur = next;
+      }
+
+      if (buckets.length === 1) {
+        buckets.push({ t: tEnd, v: buckets[0].v });
+      } else if (buckets.length > 1 && buckets[buckets.length - 1].t < tEnd) {
+        buckets.push({ t: tEnd, v: buckets[buckets.length - 1].v });
+      }
+
+      return buckets.length >= 2 ? buckets : raw;
     }
 
     // ── Timeline rendering ────────────────────────────────────────────────────
@@ -691,7 +862,7 @@
     _renderLineChart(histories) {
       const W   = 400;
       const H   = this._config.height;
-      const pad = 5;
+      const pad = 6;
       const uid = this._uid;
       const [ws, we] = this._winRange();
       const rangeT = we - ws;
@@ -699,44 +870,43 @@
       const toX = t => ((t - ws) / rangeT * W).toFixed(1);
       const toY = (v, minV, rv) => (H - ((v - minV) / rv) * (H - pad * 2) - pad).toFixed(1);
 
+      const seriesList = [];
+      histories.forEach((h, i) => {
+        if (this._isBinary(h)) return;
+        const entityId = this._entities[i]?.entity;
+        const pts = this._getSeriesPoints(h, entityId, ws, we);
+        if (pts.length < 2) return;
+        seriesList.push({ pts, i, entityId });
+      });
+
+      if (!seriesList.length) {
+        return `<div class="no-data">Nessun dato nel periodo selezionato</div>`;
+      }
+
+      const allVals     = seriesList.flatMap(s => s.pts.map(p => p.v));
+      const globalMin   = Math.min(...allVals);
+      const globalMax   = Math.max(...allVals);
+      const globalRange = (globalMax - globalMin) || 1;
+      const yUnit       = this._hass?.states[seriesList[0].entityId]?.attributes?.unit_of_measurement ?? '';
+
       const defs  = [];
       const areas = [];
       const lines = [];
-      let yMin = null, yMax = null, yUnit = '';
 
-      histories.forEach((h, i) => {
-        if (this._isBinary(h)) return;
-        const pts = this._toPoints(h);
-        if (pts.length < 2) return;
-
-        const color  = this._entityColor(i);
-        const vals   = pts.map(p => p.v);
-        const minV   = Math.min(...vals);
-        const maxV   = Math.max(...vals);
-        const rangeV = maxV - minV || 1;
-
-        if (yMin === null) {
-          yMin  = minV;
-          yMax  = maxV;
-          yUnit = this._hass?.states[this._entities[i].entity]?.attributes?.unit_of_measurement ?? '';
-        }
-
-        const linePts = pts.map((p, j) => `${j === 0 ? 'M' : 'L'}${toX(p.t)},${toY(p.v, minV, rangeV)}`).join(' ');
+      seriesList.forEach(({ pts, i }) => {
+        const color   = this._entityColor(i);
+        const linePts = pts.map((p, j) => `${j === 0 ? 'M' : 'L'}${toX(p.t)},${toY(p.v, globalMin, globalRange)}`).join(' ');
         const areaPts = `${linePts} L${toX(pts[pts.length - 1].t)},${H} L${toX(pts[0].t)},${H} Z`;
         const gid     = `wicg-${uid}-${i}`;
 
         defs.push(`<linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="${color}" stop-opacity="0.35"/>
+          <stop offset="0%"   stop-color="${color}" stop-opacity="0.32"/>
           <stop offset="100%" stop-color="${color}" stop-opacity="0.02"/>
         </linearGradient>`);
         areas.push(`<path d="${areaPts}" fill="url(#${gid})"/>`);
         lines.push(`<path d="${linePts}" fill="none" stroke="${color}" stroke-width="1.8"
           stroke-linejoin="round" stroke-linecap="round"/>`);
       });
-
-      if (!areas.length) {
-        return `<div class="no-data">Nessun dato nel periodo selezionato</div>`;
-      }
 
       const gridHTML = this._config.show_grid ? [0.25, 0.5, 0.75].map(f => {
         const y = (f * (H - pad * 2) + pad).toFixed(1);
@@ -746,11 +916,13 @@
       const ttColor = this._palette.textDim ?? 'rgba(255,255,255,0.28)';
       const zrFill  = this._palette.rowHover ?? 'rgba(255,255,255,0.06)';
 
-      const yLabels = yMin !== null ? `
+      const globalMid = (globalMax + globalMin) / 2;
+      const yLabels = `
         <div class="y-axis">
-          <span class="y-label">${yMax.toFixed(1)} ${yUnit}</span>
-          <span class="y-label">${yMin.toFixed(1)} ${yUnit}</span>
-        </div>` : '<div class="y-axis"></div>';
+          <span class="y-label">${globalMax.toFixed(1)} ${yUnit}</span>
+          <span class="y-label y-label-mid">${globalMid.toFixed(1)} ${yUnit}</span>
+          <span class="y-label">${globalMin.toFixed(1)} ${yUnit}</span>
+        </div>`;
 
       return `
         <div class="chart-layout">
@@ -849,13 +1021,15 @@
     }
 
     _numericStat(h, entityId) {
-      if (!h?.length) return '';
-      const vals = h
-        .filter(x => x.state !== 'unavailable' && x.state !== 'unknown' && !isNaN(parseFloat(x.state)))
-        .map(x => parseFloat(x.state));
-      if (!vals.length) return '';
+      const raw = this._toRawPoints(h, entityId);
+      if (!raw.length) return '';
+      const vals = raw.map(p => p.v);
+      const minV = Math.min(...vals);
+      const maxV = Math.max(...vals);
+      const avgV = this._timeWeightedAvg(raw, raw[0].t, raw[raw.length - 1].t)
+        ?? (vals.reduce((a, b) => a + b, 0) / vals.length);
       const unit = this._hass?.states[entityId]?.attributes?.unit_of_measurement ?? '';
-      return `${Math.min(...vals).toFixed(1)} – ${Math.max(...vals).toFixed(1)} ${unit}`.trim();
+      return `Media ${avgV.toFixed(1)}${unit ? ' ' + unit : ''} · ${minV.toFixed(1)}–${maxV.toFixed(1)} ${unit}`.trim();
     }
   }
 

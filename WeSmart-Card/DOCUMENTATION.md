@@ -1,4 +1,4 @@
-# WeSmart Card (`wesmart-card.js` v1.1.0) — Technical Documentation & Architecture
+# WeSmart Card (`wesmart-card.js` v1.2.0) — Technical Documentation & Architecture
 
 **[Italiano](#italiano)** | **[English](#english)**
 
@@ -35,8 +35,10 @@ Quando l'utente seleziona un `card_type` nel configuratore:
 - **Modalità `lights` / `lights-expand`**: mostra l'elenco multi-entità con selettore filtrato su `domain: light`.
 - **Modalità `chart` / `history`**:
   - Sblocca automaticamente il selettore di aggiunta entità su **tutti i domini** di Home Assistant (`sensor.*`, `binary_sensor.*`, `light.*`, `switch.*`, `climate.*`, ecc.).
+  - Nelle impostazioni di ciascuna entità della lista, aggiunge il selettore **Colore Entità** (pulsante `Auto` per la rotazione cromatica automatica, 10 swatch rapidi, color picker nativo e campo HEX `#RRGGBB`).
   - Nella sezione **3. Controlli & Comportamento**, sostituisce le opzioni delle luci con i controlli dedicati ai grafici:
     - **Intervallo Temporale (`hours`)**: `1h`, `6h`, `24h`, `7d`
+    - **Calcolo Valori Grafico (`aggregation`)**: `Valori Puntuali` (`raw`, ogni variazione istantanea reale ancorata ai bordi temporali) oppure `Media Aggregata` (`avg`, media ponderata nel tempo su intervalli regolari)
     - **Altezza Area Grafico (`height`, px)**: Slider da `60px` a `220px` (modalità `chart`)
     - **Mostra Griglia Orizzontale (`show_grid`)** (modalità `chart`)
     - **Abilita Drag-to-Zoom (`zoom`)** (modalità `chart`)
@@ -104,7 +106,8 @@ sequenceDiagram
 |---|---|---|---|
 | `title` | `string` | `'Grafico'` / `'History'` | Titolo mostrato nell'header della card. |
 | `icon` | `string` | `'mdi:chart-areaspline'` | Icona mostrata nell'header. |
-| `entities` | `array` | **Obbligatorio** | Lista di qualsiasi entità (`sensor.*`, `binary_sensor.*`, `light.*`, ecc.) come stringa o `{ entity, name, icon }`. |
+| `entities` | `array` | **Obbligatorio** | Lista di qualsiasi entità (`sensor.*`, `binary_sensor.*`, `light.*`, ecc.) come stringa o oggetto `{ entity, name, icon, color }`. Se `color` (`#RRGGBB`) non è specificato, viene assegnato un colore automatico armonizzato col tema. |
+| `aggregation` | `string` | `'raw'` | Metodo di calcolo dei valori sul grafico: `'raw'` (**Valori puntuali** istantanei reali) oppure `'avg'` (**Media ponderata** nel tempo per intervalli regolari: `5m` su 1h, `15m` su 6h, `30m` su 24h, `3h` su 7d). Commutabile anche dal vivo sulla card. |
 | `hours` | `number` | `24` | Intervallo temporale iniziale in ore (`1`, `6`, `24`, `168`). |
 | `height` | `number` | `100` | *(Solo `chart`)* Altezza in pixel dell'area del grafico SVG (`60` – `220`). |
 | `show_grid` | `boolean` | `false` | *(Solo `chart`)* Mostra le linee guida orizzontali dietro il grafico. |
@@ -141,8 +144,10 @@ When the user selects a `card_type` in the configurator:
 - **`lights` / `lights-expand` modes**: displays the multi-entity list manager with the entity picker filtered to `domain: light`.
 - **`chart` / `history` modes**:
   - Automatically unlocks the entity picker across **all Home Assistant domains** (`sensor.*`, `binary_sensor.*`, `light.*`, `switch.*`, `climate.*`, etc.).
+  - In each entity's inline edit panel, adds the **Entity Color** picker (`Auto` button for automatic golden-angle palette, 10 quick swatches, native color input, and `#RRGGBB` HEX field).
   - In section **3. Controls & Behavior**, replaces light-specific toggles with chart controls:
     - **Default Time Range (`hours`)**: `1h`, `6h`, `24h`, `7d`
+    - **Chart Value Calculation (`aggregation`)**: `Raw Points` (`raw`, instantaneous state changes anchored across the time window) or `Time-Weighted Average` (`avg`, time-weighted bucket averages)
     - **Chart Area Height (`height`, px)**: Slider from `60px` to `220px` (`chart` mode)
     - **Show Horizontal Grid (`show_grid`)** (`chart` mode)
     - **Enable Drag-to-Zoom (`zoom`)** (`chart` mode)
@@ -196,7 +201,8 @@ When the user selects a `card_type` in the configurator:
 |---|---|---|---|
 | `title` | `string` | `'Grafico'` / `'History'` | Header title. |
 | `icon` | `string` | `'mdi:chart-areaspline'` | Header icon. |
-| `entities` | `array` | **Required** | List of any entities (`sensor.*`, `binary_sensor.*`, `light.*`, etc.) as strings or `{ entity, name, icon }`. |
+| `entities` | `array` | **Required** | List of any entities (`sensor.*`, `binary_sensor.*`, `light.*`, etc.) as strings or `{ entity, name, icon, color }` objects. If `color` (`#RRGGBB`) is omitted, an automatic theme-harmonized color is assigned. |
+| `aggregation` | `string` | `'raw'` | Value calculation mode: `'raw'` (instantaneous **Raw points**) or `'avg'` (**Time-weighted average** grouped by interval: `5m` for 1h, `15m` for 6h, `30m` for 24h, `3h` for 7d). Can also be toggled live on the card. |
 | `hours` | `number` | `24` | Default time range in hours (`1`, `6`, `24`, `168`). |
 | `height` | `number` | `100` | *(`chart` only)* Height in pixels of the SVG chart area (`60` – `220`). |
 | `show_grid` | `boolean` | `false` | *(`chart` only)* Renders horizontal guide lines behind the chart. |

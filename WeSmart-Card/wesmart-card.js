@@ -14,11 +14,16 @@
 (() => {
   'use strict';
 
-  const CARD_VERSION = '1.1.0';
+  const CARD_VERSION = '1.2.0';
 
   const HOURS_OPTIONS = [1, 6, 24, 168];
   const HOURS_LABELS  = { 1: '1h', 6: '6h', 24: '24h', 168: '7d' };
   const HOURS_NAMES   = { 1: '1 ora', 6: '6 ore', 24: '24 ore', 168: '7 giorni' };
+
+  const ENTITY_COLOR_SWATCHES = [
+    '#D97757', '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
+    '#A855F7', '#EC4899', '#14B8A6', '#6366F1', '#84CC16',
+  ];
 
   // ─── Modular Card Type Registry (Extensible for Climate, Sensors, Doors, etc.) ─
   const CARD_TYPES = [
@@ -533,20 +538,37 @@
   .time-pill.active { background: var(--accent); color: #fff; }
   .time-pill:not(.active):hover { background: var(--row-hover); color: var(--text); }
   .chart-section { padding: 4px 0 8px; }
+  .chart-meta-bar {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 8px; margin-bottom: 6px; flex-wrap: wrap;
+  }
+  .chart-meta-right { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+  .agg-pills {
+    display: inline-flex; gap: 2px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; padding: 2px;
+  }
+  .agg-pill {
+    padding: 2px 8px; border-radius: 6px; font-size: 10.5px; font-weight: 500;
+    border: none; cursor: pointer; background: transparent;
+    color: var(--text-muted); transition: var(--transition);
+  }
+  .agg-pill.active { background: var(--accent); color: #fff; }
+  .agg-pill:not(.active):hover { background: var(--row-hover); color: var(--text); }
   .zoom-reset {
-    display: none; margin: 0 0 10px; padding: 3px 12px;
+    display: none; padding: 3px 10px;
     background: var(--accent-soft); border: 1px solid var(--accent);
-    border-radius: 8px; color: var(--accent); font-size: 11px; font-weight: 500;
+    border-radius: 8px; color: var(--accent); font-size: 10.5px; font-weight: 500;
     cursor: pointer; transition: var(--transition);
   }
   .zoom-reset.visible { display: inline-flex; align-items: center; gap: 4px; }
   .zoom-reset:hover { background: var(--accent); color: #fff; }
   .chart-layout { display: flex; gap: 6px; align-items: stretch; }
   .y-axis {
-    width: 44px; flex-shrink: 0; display: flex; flex-direction: column;
-    justify-content: space-between; padding-bottom: 22px;
+    width: 48px; flex-shrink: 0; display: flex; flex-direction: column;
+    justify-content: space-between; padding: 2px 0 22px;
   }
-  .y-label { font-size: 10px; color: var(--text-dim); text-align: right; line-height: 1; }
+  .y-label { font-size: 10px; color: var(--text-dim); text-align: right; line-height: 1; white-space: nowrap; }
+  .y-label-mid { opacity: 0.72; }
   .chart-area { flex: 1; position: relative; cursor: crosshair; touch-action: pan-y; }
   .chart-svg { display: block; width: 100%; }
   .tooltip-box {
@@ -622,6 +644,7 @@
       this._forcedMode = null; // Used by legacy tag aliases
       this._history    = {};
       this._hours      = 24;
+      this._aggregation = 'raw';
       this._zoomRange  = null;
       this._uid        = Math.random().toString(36).slice(2, 8);
       this._lastHistKey = '';
@@ -677,10 +700,12 @@
         height:              100,
         show_grid:           false,
         zoom:                true,
+        aggregation:         'raw',
         entities:            [],
         ...config,
       };
       this._hours = Number(this._config.hours) || 24;
+      this._aggregation = this._config.aggregation === 'avg' ? 'avg' : 'raw';
       const rawEntities = Array.isArray(this._config.entities) && this._config.entities.length > 0
         ? this._config.entities
         : (this._config.entity ? [{ entity: this._config.entity, name: this._config.name, icon: this._config.icon }] : []);
@@ -1506,7 +1531,11 @@
     // ── 4. CHART & 5. HISTORY MODES HTML & LOGIC ────────────────────────────────
 
     _entityColor(i) {
-      const baseColor = /^#[0-9A-Fa-f]{6}$/.test(this._config.color) ? this._config.color : '#D97757';
+      const custom = this._entities[i]?.color;
+      if (custom && /^#[0-9A-Fa-f]{6}$/i.test(custom.trim())) {
+        return custom.trim();
+      }
+      const baseColor = /^#[0-9A-Fa-f]{6}$/i.test(this._config.color) ? this._config.color : '#D97757';
       const { h, s } = this._hexToHsl(baseColor);
       const hue = (h + i * 137.508) % 360;
       const sat = this._clamp(s, 55, 82);
@@ -1515,6 +1544,24 @@
         : this._config.theme !== 'light';
       const lig = isDark ? 62 : 48;
       return this._hsl(hue, sat, lig);
+    }
+
+    _getBucketInfo(durMs = null) {
+      const [ws, we] = this._mode === 'chart' ? this._winRange() : [Date.now() - this._hours * 3600000, Date.now()];
+      const dur = durMs ?? (we - ws);
+      const hours = dur / 3600000;
+      if (hours <= 2)  return { ms: 5 * 60000,   label: '5m' };
+      if (hours <= 8)  return { ms: 15 * 60000,  label: '15m' };
+      if (hours <= 36) return { ms: 30 * 60000,  label: '30m' };
+      return                  { ms: 180 * 60000, label: '3h' };
+    }
+
+    _getSubtitleText() {
+      const period = HOURS_NAMES[this._hours] ?? `${this._hours}h`;
+      const calc   = this._aggregation === 'avg'
+        ? `Media (${this._getBucketInfo().label})`
+        : 'Valori puntuali';
+      return `Ultimi ${period} · ${calc}`;
     }
 
     _getChartHTML() {
@@ -1531,7 +1578,7 @@
         const color = this._entityColor(i);
         const name  = cfg.name || this._friendlyName(cfg.entity);
         return `<div class="legend-row" data-index="${i}">
-          <span class="legend-dot" style="background:${color}"></span>
+          <span class="legend-dot" id="ldot-${i}" style="background:${color}"></span>
           <span class="legend-name">${name}</span>
           <span class="legend-state" id="ls-${i}">—</span>
           <span class="legend-stat"  id="lx-${i}"></span>
@@ -1545,14 +1592,25 @@
             <div class="header-icon-wrap"><ha-icon icon="${icon}"></ha-icon></div>
             <div class="header-titles">
               <div class="header-title">${title}</div>
-              <div class="header-sub" id="sub">Ultimi ${HOURS_NAMES[this._hours] ?? this._hours + 'h'}</div>
+              <div class="header-sub" id="sub">${this._getSubtitleText()}</div>
             </div>
           </div>
           <div class="time-pills">${pillsHTML}</div>
         </div>
         <div class="separator"></div>
         <div class="chart-section">
-          <button class="zoom-reset" id="zreset">↺ Reset zoom</button>
+          <div class="chart-meta-bar">
+            <div class="chart-meta-right">
+              <button class="zoom-reset" id="zreset">
+                <ha-icon icon="mdi:magnify-minus-outline" style="--mdc-icon-size:13px"></ha-icon>
+                <span>Reset zoom</span>
+              </button>
+              <div class="agg-pills">
+                <button class="agg-pill${this._aggregation !== 'avg' ? ' active' : ''}" data-agg="raw" title="Mostra ogni singola variazione reale del sensore">Puntuali</button>
+                <button class="agg-pill${this._aggregation === 'avg' ? ' active' : ''}" data-agg="avg" title="Mostra la media ponderata per intervallo di tempo">Media</button>
+              </div>
+            </div>
+          </div>
           <div id="chart-container"><div class="no-data">Caricamento…</div></div>
         </div>
         <div class="legend" id="legend">${legendHTML}</div>
@@ -1578,11 +1636,12 @@
       const rowsHTML = this._entities.map((cfg, i) => {
         const name = cfg.name || this._friendlyName(cfg.entity);
         const entIcon = cfg.icon || this._iconForEntity(cfg.entity);
+        const customCol = (cfg.color && /^#[0-9A-Fa-f]{6}$/i.test(cfg.color.trim())) ? cfg.color.trim() : '';
         return `
           <div class="hist-row" data-index="${i}">
             <div class="hist-meta">
-              <div class="hist-icon-wrap">
-                <ha-icon id="hicon-${i}" icon="${entIcon}"></ha-icon>
+              <div class="hist-icon-wrap" style="${customCol ? `border-color:${customCol}55` : ''}">
+                <ha-icon id="hicon-${i}" icon="${entIcon}" style="${customCol ? `color:${customCol}` : ''}"></ha-icon>
               </div>
               <span class="legend-name">${name}</span>
               <span class="hist-state" id="hstate-${i}">—</span>
@@ -1601,7 +1660,7 @@
             <div class="header-icon-wrap"><ha-icon icon="${icon}"></ha-icon></div>
             <div class="header-titles">
               <div class="header-title">${title}</div>
-              <div class="header-sub" id="sub">Ultimi ${HOURS_NAMES[this._hours] ?? this._hours + 'h'}</div>
+              <div class="header-sub" id="sub">${this._getSubtitleText()}</div>
             </div>
           </div>
           <div class="time-pills">${pillsHTML}</div>
@@ -1617,6 +1676,14 @@
         </div>`;
     }
 
+    _syncCalcUI() {
+      const sub = this._q('#sub');
+      if (sub) sub.textContent = this._getSubtitleText();
+      this._card?.querySelectorAll('.agg-pill').forEach(b => {
+        b.classList.toggle('active', b.dataset.agg === this._aggregation);
+      });
+    }
+
     _bindChartEvents() {
       this._card.querySelectorAll('.time-pill').forEach(btn => {
         btn.addEventListener('click', e => {
@@ -1625,15 +1692,24 @@
           this._zoomRange = null;
           this._card.querySelectorAll('.time-pill').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          const sub = this._q('#sub');
-          if (sub) sub.textContent = `Ultimi ${HOURS_NAMES[this._hours] ?? this._hours + 'h'}`;
+          this._syncCalcUI();
           this._refreshZoomBtn();
           this._fetchHistory();
         });
       });
 
+      this._card.querySelectorAll('.agg-pill').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          this._aggregation = btn.dataset.agg === 'avg' ? 'avg' : 'raw';
+          this._syncCalcUI();
+          this._updateGraphs();
+        });
+      });
+
       this._q('#zreset')?.addEventListener('click', () => {
         this._zoomRange = null;
+        this._syncCalcUI();
         this._refreshZoomBtn();
         this._updateGraphs();
       });
@@ -1659,8 +1735,7 @@
           this._hours = parseInt(btn.dataset.hours, 10);
           this._card.querySelectorAll('.time-pill').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          const sub = this._q('#sub');
-          if (sub) sub.textContent = `Ultimi ${HOURS_NAMES[this._hours] ?? this._hours + 'h'}`;
+          this._syncCalcUI();
           this._fetchHistory();
         });
       });
@@ -1721,6 +1796,7 @@
     }
 
     _updateGraphs() {
+      this._syncCalcUI();
       if (this._mode === 'chart') {
         const container = this._q('#chart-container');
         if (!container) return;
@@ -1732,11 +1808,13 @@
           this._bindChartInteraction(container.querySelector('.chart-area'), []);
         } else {
           container.innerHTML = this._renderChartLines(histories);
-          const pts = histories.map(h => this._isBinary(h) ? [] : this._toPoints(h));
+          const pts = histories.map((h, i) => this._isBinary(h) ? [] : this._getSeriesPoints(h, this._entities[i]?.entity));
           this._bindChartInteraction(container.querySelector('.chart-area'), pts);
         }
 
         histories.forEach((h, i) => {
+          const dot = this._q(`#ldot-${i}`);
+          if (dot) dot.style.background = this._entityColor(i);
           const el = this._q(`#lx-${i}`);
           if (el) el.textContent = this._isBinary(h) ? this._binaryStat(h) : this._numericStat(h, this._entities[i].entity);
         });
@@ -1748,22 +1826,126 @@
           if (!container) return;
 
           if (this._isBinary(history)) {
-            container.innerHTML = this._renderHistoryTimeline(history);
+            container.innerHTML = this._renderHistoryTimeline(history, i);
             if (statEl) statEl.textContent = this._binaryStat(history);
           } else {
-            container.innerHTML = this._renderHistoryLineChart(history, cfg.entity);
+            container.innerHTML = this._renderHistoryLineChart(history, cfg.entity, i);
             if (statEl) statEl.textContent = this._numericStat(history, cfg.entity);
           }
         });
       }
     }
 
-    _toPoints(history) {
-      const [ws, we] = this._winRange();
-      return (history || [])
+    /**
+     * Extracts valid numeric points in [ws, we], anchoring the active state at ws
+     * (if the entity already had a state at/before ws) and extending the last valid
+     * state up to we so steady sensors never truncate midway across the chart.
+     */
+    _toRawPoints(history, entityId, wsOverride = null, weOverride = null) {
+      const [ws, we] = (wsOverride !== null && weOverride !== null)
+        ? [wsOverride, weOverride]
+        : (this._mode === 'chart' ? this._winRange() : [Date.now() - this._hours * 3600000, Date.now()]);
+
+      const all = (history || [])
         .filter(h => h.state !== 'unavailable' && h.state !== 'unknown' && !isNaN(parseFloat(h.state)))
-        .map(h => ({ t: new Date(h.last_changed).getTime(), v: parseFloat(h.state) }))
-        .filter(p => p.t >= ws - 3600000 && p.t <= we + 60000);
+        .map(h => ({ t: new Date(h.last_changed || h.last_updated).getTime(), v: parseFloat(h.state) }))
+        .filter(p => !isNaN(p.t))
+        .sort((a, b) => a.t - b.t);
+
+      if (!all.length) {
+        const curVal = parseFloat(this._hass?.states[entityId]?.state);
+        if (!isNaN(curVal)) {
+          return [{ t: ws, v: curVal }, { t: we, v: curVal }];
+        }
+        return [];
+      }
+
+      let beforeWs = null;
+      for (const p of all) {
+        if (p.t <= ws) beforeWs = p;
+        else break;
+      }
+
+      const inside = all.filter(p => p.t > ws && p.t <= we);
+      const pts = [];
+
+      if (beforeWs) {
+        pts.push({ t: ws, v: beforeWs.v });
+      }
+      for (const p of inside) {
+        pts.push({ t: p.t, v: p.v });
+      }
+
+      if (pts.length > 0) {
+        const last = pts[pts.length - 1];
+        if (last.t < we) {
+          pts.push({ t: we, v: last.v });
+        } else if (pts.length === 1) {
+          pts.unshift({ t: Math.max(ws, last.t - 60000), v: last.v });
+        }
+      }
+
+      return pts;
+    }
+
+    _timeWeightedAvg(rawPts, tA, tB) {
+      if (!rawPts?.length) return null;
+      let weightedSum = 0;
+      let totalDur = 0;
+      for (let i = 0; i < rawPts.length - 1; i++) {
+        const p0 = rawPts[i];
+        const p1 = rawPts[i + 1];
+        const s0 = Math.max(tA, p0.t);
+        const s1 = Math.min(tB, p1.t);
+        if (s1 > s0) {
+          const dt = s1 - s0;
+          weightedSum += p0.v * dt;
+          totalDur += dt;
+        }
+      }
+      if (totalDur > 0) return weightedSum / totalDur;
+      let near = rawPts[0], minD = Infinity;
+      const mid = (tA + tB) / 2;
+      for (const p of rawPts) {
+        const d = Math.abs(p.t - mid);
+        if (d < minD) { minD = d; near = p; }
+      }
+      return near.v;
+    }
+
+    _getSeriesPoints(history, entityId, wsOverride = null, weOverride = null) {
+      const raw = this._toRawPoints(history, entityId, wsOverride, weOverride);
+      if (this._aggregation !== 'avg' || raw.length < 2) return raw;
+
+      const tStart = raw[0].t;
+      const tEnd   = raw[raw.length - 1].t;
+      const span   = tEnd - tStart;
+      if (span <= 0) return raw;
+
+      const [ws, we] = (wsOverride !== null && weOverride !== null)
+        ? [wsOverride, weOverride]
+        : (this._mode === 'chart' ? this._winRange() : [Date.now() - this._hours * 3600000, Date.now()]);
+      const { ms: bucketMs } = this._getBucketInfo(we - ws);
+
+      const buckets = [];
+      let cur = tStart;
+      while (cur < tEnd) {
+        const next = Math.min(cur + bucketMs, tEnd);
+        const avg  = this._timeWeightedAvg(raw, cur, next);
+        if (avg !== null) {
+          const tPoint = cur === tStart ? tStart : (next === tEnd ? tEnd : Math.round((cur + next) / 2));
+          buckets.push({ t: tPoint, v: avg });
+        }
+        cur = next;
+      }
+
+      if (buckets.length === 1) {
+        buckets.push({ t: tEnd, v: buckets[0].v });
+      } else if (buckets.length > 1 && buckets[buckets.length - 1].t < tEnd) {
+        buckets.push({ t: tEnd, v: buckets[buckets.length - 1].v });
+      }
+
+      return buckets.length >= 2 ? buckets : raw;
     }
 
     _renderChartTimelines(histories) {
@@ -1810,7 +1992,7 @@
     _renderChartLines(histories) {
       const W   = 400;
       const H   = Number(this._config.height) || 100;
-      const pad = 5;
+      const pad = 6;
       const uid = this._uid;
       const [ws, we] = this._winRange();
       const rangeT = we - ws;
@@ -1818,43 +2000,43 @@
       const toX = t => ((t - ws) / rangeT * W).toFixed(1);
       const toY = (v, minV, rv) => (H - ((v - minV) / rv) * (H - pad * 2) - pad).toFixed(1);
 
+      const seriesList = [];
+      histories.forEach((h, i) => {
+        if (this._isBinary(h)) return;
+        const entityId = this._entities[i]?.entity;
+        const pts = this._getSeriesPoints(h, entityId, ws, we);
+        if (pts.length < 2) return;
+        seriesList.push({ pts, i, entityId });
+      });
+
+      if (!seriesList.length) {
+        return `<div class="no-data">Nessun dato nel periodo selezionato</div>`;
+      }
+
+      // Unified Shared Y-Axis across all visible numeric series
+      const allVals     = seriesList.flatMap(s => s.pts.map(p => p.v));
+      const globalMin   = Math.min(...allVals);
+      const globalMax   = Math.max(...allVals);
+      const globalRange = (globalMax - globalMin) || 1;
+      const yUnit       = this._hass?.states[seriesList[0].entityId]?.attributes?.unit_of_measurement ?? '';
+
       const defs  = [];
       const areas = [];
       const lines = [];
-      let yMin = null, yMax = null, yUnit = '';
 
-      histories.forEach((h, i) => {
-        if (this._isBinary(h)) return;
-        const pts = this._toPoints(h);
-        if (pts.length < 2) return;
-
-        const color  = this._entityColor(i);
-        const vals   = pts.map(p => p.v);
-        const minV   = Math.min(...vals);
-        const maxV   = Math.max(...vals);
-        const rangeV = maxV - minV || 1;
-
-        if (yMin === null) {
-          yMin  = minV;
-          yMax  = maxV;
-          yUnit = this._hass?.states[this._entities[i].entity]?.attributes?.unit_of_measurement ?? '';
-        }
-
-        const linePts = pts.map((p, j) => `${j === 0 ? 'M' : 'L'}${toX(p.t)},${toY(p.v, minV, rangeV)}`).join(' ');
+      seriesList.forEach(({ pts, i }) => {
+        const color   = this._entityColor(i);
+        const linePts = pts.map((p, j) => `${j === 0 ? 'M' : 'L'}${toX(p.t)},${toY(p.v, globalMin, globalRange)}`).join(' ');
         const areaPts = `${linePts} L${toX(pts[pts.length - 1].t)},${H} L${toX(pts[0].t)},${H} Z`;
         const gid     = `wicg-${uid}-${i}`;
 
         defs.push(`<linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="${color}" stop-opacity="0.35"/>
+          <stop offset="0%"   stop-color="${color}" stop-opacity="0.32"/>
           <stop offset="100%" stop-color="${color}" stop-opacity="0.02"/>
         </linearGradient>`);
         areas.push(`<path d="${areaPts}" fill="url(#${gid})"/>`);
         lines.push(`<path d="${linePts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>`);
       });
-
-      if (!areas.length) {
-        return `<div class="no-data">Nessun dato nel periodo selezionato</div>`;
-      }
 
       const gridHTML = this._config.show_grid ? [0.25, 0.5, 0.75].map(f => {
         const y = (f * (H - pad * 2) + pad).toFixed(1);
@@ -1864,11 +2046,13 @@
       const ttColor = this._palette?.textDim ?? 'rgba(255,255,255,0.28)';
       const zrFill  = this._palette?.rowHover ?? 'rgba(255,255,255,0.06)';
 
-      const yLabels = yMin !== null ? `
+      const globalMid = (globalMax + globalMin) / 2;
+      const yLabels = `
         <div class="y-axis">
-          <span class="y-label">${yMax.toFixed(1)} ${yUnit}</span>
-          <span class="y-label">${yMin.toFixed(1)} ${yUnit}</span>
-        </div>` : '<div class="y-axis"></div>';
+          <span class="y-label">${globalMax.toFixed(1)} ${yUnit}</span>
+          <span class="y-label y-label-mid">${globalMid.toFixed(1)} ${yUnit}</span>
+          <span class="y-label">${globalMin.toFixed(1)} ${yUnit}</span>
+        </div>`;
 
       return `
         <div class="chart-layout">
@@ -1972,6 +2156,7 @@
 
       const rows = allEntityPoints.map((pts, i) => {
         if (!pts?.length) return null;
+        if (t < pts[0].t - 60000 || t > pts[pts.length - 1].t + 60000) return null;
         let near = pts[0], minD = Infinity;
         for (const p of pts) { const d = Math.abs(p.t - t); if (d < minD) { minD = d; near = p; } }
         return { near, i };
@@ -1984,6 +2169,7 @@
       const lbl = dur <= 172800000
         ? d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0')
         : d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
+      const modeTag = this._aggregation === 'avg' ? `Media ${this._getBucketInfo(dur).label}` : 'Puntuale';
 
       const rowsHTML = rows.map(({ near, i }) => {
         const cfg  = this._entities[i];
@@ -1992,23 +2178,25 @@
         const unit = this._hass?.states[cfg.entity]?.attributes?.unit_of_measurement ?? '';
         return `<div class="tt-row">
           <span class="tt-dot" style="background:${col}"></span>
-          <span style="color:var(--text-muted);font-size:10px;max-width:80px;overflow:hidden;text-overflow:ellipsis">${name}</span>
+          <span style="color:var(--text-muted);font-size:10px;max-width:85px;overflow:hidden;text-overflow:ellipsis">${name}</span>
           <span style="font-weight:600;margin-left:auto">${near.v.toFixed(1)} ${unit}</span>
         </div>`;
       }).join('');
 
-      ttBox.innerHTML = `<div class="tt-time">${lbl}</div>${rowsHTML}`;
+      ttBox.innerHTML = `<div class="tt-time">${lbl} · ${modeTag}</div>${rowsHTML}`;
       ttBox.style.opacity = '1';
       ttBox.style.left = pct > 0.65
         ? `calc(${pct * 100}% - ${(ttBox.offsetWidth || 120) + 14}px)`
         : `calc(${pct * 100}% + 12px)`;
     }
 
-    _renderHistoryTimeline(history) {
+    _renderHistoryTimeline(history, idx = 0) {
       const now   = Date.now();
       const start = now - this._hours * 3600000;
       const range = now - start;
       const valid = (history || []).filter(h => h.state !== 'unavailable' && h.state !== 'unknown');
+      const customCol = this._entities[idx]?.color;
+      const barColor  = (customCol && /^#[0-9A-Fa-f]{6}$/i.test(customCol.trim())) ? customCol.trim() : '';
 
       const segsHTML = valid.map((item, i) => {
         const tStart = Math.max(new Date(item.last_changed).getTime(), start);
@@ -2016,21 +2204,20 @@
         if (tEnd <= start || tStart >= now) return '';
         const xPct = ((tStart - start) / range) * 100;
         const wPct = ((Math.min(tEnd, now) - tStart) / range) * 100;
-        const cls  = this._isOnState(item.state) ? 'seg-on' : 'seg-off';
-        return `<div class="seg ${cls}" style="left:${xPct.toFixed(2)}%;width:${Math.max(wPct, 0.3).toFixed(2)}%"></div>`;
+        const isOn = this._isOnState(item.state);
+        const cls  = isOn ? 'seg-on' : 'seg-off';
+        const colStyle = (isOn && barColor) ? `;background:${barColor}` : '';
+        return `<div class="seg ${cls}" style="left:${xPct.toFixed(2)}%;width:${Math.max(wPct, 0.3).toFixed(2)}%${colStyle}"></div>`;
       }).join('');
 
       if (!segsHTML.trim()) return `<div class="no-data">Nessun dato nel periodo selezionato</div>`;
       return `<div class="timeline-bar">${segsHTML}</div>${this._timeAxisHTML()}`;
     }
 
-    _renderHistoryLineChart(history, entityId) {
-      const now   = Date.now();
-      const start = now - this._hours * 3600000;
-      const points = (history || [])
-        .filter(h => h.state !== 'unavailable' && h.state !== 'unknown' && !isNaN(parseFloat(h.state)))
-        .map(h => ({ t: new Date(h.last_changed).getTime(), v: parseFloat(h.state) }))
-        .filter(p => p.t >= start);
+    _renderHistoryLineChart(history, entityId, idx = 0) {
+      const now    = Date.now();
+      const start  = now - this._hours * 3600000;
+      const points = this._getSeriesPoints(history, entityId, start, now);
 
       if (points.length < 2) return `<div class="no-data">Nessun dato nel periodo selezionato</div>`;
 
@@ -2045,8 +2232,11 @@
 
       const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${toX(p.t)},${toY(p.v)}`).join(' ');
       const areaPath = `${linePath} L${toX(points[points.length - 1].t)},${H} L${toX(points[0].t)},${H} Z`;
-      const gradId   = `wic-${this._uid}-${entityId.replace(/\W/g, '-')}`;
-      const accent   = this._palette?.accent ?? '#D97757';
+      const gradId   = `wic-${this._uid}-${idx}-${entityId.replace(/\W/g, '-')}`;
+      const customCol = this._entities[idx]?.color;
+      const accent   = (customCol && /^#[0-9A-Fa-f]{6}$/i.test(customCol.trim()))
+        ? customCol.trim()
+        : (this._palette?.accent ?? '#D97757');
 
       return `
         <div class="linechart">
@@ -2129,13 +2319,15 @@
     }
 
     _numericStat(h, entityId) {
-      if (!h?.length) return '';
-      const vals = h
-        .filter(x => x.state !== 'unavailable' && x.state !== 'unknown' && !isNaN(parseFloat(x.state)))
-        .map(x => parseFloat(x.state));
-      if (!vals.length) return '';
+      const raw = this._toRawPoints(h, entityId);
+      if (!raw.length) return '';
+      const vals = raw.map(p => p.v);
+      const minV = Math.min(...vals);
+      const maxV = Math.max(...vals);
+      const avgV = this._timeWeightedAvg(raw, raw[0].t, raw[raw.length - 1].t)
+        ?? (vals.reduce((a, b) => a + b, 0) / vals.length);
       const unit = this._hass?.states[entityId]?.attributes?.unit_of_measurement ?? '';
-      return `${Math.min(...vals).toFixed(1)} – ${Math.max(...vals).toFixed(1)} ${unit}`.trim();
+      return `Media ${avgV.toFixed(1)}${unit ? ' ' + unit : ''} · ${minV.toFixed(1)}–${maxV.toFixed(1)} ${unit}`.trim();
     }
 
     _updateChartState() {
@@ -2423,6 +2615,7 @@
       display: flex; flex-direction: column; gap: 10px;
     }
     .entity-item-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .entity-color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.25); }
     .entity-item-label { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
     .entity-item-actions { display: flex; align-items: center; gap: 4px; }
     .icon-btn {
@@ -2441,6 +2634,32 @@
       border: 1px solid rgba(255,255,255,0.14); background: rgba(0,0,0,0.2);
       color: var(--primary-text-color, #F5F0EB); font-size: 12px;
     }
+    .entity-color-picker {
+      grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px;
+      padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .entity-color-header {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; color: var(--secondary-text-color, #A09080); font-weight: 600;
+    }
+    .entity-color-status { font-family: monospace; color: var(--primary-text-color, #F5F0EB); font-weight: 500; }
+    .entity-color-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .entity-auto-btn {
+      height: 26px; padding: 0 10px; border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.16); background: rgba(0,0,0,0.2);
+      color: var(--primary-text-color, #F5F0EB); font-size: 11px; font-weight: 600; cursor: pointer;
+    }
+    .entity-auto-btn.active { border-color: #D97757; background: rgba(217, 119, 87, 0.2); color: #D97757; }
+    .entity-swatch {
+      width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent;
+      cursor: pointer; padding: 0; transition: transform 0.15s ease;
+    }
+    .entity-swatch.active { border-color: #fff; box-shadow: 0 0 0 2px #D97757; transform: scale(1.12); }
+    .entity-color-native {
+      width: 28px; height: 26px; padding: 1px; border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.16); background: transparent; cursor: pointer;
+    }
+    .entity-color-hex { width: 84px; height: 26px; font-family: monospace; font-size: 11.5px; }
     .toggle-row {
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
       padding: 8px 0; border-bottom: 1px solid var(--divider-color, rgba(255, 255, 255, 0.06));
@@ -2495,6 +2714,7 @@
         height:              100,
         show_grid:           false,
         zoom:                true,
+        aggregation:         'raw',
         entities:            [],
         ...config,
       };
@@ -2573,7 +2793,7 @@
                 <div class="entity-list" id="entity-list"></div>
               </div>
               <div>
-                <div class="field-label" id="add-label">➕ Aggiungi Entità alla Lista</div>
+                <div class="field-label" id="add-label">Aggiungi Entità alla Lista</div>
                 <ha-form id="ha-add-entity-form"></ha-form>
               </div>
             </div>
@@ -2593,9 +2813,9 @@
             <div>
               <div class="field-label">Tema Superficie</div>
               <div class="theme-pills">
-                <button type="button" class="theme-pill" data-theme="dark">🌙 Dark</button>
-                <button type="button" class="theme-pill" data-theme="light">☀️ Light</button>
-                <button type="button" class="theme-pill" data-theme="auto">🔄 Auto</button>
+                <button type="button" class="theme-pill" data-theme="dark"><ha-icon icon="mdi:weather-night" style="--mdc-icon-size:16px"></ha-icon><span>Dark</span></button>
+                <button type="button" class="theme-pill" data-theme="light"><ha-icon icon="mdi:white-balance-sunny" style="--mdc-icon-size:16px"></ha-icon><span>Light</span></button>
+                <button type="button" class="theme-pill" data-theme="auto"><ha-icon icon="mdi:theme-light-dark" style="--mdc-icon-size:16px"></ha-icon><span>Auto</span></button>
               </div>
             </div>
 
@@ -2683,6 +2903,20 @@
 
             <!-- Controlli per Grafici (Chart / History) -->
             <div id="controls-graph-only" style="display:none; flex-direction:column; gap:14px">
+              <div>
+                <div class="field-label">Calcolo Valori Grafico (aggregation)</div>
+                <div class="theme-pills" style="grid-template-columns:repeat(2,1fr)">
+                  <button type="button" class="theme-pill agg-editor-pill" data-agg="raw">
+                    <ha-icon icon="mdi:pulse" style="--mdc-icon-size:16px"></ha-icon>
+                    <span>Valori Puntuali (Raw)</span>
+                  </button>
+                  <button type="button" class="theme-pill agg-editor-pill" data-agg="avg">
+                    <ha-icon icon="mdi:function-variant" style="--mdc-icon-size:16px"></ha-icon>
+                    <span>Media Ponderata (Avg)</span>
+                  </button>
+                </div>
+              </div>
+
               <div>
                 <div class="field-label">Intervallo Temporale Predefinito (hours)</div>
                 <div class="theme-pills" style="grid-template-columns:repeat(4,1fr)">
@@ -2843,6 +3077,13 @@
         });
       }
 
+      // Aggregation pills (Chart / History)
+      shadow.querySelectorAll('.agg-editor-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          this._updateConfig({ aggregation: btn.dataset.agg });
+        });
+      });
+
       // Hours pills (Chart / History)
       shadow.querySelectorAll('.hours-pill').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -2862,8 +3103,8 @@
         });
       }
 
-      // Theme pills (exclude .hours-pill)
-      shadow.querySelectorAll('.theme-pill:not(.hours-pill)').forEach(btn => {
+      // Theme pills (exclude .hours-pill and .agg-editor-pill)
+      shadow.querySelectorAll('.theme-pill:not(.hours-pill):not(.agg-editor-pill)').forEach(btn => {
         btn.addEventListener('click', () => this._updateConfig({ theme: btn.dataset.theme }));
       });
 
@@ -2894,6 +3135,31 @@
       });
     }
 
+    _computeAutoEntityColor(idx) {
+      const baseHex = /^#[0-9A-Fa-f]{6}$/i.test(this._config.color) ? this._config.color : '#D97757';
+      let r = parseInt(baseHex.slice(1, 3), 16) / 255;
+      let g = parseInt(baseHex.slice(3, 5), 16) / 255;
+      let b = parseInt(baseHex.slice(5, 7), 16) / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h = 0, s = 0, l = (max + min) / 2;
+      if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+          case g: h = ((b - r) / d + 2) / 6; break;
+          case b: h = ((r - g) / d + 4) / 6; break;
+        }
+      }
+      const hue = Math.round((h * 360 + idx * 137.508) % 360);
+      const sat = Math.max(55, Math.min(82, Math.round(s * 100)));
+      const isDark = this._config.theme === 'auto'
+        ? !window.matchMedia('(prefers-color-scheme: light)').matches
+        : this._config.theme !== 'light';
+      const lig = isDark ? 62 : 48;
+      return `hsl(${hue},${sat}%,${lig}%)`;
+    }
+
     _renderEntityList() {
       const listEl = this.shadowRoot.querySelector('#entity-list');
       if (!listEl) return;
@@ -2904,23 +3170,43 @@
         return;
       }
 
-      listEl.innerHTML = items.map((item, idx) => `
+      listEl.innerHTML = items.map((item, idx) => {
+        const hasCustomColor = Boolean(item.color && /^#[0-9A-Fa-f]{6}$/i.test(item.color.trim()));
+        const customHex      = hasCustomColor ? item.color.trim().toUpperCase() : '';
+        const previewColor   = hasCustomColor ? customHex : this._computeAutoEntityColor(idx);
+
+        return `
         <div class="entity-item ${this._expandedRow === idx ? 'expanded' : ''}" data-idx="${idx}">
           <div class="entity-item-top">
+            <span class="entity-color-dot" style="background:${previewColor}" title="${hasCustomColor ? 'Colore personalizzato: ' + customHex : 'Colore automatico'}"></span>
             <span class="entity-item-label">${item.name ? `${item.name} (${item.entity})` : item.entity}</span>
             <div class="entity-item-actions">
-              <button type="button" class="icon-btn" data-act="up" data-idx="${idx}" title="Sposta su">↑</button>
-              <button type="button" class="icon-btn" data-act="down" data-idx="${idx}" title="Sposta giù">↓</button>
-              <button type="button" class="icon-btn" data-act="edit" data-idx="${idx}" title="Personalizza nome/icona">⚙️</button>
-              <button type="button" class="icon-btn" data-act="del" data-idx="${idx}" title="Rimuovi">✕</button>
+              <button type="button" class="icon-btn" data-act="up" data-idx="${idx}" title="Sposta su"><ha-icon icon="mdi:arrow-up" style="--mdc-icon-size:15px"></ha-icon></button>
+              <button type="button" class="icon-btn" data-act="down" data-idx="${idx}" title="Sposta giù"><ha-icon icon="mdi:arrow-down" style="--mdc-icon-size:15px"></ha-icon></button>
+              <button type="button" class="icon-btn" data-act="edit" data-idx="${idx}" title="Personalizza nome, icona e colore"><ha-icon icon="mdi:tune" style="--mdc-icon-size:15px"></ha-icon></button>
+              <button type="button" class="icon-btn" data-act="del" data-idx="${idx}" title="Rimuovi"><ha-icon icon="mdi:close" style="--mdc-icon-size:15px"></ha-icon></button>
             </div>
           </div>
           <div class="entity-item-details">
             <input type="text" class="mini-input" data-field="name" data-idx="${idx}" placeholder="Nome custom" value="${item.name || ''}">
             <input type="text" class="mini-input" data-field="icon" data-idx="${idx}" placeholder="Icona (es. mdi:chart-line)" value="${item.icon || ''}">
+            <div class="entity-color-picker">
+              <div class="entity-color-header">
+                <span>Colore Entità (Grafico / Storico)</span>
+                <span class="entity-color-status">${hasCustomColor ? customHex : 'Automatico'}</span>
+              </div>
+              <div class="entity-color-controls">
+                <button type="button" class="entity-auto-btn ${!hasCustomColor ? 'active' : ''}" data-color-auto="${idx}" title="Usa il colore calcolato in automatico">Auto</button>
+                ${ENTITY_COLOR_SWATCHES.map(hex => `
+                  <button type="button" class="entity-swatch ${hasCustomColor && customHex === hex ? 'active' : ''}" data-color-swatch="${hex}" data-idx="${idx}" style="background:${hex}" title="${hex}"></button>
+                `).join('')}
+                <input type="color" class="entity-color-native" data-color-native="${idx}" value="${hasCustomColor ? customHex : '#D97757'}" title="Scegli colore personalizzato">
+                <input type="text" class="mini-input entity-color-hex" data-field="color" data-idx="${idx}" maxlength="7" placeholder="#RRGGBB" value="${customHex}">
+              </div>
+            </div>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
 
       listEl.querySelectorAll('.icon-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -2943,13 +3229,52 @@
         });
       });
 
+      listEl.querySelectorAll('[data-color-auto]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.colorAuto, 10);
+          const arr = this._getNormalizedEntities();
+          if (arr[idx]) {
+            delete arr[idx].color;
+            this._updateConfig({ entities: arr });
+          }
+        });
+      });
+
+      listEl.querySelectorAll('[data-color-swatch]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx, 10);
+          const hex = btn.dataset.colorSwatch;
+          const arr = this._getNormalizedEntities();
+          if (arr[idx] && hex) {
+            arr[idx].color = hex.toUpperCase();
+            this._updateConfig({ entities: arr });
+          }
+        });
+      });
+
+      listEl.querySelectorAll('[data-color-native]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const idx = parseInt(inp.dataset.colorNative, 10);
+          const arr = this._getNormalizedEntities();
+          if (arr[idx]) {
+            arr[idx].color = e.target.value.toUpperCase();
+            this._updateConfig({ entities: arr });
+          }
+        });
+      });
+
       listEl.querySelectorAll('.mini-input').forEach(inp => {
         inp.addEventListener('change', () => {
           const idx   = parseInt(inp.dataset.idx, 10);
           const field = inp.dataset.field;
           const arr   = this._getNormalizedEntities();
           if (arr[idx]) {
-            const val = inp.value.trim();
+            let val = inp.value.trim();
+            if (field === 'color' && val) {
+              if (!val.startsWith('#')) val = '#' + val;
+              if (!/^#[0-9A-Fa-f]{6}$/.test(val)) return;
+              val = val.toUpperCase();
+            }
             if (val) arr[idx][field] = val;
             else delete arr[idx][field];
             this._updateConfig({ entities: arr });
@@ -3031,6 +3356,10 @@
       if (!isSingle) this._renderEntityList();
 
       // Sync Graph Controls
+      const curAgg = c.aggregation === 'avg' ? 'avg' : 'raw';
+      shadow.querySelectorAll('.agg-editor-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.agg === curAgg);
+      });
       const curHours = Number(c.hours) || 24;
       shadow.querySelectorAll('.hours-pill').forEach(btn => {
         btn.classList.toggle('active', parseInt(btn.dataset.hours, 10) === curHours);
@@ -3043,7 +3372,7 @@
 
       // Sync Theme
       const curTheme = c.theme || 'dark';
-      shadow.querySelectorAll('.theme-pill:not(.hours-pill)').forEach(btn => {
+      shadow.querySelectorAll('.theme-pill:not(.hours-pill):not(.agg-editor-pill)').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === curTheme);
       });
 

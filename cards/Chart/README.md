@@ -17,9 +17,14 @@ Temi **dark**, **light** e **auto**.
   - Doppio click per resettare lo zoom
   - Pulsante "↺ Reset zoom" visibile durante lo zoom
 - **Tooltip hover** — linea verticale tratteggiata + box con valore/ora per ogni entità
-- **Etichette asse Y** — min/max della prima entità numerica
+- **Scala Y condivisa reale** — `min`, `mid` e `max` globali su tutte le entità numeriche per un confronto visivo fedele
+- **Doppio metodo di calcolo (`aggregation`):**
+  - `raw` *(Default)*: **Valori puntuali** istantanei con ancoraggio temporale continuo fino a fine finestra
+  - `avg`: **Media ponderata** nel tempo per intervalli regolari (`5m` su 1h, `15m` su 6h, `30m` su 24h, `3h` su 7d)
+  - Selettore rapido `Puntuali | Media` direttamente sulla card e indicazione nel sottotitolo dell'header
+- **Colore personalizzato per singola entità (`color: '#RRGGBB'`)** oltre alla generazione automatica InfiniteColor
 - **Grid lines opzionali** (`show_grid: true`)
-- **Legenda** — una riga per entità con: dot colorato · nome · stato corrente · range min–max
+- **Legenda** — una riga per entità con: dot colorato · nome · stato corrente · `Media · min–max`
 - **Asse temporale** — etichette HH:MM (≤ 48h) o giorno+data (> 48h)
 - Barra loader animata durante il fetch
 - Clic su riga legenda → apre dialogo **More Info**
@@ -29,16 +34,20 @@ Temi **dark**, **light** e **auto**.
 
 ## Colori multi-entità
 
-La versione Original usa una palette fissa di 6 colori che si ripete:
+Ogni entità in `entities` può definire un proprio colore esadecimale (`color: '#RRGGBB'`). Se non viene specificato, la card calcola automaticamente un colore distinto armonizzato con il colore base (`color` della card):
 
-| Indice | Colore | Uso tipico |
-|--------|--------|-----------|
-| 0 | `#D97757` Arancione WeSmart | Prima entità |
-| 1 | `#60B4D8` Blu freddo | Seconda entità |
-| 2 | `#5aad6f` Verde | Terza entità |
-| 3 | `#A78BFA` Viola | Quarta entità |
-| 4 | `#F59E0B` Ambra | Quinta entità |
-| 5 | `#EC4899` Rosa | Sesta entità |
+```yaml
+entities:
+  - entity: sensor.temperatura_camera
+    name: Camera da letto
+    color: '#60B4D8'
+  - entity: sensor.temperatura_soggiorno
+    name: Soggiorno
+    color: '#EF4444'
+  - entity: sensor.temperatura_meross
+    name: Meross
+    color: '#10B981'
+```
 
 ---
 
@@ -126,6 +135,7 @@ entities:
 | `height` | number | `100` | Altezza area grafico in px |
 | `show_grid` | boolean | `false` | Mostra grid lines orizzontali |
 | `zoom` | boolean | `true` | Abilita drag-to-zoom |
+| `aggregation` | string | `'raw'` | `'raw'` (Valori puntuali) \| `'avg'` (Media ponderata) |
 | `entity` | string | — | Entità singola (alternativa a `entities`) |
 | `entities` | list | — | Lista entità (alternativa a `entity`) |
 
@@ -139,6 +149,7 @@ entities:
   - entity: sensor.humidity_bagno            # oggetto con override
     name: Umidità Bagno
     icon: mdi:water-percent
+    color: '#3B82F6'
 ```
 
 | Campo entità | Tipo | Default | Descrizione |
@@ -146,6 +157,7 @@ entities:
 | `entity` | string | — | ID entità (obbligatorio) |
 | `name` | string | auto | Override nome visualizzato |
 | `icon` | string | auto | Override icona (mdi:*) |
+| `color` | string | auto | Colore linea/area personalizzato (`#RRGGBB`) |
 
 ---
 
@@ -157,8 +169,7 @@ Renderizzato automaticamente se lo storico contiene valori numerici.
 
 - Tracciato SVG con tratto colorato (1.8px)
 - Area fill con gradiente dal colore a trasparente
-- Asse Y con etichette min/max della prima entità numerica
-- Ogni entità ha la propria scala Y indipendente → visibilità ottimale per unità diverse
+- Asse Y con **scala globale condivisa** (`min`, `mid`, `max`) su tutte le entità numeriche
 - Grid lines opzionali (`show_grid: true`)
 
 ### Barra timeline (entità binarie)
