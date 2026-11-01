@@ -1,4 +1,4 @@
-# WeSmart Card (`wesmart-card.js` v1.2.0) — Technical Documentation & Architecture
+# WeSmart Card (`wesmart-card.js` v1.3.0) — Technical Documentation & Architecture
 
 **[Italiano](#italiano)** | **[English](#english)**
 
@@ -77,6 +77,9 @@ sequenceDiagram
 | `card_type` | `string` | `'light'` | Tipo di card: `'light'`, `'lights'`, `'lights-expand'`, `'chart'`, `'history'`. |
 | `color` | `string` | `'#D97757'` | Colore base esadecimale (`#RRGGBB`) per il motore **InfiniteColor**. |
 | `theme` | `string` | `'dark'` | Tema superficie: `'dark'`, `'light'` oppure `'auto'`. |
+| `bg_color` | `string` | `null` *(Auto)* | Colore di sfondo personalizzato (`#RRGGBB`) che sovrascrive lo sfondo predefinito del tema e ricalcola il tono delle superfici interne. |
+| `bg_opacity` | `number` | `100` | Opacità dello sfondo della card da `0` a `100` (%). A `0%` la card diventa completamente trasparente e rimuove automaticamente anche bordi e ombra. |
+| `show_border` | `boolean` | `true` | Mostra o nasconde il contorno e l'ombra esterna della card (a `bg_opacity: 0` viene disattivato automaticamente). |
 | `show_footer` | `boolean` | `true` | Mostra o nasconde il footer WeSmart. |
 
 #### Opzioni per `card_type: light` (Luce Singola)
@@ -172,6 +175,9 @@ When the user selects a `card_type` in the configurator:
 | `card_type` | `string` | `'light'` | Card mode: `'light'`, `'lights'`, `'lights-expand'`, `'chart'`, `'history'`. |
 | `color` | `string` | `'#D97757'` | Base HEX color (`#RRGGBB`) for the **InfiniteColor** engine. |
 | `theme` | `string` | `'dark'` | Surface theme: `'dark'`, `'light'`, or `'auto'`. |
+| `bg_color` | `string` | `null` *(Auto)* | Custom background color (`#RRGGBB`) overriding the default theme background and adapting inner surface tones. |
+| `bg_opacity` | `number` | `100` | Background opacity from `0` to `100` (%). At `0%` the card becomes completely transparent and automatically removes borders and shadows. |
+| `show_border` | `boolean` | `true` | Shows or hides the outer card border and shadow (automatically disabled when `bg_opacity: 0`). |
 | `show_footer` | `boolean` | `true` | Shows or hides the bottom WeSmart status bar. |
 
 #### Options for `card_type: light` (Single Light)

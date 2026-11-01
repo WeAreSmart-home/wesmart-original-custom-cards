@@ -8,13 +8,13 @@
  *   - 'chart'                          : Interactive single/multi-entity chart with drag-to-zoom, tooltip & time pills
  *   - 'history'                        : Multi-entity history card with per-row SVG line chart or binary timeline bar
  * Infinite Color Engine: full palette derived from a single base color (#D97757 default).
- * Version: 1.1.0
+ * Version: 1.3.0
  */
 
 (() => {
   'use strict';
 
-  const CARD_VERSION = '1.3.0-exp';
+  const CARD_VERSION = '1.3.0';
 
   const HOURS_OPTIONS = [1, 6, 24, 168];
   const HOURS_LABELS  = { 1: '1h', 6: '6h', 24: '24h', 168: '7d' };

@@ -25,13 +25,13 @@ This project was born for the Home Assistant community, merging passion for smar
 ## Il Passo Successivo: `WeSmart-Card` (All-in-One Studio con Configurazione Grafica UI)
 
 > [!TIP]
-> **Nuova Generazione All-in-One ([`WeSmart-Card/wesmart-card.js`](WeSmart-Card/) — `v1.2.0`)**  
+> **Nuova Generazione All-in-One ([`WeSmart-Card/wesmart-card.js`](WeSmart-Card/) — `v1.3.0`)**  
 > **[`WeSmart-Card/`](WeSmart-Card/)** rappresenta il **passo evolutivo successivo** rispetto alle card singole precedenti. L'obiettivo è migliorare e ottimizzare l'esperienza d'uso introducendo una **UI di configurazione grafica dedicata (Visual Editor)** in stile *Bubble Card*, racchiusa in **un unico file `.js`** (`wesmart-card.js`, tag `custom:wesmart-card`).
 >
 > **Obiettivo del Progetto (Roadmap):**  
 > Portare progressivamente **tutte le card del catalogo WeSmart** dentro questa nuova versione All-in-One dotata di configuratore grafico, migliorarle, ottimizzarle e — dove possibile — **aggiungerne di nuove**.
 >
-> - **Moduli già attivi nel configuratore (`v1.2.0`)**: **Light (Singola)** · **Lights (Lista)** · **Lights Expand (Slider Inline)** · **Chart (Grafico con Scala Condivisa, Valori Puntuali/Media, Colori per Entità, Zoom & Tooltip)** · **History (Storico per riga con Colori Personalizzati)**
+> - **Moduli già attivi nel configuratore (`v1.3.0`)**: **Light (Singola)** · **Lights (Lista)** · **Lights Expand (Slider Inline)** · **Chart (Grafico con Scala Condivisa, Valori Puntuali/Media, Colori per Entità, Zoom & Tooltip)** · **History (Storico per riga con Colori Personalizzati)** + **Controllo Stile Sfondo, Opacità (0–100%) e Trasparenza Senza Bordi**
 > - **[Vai alla Guida Completa di `WeSmart-Card/`](WeSmart-Card/README.md)** · **[Documentazione Tecnica](WeSmart-Card/DOCUMENTATION.md)**
 
 ![WeSmart Card All-in-One Visual Configurator](WeSmart-Card/assets/wesmart-card-configurator.png)
@@ -57,13 +57,13 @@ This project was born for the Home Assistant community, merging passion for smar
 ## The Next Step: `WeSmart-Card` (All-in-One Studio with Visual Editor GUI)
 
 > [!TIP]
-> **Next-Generation All-in-One Suite ([`WeSmart-Card/wesmart-card.js`](WeSmart-Card/#english) — `v1.2.0`)**  
+> **Next-Generation All-in-One Suite ([`WeSmart-Card/wesmart-card.js`](WeSmart-Card/#english) — `v1.3.0`)**  
 > **[`WeSmart-Card/`](WeSmart-Card/#english)** is the **next evolutionary step** beyond previous standalone cards. Its purpose is to streamline and optimize the user experience by introducing a **dedicated graphical configuration UI (Visual Editor)** inspired by *Bubble Card*, packaged into **a single `.js` file** (`wesmart-card.js`, tag `custom:wesmart-card`).
 >
 > **Project Goal & Roadmap:**  
 > Progressively bring **all cards from the WeSmart catalog** into this new GUI-configured All-in-One version, refine and improve them, and introduce **brand-new card types**.
 >
-> - **Modules currently active in the configurator (`v1.2.0`)**: **Light (Single)** · **Lights (List)** · **Lights Expand (Inline Sliders)** · **Chart (Shared Y-Scale, Raw/Average Calculation, Per-Entity Colors, Zoom & Tooltip)** · **History (Per-row History with Custom Colors)**
+> - **Modules currently active in the configurator (`v1.3.0`)**: **Light (Single)** · **Lights (List)** · **Lights Expand (Inline Sliders)** · **Chart (Shared Y-Scale, Raw/Average Calculation, Per-Entity Colors, Zoom & Tooltip)** · **History (Per-row History with Custom Colors)** + **Custom Background Color, Opacity (0–100%) & Borderless Transparency**
 > - **[Read the `WeSmart-Card/` Guide (EN/IT)](WeSmart-Card/README.md#english)** · **[Technical Documentation (EN/IT)](WeSmart-Card/DOCUMENTATION.md#english)**
 
 > [!IMPORTANT]

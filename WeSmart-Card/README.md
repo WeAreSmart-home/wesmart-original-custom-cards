@@ -1,4 +1,4 @@
-# WeSmart Card (`wesmart-card.js` v1.2.0) — All-in-One Modular Suite
+# WeSmart Card (`wesmart-card.js` v1.3.0) — All-in-One Modular Suite
 
 **[Italiano](#italiano)** | **[English](#english)**
 
@@ -14,13 +14,13 @@
 ### Visione e Obiettivo del Progetto
 
 Dopo aver consolidato il catalogo delle card standalone (nella cartella `cards/`) e il motore cromatico **InfiniteColor**, l'obiettivo di **`WeSmart-Card`** è:
-1. **Configurazione Visuale (Zero YAML obbligatorio)**: configurare qualsiasi card, entità, opzione e palette cromatica direttamente dall'interfaccia visuale di Home Assistant con anteprima in tempo reale.
+1. **Configurazione Visuale (Zero YAML obbligatorio)**: configurare qualsiasi card, entità, opzione, **stile di sfondo/trasparenza (`bg_color`, `bg_opacity` 0–100%, rimozione bordi)** e palette cromatica direttamente dall'interfaccia visuale di Home Assistant con anteprima in tempo reale.
 2. **Un solo file per tutte le card**: eliminare la necessità di registrare decine di risorse separate in Lovelace; basta installare `wesmart-card.js` e selezionare il **Tipo di Card (`card_type`)** in cima al configuratore.
 3. **Migrazione, Ottimizzazione e Nuove Card**: il goal del progetto è portare progressivamente **tutte le card WeSmart** dentro questa nuova architettura All-in-One, migliorandone prestazioni, animazioni e opzioni di personalizzazione, oltre a introdurre nuove tipologie di card.
 
 ---
 
-### Tipi di Card Integrati (`card_type` — v1.2.0)
+### Tipi di Card Integrati (`card_type` — v1.3.0)
 
 Appena aggiungi **WeSmart Card (All-in-One)** nella tua dashboard, in cima alla finestra di configurazione puoi selezionare tra **5 tipologie**:
 
@@ -63,7 +63,7 @@ Dentro la cartella `/config/www/` di Home Assistant, crea la sottocartella `wesm
 #### 2. Aggiungi la Risorsa in Home Assistant
 Vai su **Impostazioni → Dashboard → Menu (in alto a destra) → Risorse → Aggiungi risorsa**:
 
-- **URL:** `/local/wesmart-cards/wesmart-card.js?v=1.2.0`
+- **URL:** `/local/wesmart-cards/wesmart-card.js?v=1.3.0`
 - **Tipo di risorsa:** `Modulo JavaScript`
 
 *(Nota: in Home Assistant la cartella fisica `/config/www/` corrisponde sempre all'indirizzo web `/local/`).*
@@ -85,13 +85,13 @@ Per i dettagli tecnici e gli esempi YAML completi, consulta [`DOCUMENTATION.md`]
 ### Project Vision & Goal
 
 After consolidating the standalone card catalog (in `cards/`) and the **InfiniteColor** dynamic engine, the goal of **`WeSmart-Card`** is:
-1. **Visual Configuration (Zero mandatory YAML)**: configure any card, entity, behavior, and color palette directly from the Home Assistant visual interface with live preview.
+1. **Visual Configuration (Zero mandatory YAML)**: configure any card, entity, behavior, **card background style/transparency (`bg_color`, `bg_opacity` 0–100%, borderless mode)**, and color palette directly from the Home Assistant visual interface with live preview.
 2. **One File, All Cards**: eliminate the need to register dozens of separate Lovelace resources; simply install `wesmart-card.js` and select the **Card Type (`card_type`)** at the top of the visual configurator.
 3. **Migration, Optimization & New Cards**: the overarching goal is to progressively bring **all WeSmart cards** into this new All-in-One architecture, enhancing their performance, animations, and customization options, while introducing brand-new card types along the way.
 
 ---
 
-### Integrated Card Types (`card_type` — v1.2.0)
+### Integrated Card Types (`card_type` — v1.3.0)
 
 When you add **WeSmart Card (All-in-One)** to your dashboard, the top selector in the configuration dialog lets you choose among **5 card types**:
 
@@ -134,7 +134,7 @@ Inside your Home Assistant `/config/www/` directory, create the `wesmart-cards` 
 #### 2. Register the Resource in Home Assistant
 Go to **Settings → Dashboards → Menu (top right) → Resources → Add resource**:
 
-- **URL:** `/local/wesmart-cards/wesmart-card.js?v=1.2.0`
+- **URL:** `/local/wesmart-cards/wesmart-card.js?v=1.3.0`
 - **Resource type:** `JavaScript Module`
 
 *(Note: in Home Assistant the physical folder `/config/www/` always maps to the `/local/` web URL).*
