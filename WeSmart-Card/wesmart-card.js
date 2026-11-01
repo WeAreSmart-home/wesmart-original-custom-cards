@@ -14,7 +14,7 @@
 (() => {
   'use strict';
 
-  const CARD_VERSION = '1.3.0';
+  const CARD_VERSION = '1.4.0-exp';
 
   const HOURS_OPTIONS = [1, 6, 24, 168];
   const HOURS_LABELS  = { 1: '1h', 6: '6h', 24: '24h', 168: '7d' };
@@ -38,11 +38,12 @@
 
   // ─── Modular Card Type Registry (Extensible for Climate, Sensors, Doors, etc.) ─
   const CARD_TYPES = [
-    { id: 'light',         mode: 'single',  category: 'Lights', icon: 'mdi:lightbulb-on',         name: 'Light',         sub: '1 Luce · Slider completi' },
-    { id: 'lights',        mode: 'list',    category: 'Lights', icon: 'mdi:format-list-bulleted', name: 'Lights',        sub: 'Multi-luce · Toggle rapidi' },
-    { id: 'lights-expand', mode: 'expand',  category: 'Lights', icon: 'mdi:tune-vertical',        name: 'Lights Expand', sub: 'Multi-luce · Slider inline' },
-    { id: 'chart',         mode: 'chart',   category: 'Graphs', icon: 'mdi:chart-areaspline',     name: 'Chart',         sub: 'Grafico Zoom & Tooltip' },
-    { id: 'history',       mode: 'history', category: 'Graphs', icon: 'mdi:chart-timeline',       name: 'History',       sub: 'Storico per ogni riga' },
+    { id: 'light',         mode: 'single',  category: 'Lights',   icon: 'mdi:lightbulb-on',         name: 'Light',         sub: '1 Luce · Slider completi' },
+    { id: 'lights',        mode: 'list',    category: 'Lights',   icon: 'mdi:format-list-bulleted', name: 'Lights',        sub: 'Multi-luce · Toggle rapidi' },
+    { id: 'lights-expand', mode: 'expand',  category: 'Lights',   icon: 'mdi:tune-vertical',        name: 'Lights Expand', sub: 'Multi-luce · Slider inline' },
+    { id: 'button',        mode: 'button',  category: 'Controls', icon: 'mdi:gesture-tap-button',   name: 'Button Pad',    sub: 'Tasto Mixer 1x1 / 2x2 · LED' },
+    { id: 'chart',         mode: 'chart',   category: 'Graphs',   icon: 'mdi:chart-areaspline',     name: 'Chart',         sub: 'Grafico Zoom & Tooltip' },
+    { id: 'history',       mode: 'history', category: 'Graphs',   icon: 'mdi:chart-timeline',       name: 'History',       sub: 'Storico per ogni riga' },
   ];
 
   function resolveModeFromType(cardType) {
@@ -51,6 +52,7 @@
     if (t === 'light' || t === 'single') return 'single';
     if (t === 'lights' || t === 'list') return 'list';
     if (t === 'lights-expand' || t === 'lights_expand' || t === 'expand') return 'expand';
+    if (t === 'button' || t === 'pad' || t === 'switch') return 'button';
     if (t === 'chart' || t === 'graph') return 'chart';
     if (t === 'history') return 'history';
     return null;
@@ -59,6 +61,7 @@
   function modeToCanonicalType(mode) {
     if (mode === 'list') return 'lights';
     if (mode === 'expand') return 'lights-expand';
+    if (mode === 'button') return 'button';
     if (mode === 'chart') return 'chart';
     if (mode === 'history') return 'history';
     return 'light';
@@ -640,6 +643,219 @@
   .hist-icon-wrap ha-icon { --mdc-icon-size: 16px; color: var(--text-muted); }
   .linechart { width: 100%; }
   .linechart svg { display: block; overflow: visible; }
+
+  /* ── 6. Tactile Mixer Button / Pad Mode (mode-button) ── */
+  .card.mode-button {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .card.mode-button.size-1x1 {
+    width: 136px;
+    height: 136px;
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    border-radius: 22px;
+  }
+  .card.mode-button.size-2x2 {
+    width: 220px;
+    height: 220px;
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    border-radius: 26px;
+    padding: 12px;
+  }
+  .card.mode-button.size-full {
+    width: 100%;
+    min-height: 140px;
+    border-radius: 22px;
+  }
+  .mixer-well {
+    width: 100%;
+    height: 100%;
+    min-height: 112px;
+    flex: 1;
+    border-radius: 16px;
+    padding: 4px;
+    background: rgba(0, 0, 0, 0.38);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(255, 255, 255, 0.05);
+    display: flex;
+  }
+  .card.no-bg .mixer-well {
+    background: rgba(0, 0, 0, 0.22);
+  }
+  .mixer-cap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    border-radius: 13px;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.16),
+      inset 0 -3px 0 rgba(0, 0, 0, 0.45),
+      0 4px 10px rgba(0, 0, 0, 0.42);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 12px 12px;
+    cursor: pointer;
+    transition: transform 0.09s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+  }
+  .mixer-cap::after {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -20%;
+    width: 75%;
+    height: 75%;
+    background: radial-gradient(circle, var(--accent-Glow, var(--accent-glow)) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+  .card.mode-button.btn-active .mixer-cap {
+    border-color: var(--accent-border);
+    box-shadow:
+      inset 0 1px 2px rgba(255, 255, 255, 0.22),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+      0 2px 12px var(--accent-glow);
+  }
+  .card.mode-button.btn-active .mixer-cap::after {
+    opacity: 0.85;
+  }
+  .mixer-cap:active,
+  .mixer-cap.pressing {
+    transform: translateY(2.5px) scale(0.985);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.45),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+      0 1px 3px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  /* Recessed Top-Right Corner LED */
+  .mixer-led-bezel {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1.5px 3px rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+  .card.mode-button.size-2x2 .mixer-led-bezel {
+    top: 14px;
+    right: 14px;
+    width: 17px;
+    height: 17px;
+  }
+  .mixer-led {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .card.mode-button.size-2x2 .mixer-led {
+    width: 9px;
+    height: 9px;
+  }
+  .card.mode-button.btn-active .mixer-led {
+    background: var(--accent);
+    box-shadow:
+      0 0 6px var(--accent),
+      0 0 14px var(--accent),
+      0 0 22px var(--accent-glow-strong),
+      inset 0 0 2.5px #ffffff;
+    transform: scale(1.06);
+  }
+
+  /* Mixer Button Icon & Labels */
+  .mixer-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: color 0.22s ease, transform 0.22s ease, filter 0.22s ease;
+    z-index: 1;
+  }
+  .mixer-icon-wrap ha-icon {
+    --mdc-icon-size: 28px;
+  }
+  .card.mode-button.size-2x2 .mixer-icon-wrap ha-icon {
+    --mdc-icon-size: 44px;
+  }
+  .card.mode-button.icon-only .mixer-icon-wrap ha-icon {
+    --mdc-icon-size: 36px;
+  }
+  .card.mode-button.size-2x2.icon-only .mixer-icon-wrap ha-icon {
+    --mdc-icon-size: 58px;
+  }
+  .card.mode-button.btn-active .mixer-icon-wrap {
+    color: var(--accent);
+    filter: drop-shadow(0 0 8px var(--accent-glow));
+  }
+  .mixer-texts {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    max-width: 100%;
+    gap: 2px;
+    z-index: 1;
+  }
+  .mixer-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .card.mode-button.size-2x2 .mixer-name {
+    font-size: 15px;
+  }
+  .card.mode-button.text-only .mixer-name {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .card.mode-button.size-2x2.text-only .mixer-name {
+    font-size: 18px;
+  }
+  .mixer-state {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+  .card.mode-button.btn-active .mixer-state {
+    color: var(--accent);
+  }
   `;
 
   // ─── Unified All-in-One Custom Element (WeSmartCard) ─────────────────────────
@@ -716,6 +932,14 @@
         collapse_when_off:   false,
         dynamic_light_color: false,
         show_footer:         true,
+        button_size:         '1x1',
+        show_icon:           true,
+        show_name:           true,
+        show_state:          true,
+        tap_action:          'toggle',
+        hold_action:         'more-info',
+        tap_service:         '',
+        hold_service:        '',
         hours:               24,
         height:              100,
         show_grid:           false,
@@ -752,10 +976,20 @@
 
     getCardSize() {
       const m = this._mode;
+      if (m === 'button')  return this._config.button_size === '2x2' ? 3 : 2;
       if (m === 'single')  return 3;
       if (m === 'chart')   return 4 + Math.ceil(this._entities.length * 0.7);
       if (m === 'history') return 2 + Math.ceil(this._entities.length * 1.5);
       return 1 + Math.ceil((this._entities.length * 52 + 100) / 50);
+    }
+
+    getGridOptions() {
+      if (this._mode === 'button') {
+        const sz = this._config.button_size || '1x1';
+        if (sz === '2x2') return { columns: 6, rows: 3, min_columns: 4, min_rows: 2 };
+        if (sz === '1x1') return { columns: 3, rows: 2, min_columns: 2, min_rows: 2 };
+      }
+      return { columns: 12, min_columns: 6 };
     }
 
     disconnectedCallback() {
@@ -969,13 +1203,18 @@
         : 100;
       const bgOpacity = this._clamp(Number.isFinite(rawOp) ? rawOp : 100, 0, 100);
       const hasBorder = this._config.show_border !== false && bgOpacity > 0;
+      const btnSizeCls = mode === 'button' ? ` size-${this._config.button_size || '1x1'}` : '';
       this._card = document.createElement('div');
-      this._card.className = `card mode-${mode}${bgOpacity <= 0 ? ' no-bg' : ''}${!hasBorder ? ' no-border' : ''}`;
+      this._card.className = `card mode-${mode}${btnSizeCls}${bgOpacity <= 0 ? ' no-bg' : ''}${!hasBorder ? ' no-border' : ''}`;
 
       if (mode === 'single') {
         this._card.innerHTML = this._getSingleHTML();
         shadow.appendChild(this._card);
         this._bindSingleEvents();
+      } else if (mode === 'button') {
+        this._card.innerHTML = this._getButtonHTML();
+        shadow.appendChild(this._card);
+        this._bindButtonEvents();
       } else if (mode === 'list') {
         this._card.innerHTML = this._getListHTML();
         shadow.appendChild(this._card);
@@ -2448,12 +2687,227 @@
       });
     }
 
+    // ── 6. BUTTON PAD / TACTILE MIXER MODE HTML & LOGIC ─────────────────────────
+
+    _getButtonHTML() {
+      const showIcon  = this._config.show_icon !== false;
+      const showName  = this._config.show_name !== false;
+      const showState = this._config.show_state !== false;
+      return `
+        <div class="mixer-well">
+          <div class="mixer-cap" id="mixer-cap">
+            <div class="mixer-led-bezel" title="Stato">
+              <div class="mixer-led" id="mixer-led"></div>
+            </div>
+            <div class="mixer-icon-wrap" id="mixer-icon-wrap" style="${showIcon ? '' : 'display:none'}">
+              <ha-icon id="mixer-icon" icon="mdi:power"></ha-icon>
+            </div>
+            <div class="mixer-texts" id="mixer-texts" style="${(showName || showState) ? '' : 'display:none'}">
+              <div class="mixer-name" id="mixer-name" style="${showName ? '' : 'display:none'}">—</div>
+              <div class="mixer-state" id="mixer-state" style="${showState ? '' : 'display:none'}">—</div>
+            </div>
+          </div>
+        </div>
+        <div class="unavailable-overlay" id="unavailable-overlay" style="display:none">
+          <ha-icon icon="mdi:lan-disconnect"></ha-icon>
+          <span>N/D</span>
+        </div>
+      `;
+    }
+
+    _updateButtonState() {
+      if (!this._card) return;
+      const c = this._config;
+      const entityId = c.entity || (this._entities[0]?.entity ?? '');
+      const showIcon  = c.show_icon !== false;
+      const showName  = c.show_name !== false;
+      const showState = c.show_state !== false;
+
+      this._card.classList.toggle('icon-only', showIcon && !showName && !showState);
+      this._card.classList.toggle('text-only', !showIcon && (showName || showState));
+
+      const iconWrap = this._q('#mixer-icon-wrap');
+      const iconEl   = this._q('#mixer-icon');
+      const textsEl  = this._q('#mixer-texts');
+      const nameEl   = this._q('#mixer-name');
+      const stateEl  = this._q('#mixer-state');
+      const unavail  = this._q('#unavailable-overlay');
+
+      if (iconWrap) iconWrap.style.display = showIcon ? 'flex' : 'none';
+      if (textsEl)  textsEl.style.display  = (showName || showState) ? 'flex' : 'none';
+      if (nameEl)   nameEl.style.display   = showName ? '-webkit-box' : 'none';
+      if (stateEl)  stateEl.style.display  = showState ? 'block' : 'none';
+
+      if (!entityId) {
+        if (nameEl)  nameEl.textContent  = c.name || 'Tasto Mixer';
+        if (stateEl) stateEl.textContent = 'Scegli entità';
+        if (iconEl)  iconEl.setAttribute('icon', c.icon || 'mdi:gesture-tap-button');
+        this._card.classList.remove('btn-active');
+        return;
+      }
+
+      const stateObj = this._hass?.states?.[entityId];
+      if (!stateObj) {
+        if (nameEl)  nameEl.textContent  = c.name || entityId;
+        if (stateEl) stateEl.textContent = 'Non trovata';
+        if (iconEl)  iconEl.setAttribute('icon', c.icon || this._iconForEntity(entityId));
+        return;
+      }
+
+      const domain    = entityId.split('.')[0];
+      const attrs     = stateObj.attributes || {};
+      const isUnavail = stateObj.state === 'unavailable';
+      const isStateless = domain === 'scene' || domain === 'button' || domain === 'input_button';
+      const isOn      = Boolean(this._flashActive) || (!isStateless && this._isOnState(stateObj.state));
+
+      if (c.dynamic_light_color && isOn && Array.isArray(attrs.rgb_color) && attrs.rgb_color.length === 3) {
+        this._applyPalette(this._rgbToHex(...attrs.rgb_color));
+      } else {
+        this._applyPalette(null);
+      }
+
+      this._card.classList.toggle('btn-active', isOn && !isUnavail);
+      if (unavail) unavail.style.display = isUnavail ? 'flex' : 'none';
+
+      const name = c.name || attrs.friendly_name || this._friendlyName(entityId);
+      if (nameEl) nameEl.textContent = name;
+
+      let defaultIcon = attrs.icon || this._iconForEntity(entityId);
+      if (domain === 'light') defaultIcon = isOn ? 'mdi:lightbulb' : 'mdi:lightbulb-outline';
+      else if (domain === 'scene') defaultIcon = 'mdi:palette-outline';
+      else if (domain === 'script') defaultIcon = 'mdi:script-text-play-outline';
+      else if (domain === 'switch' || domain === 'input_boolean') defaultIcon = isOn ? 'mdi:toggle-switch' : 'mdi:toggle-switch-off-outline';
+      if (iconEl) iconEl.setAttribute('icon', c.icon || defaultIcon);
+
+      if (stateEl) {
+        if (isUnavail) {
+          stateEl.textContent = 'N/D';
+        } else if (domain === 'scene') {
+          stateEl.textContent = this._flashActive ? 'Attivata' : 'Scena';
+        } else if (domain === 'script') {
+          stateEl.textContent = (isOn || this._flashActive) ? 'In esecuzione' : 'Script';
+        } else if (domain === 'button' || domain === 'input_button') {
+          stateEl.textContent = this._flashActive ? 'Premuto' : 'Premi';
+        } else if (domain === 'light' && isOn && attrs.brightness != null) {
+          stateEl.textContent = `ON · ${Math.round(attrs.brightness / 2.55)}%`;
+        } else {
+          stateEl.textContent = isOn ? 'ON' : (stateObj.state === 'off' ? 'OFF' : this._formatEntityState(stateObj));
+        }
+      }
+    }
+
+    _bindButtonEvents() {
+      const cap = this._q('#mixer-cap');
+      if (!cap) return;
+
+      let holdTimer = null;
+      let held      = false;
+
+      const clearHold = () => {
+        if (holdTimer) {
+          clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+        cap.classList.remove('pressing');
+      };
+
+      cap.addEventListener('pointerdown', (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        held = false;
+        cap.classList.add('pressing');
+        holdTimer = setTimeout(() => {
+          held = true;
+          cap.classList.remove('pressing');
+          this._executeButtonAction('hold');
+        }, 520);
+      });
+
+      cap.addEventListener('pointerup', () => {
+        const wasHeld = held;
+        clearHold();
+        if (!wasHeld) {
+          this._executeButtonAction('tap');
+        }
+      });
+
+      cap.addEventListener('pointerleave', clearHold);
+      cap.addEventListener('pointercancel', clearHold);
+      cap.addEventListener('contextmenu', (e) => e.preventDefault());
+    }
+
+    _triggerMomentaryLed() {
+      this._flashActive = true;
+      this._updateButtonState();
+      if (this._flashTimer) clearTimeout(this._flashTimer);
+      this._flashTimer = setTimeout(() => {
+        this._flashActive = false;
+        this._updateButtonState();
+      }, 1400);
+    }
+
+    _executeButtonAction(which) {
+      if (!this._hass) return;
+      const c = this._config;
+      const entityId = c.entity || (this._entities[0]?.entity ?? '');
+      const action   = which === 'hold' ? (c.hold_action || 'more-info') : (c.tap_action || 'toggle');
+
+      if (action === 'none') return;
+
+      if (action === 'more-info') {
+        if (!entityId) return;
+        const ev = new Event('hass-more-info', { bubbles: true, composed: true });
+        ev.detail = { entityId };
+        this.dispatchEvent(ev);
+        return;
+      }
+
+      if (action === 'call-service') {
+        const srvRaw = (which === 'hold' ? c.hold_service : c.tap_service) || '';
+        const [srvDomain, srvName] = srvRaw.trim().split('.');
+        if (srvDomain && srvName) {
+          const payload = entityId ? { entity_id: entityId } : {};
+          this._hass.callService(srvDomain, srvName, payload);
+          this._triggerMomentaryLed();
+        }
+        return;
+      }
+
+      if (!entityId) return;
+      const domain = entityId.split('.')[0];
+
+      if (domain === 'scene') {
+        this._hass.callService('scene', 'turn_on', { entity_id: entityId });
+        this._triggerMomentaryLed();
+        return;
+      }
+      if (domain === 'button' || domain === 'input_button') {
+        this._hass.callService(domain, 'press', { entity_id: entityId });
+        this._triggerMomentaryLed();
+        return;
+      }
+      if (domain === 'script') {
+        const srv = action === 'turn_off' ? 'turn_off' : 'turn_on';
+        this._hass.callService('script', srv, { entity_id: entityId });
+        this._triggerMomentaryLed();
+        return;
+      }
+
+      if (action === 'turn_on') {
+        this._hass.callService('homeassistant', 'turn_on', { entity_id: entityId });
+      } else if (action === 'turn_off') {
+        this._hass.callService('homeassistant', 'turn_off', { entity_id: entityId });
+      } else {
+        this._hass.callService('homeassistant', 'toggle', { entity_id: entityId });
+      }
+    }
+
     // ── Shared State Update & Helpers ───────────────────────────────────────────
 
     _updateState() {
       if (!this._card) return;
       const mode = this._mode;
       if (mode === 'single')       this._updateSingleState();
+      else if (mode === 'button')  this._updateButtonState();
       else if (mode === 'list')    this._updateListState();
       else if (mode === 'expand')  this._updateExpandState();
       else if (mode === 'chart')   this._updateChartState();
@@ -2765,6 +3219,14 @@
     .slider-tog:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: #fff; transition: 0.25s; border-radius: 50%; }
     input:checked + .slider-tog { background-color: #D97757; }
     input:checked + .slider-tog:before { transform: translateX(20px); }
+    .editor-select {
+      width: 100%; height: 38px; padding: 0 12px; border-radius: 10px;
+      border: 1px solid var(--divider-color, rgba(255, 255, 255, 0.14));
+      background: rgba(0, 0, 0, 0.22); color: var(--primary-text-color, #F5F0EB);
+      font-size: 13px; font-weight: 500; cursor: pointer; outline: none;
+    }
+    .editor-select:focus { border-color: #D97757; }
+    .editor-select option { background: #1C1917; color: #F5F0EB; }
   `;
 
   class WeSmartCardEditor extends HTMLElement {
@@ -2774,7 +3236,7 @@
       this._config = {};
       this._hass = null;
       this._rendered = false;
-      this._openSections = { entity: true, theme: true, style: true, controls: false };
+      this._openSections = { entity: true, theme: true, style: true, controls: true };
       this._expandedRow = null;
     }
 
@@ -2804,6 +3266,14 @@
         collapse_when_off:   false,
         dynamic_light_color: false,
         show_footer:         true,
+        button_size:         '1x1',
+        show_icon:           true,
+        show_name:           true,
+        show_state:          true,
+        tap_action:          'toggle',
+        hold_action:         'more-info',
+        tap_service:         '',
+        hold_service:        '',
         hours:               24,
         height:              100,
         show_grid:           false,
@@ -3045,6 +3515,90 @@
               </div>
             </div>
 
+            <!-- Controlli per Button Pad (Tasto Fisico Mixer) -->
+            <div id="controls-button-only" style="display:none; flex-direction:column; gap:14px">
+              <div>
+                <div class="field-label">Formato & Dimensione Tasto (button_size)</div>
+                <div class="theme-pills" style="grid-template-columns:repeat(3,1fr)">
+                  <button type="button" class="theme-pill btn-size-pill" data-bsize="1x1" title="Quadrato Compatto 136x136px">
+                    <ha-icon icon="mdi:crop-square" style="--mdc-icon-size:16px"></ha-icon>
+                    <span>1x1 Pad</span>
+                  </button>
+                  <button type="button" class="theme-pill btn-size-pill" data-bsize="2x2" title="Quadrato Grande Studio 220x220px">
+                    <ha-icon icon="mdi:vector-square" style="--mdc-icon-size:16px"></ha-icon>
+                    <span>2x2 Grande</span>
+                  </button>
+                  <button type="button" class="theme-pill btn-size-pill" data-bsize="full" title="Tutta larghezza colonna">
+                    <ha-icon icon="mdi:arrow-expand-horizontal" style="--mdc-icon-size:16px"></ha-icon>
+                    <span>Full Width</span>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div class="field-label">Azione Pressione Breve (tap_action)</div>
+                <select class="editor-select" id="tap-action-select">
+                  <option value="toggle">Toggle (Accendi / Spegni / Attiva Scena)</option>
+                  <option value="more-info">More Info (Apri Dettagli Entità)</option>
+                  <option value="turn_on">Turn On (Forza Accensione / Attivazione)</option>
+                  <option value="turn_off">Turn Off (Forza Spegnimento)</option>
+                  <option value="call-service">Call Service (Servizio Personalizzato)</option>
+                  <option value="none">Nessuna Azione (Disabilitato)</option>
+                </select>
+                <div id="tap-service-row" style="display:none; margin-top:8px">
+                  <input type="text" class="mini-input" id="tap-service-input" style="width:100%;height:34px" placeholder="es. scene.turn_on oppure script.cinema">
+                </div>
+              </div>
+
+              <div>
+                <div class="field-label">Azione Pressione Prolungata (hold_action)</div>
+                <select class="editor-select" id="hold-action-select">
+                  <option value="more-info">More Info (Apri Dettagli Entità)</option>
+                  <option value="toggle">Toggle (Accendi / Spegni / Attiva Scena)</option>
+                  <option value="turn_on">Turn On (Forza Accensione / Attivazione)</option>
+                  <option value="turn_off">Turn Off (Forza Spegnimento)</option>
+                  <option value="call-service">Call Service (Servizio Personalizzato)</option>
+                  <option value="none">Nessuna Azione (Disabilitato)</option>
+                </select>
+                <div id="hold-service-row" style="display:none; margin-top:8px">
+                  <input type="text" class="mini-input" id="hold-service-input" style="width:100%;height:34px" placeholder="es. light.turn_off oppure script.buonanotte">
+                </div>
+              </div>
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <span class="toggle-title">Mostra Icona sul Tasto</span>
+                  <span class="toggle-desc">Nascondi per avere un tasto solo testuale</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" data-toggle="show_icon">
+                  <span class="slider-tog"></span>
+                </label>
+              </div>
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <span class="toggle-title">Mostra Nome / Testo sul Tasto</span>
+                  <span class="toggle-desc">Nascondi per avere un pad minimale con sola icona centrale e LED</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" data-toggle="show_name">
+                  <span class="slider-tog"></span>
+                </label>
+              </div>
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <span class="toggle-title">Mostra Riga Stato (ON / OFF / % / Scena)</span>
+                  <span class="toggle-desc">Mostra il pallino e lo stato sotto al nome</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" data-toggle="show_state">
+                  <span class="slider-tog"></span>
+                </label>
+              </div>
+            </div>
+
             <!-- Controlli per Grafici (Chart / History) -->
             <div id="controls-graph-only" style="display:none; flex-direction:column; gap:14px">
               <div>
@@ -3103,7 +3657,7 @@
               </div>
             </div>
 
-            <div class="toggle-row">
+            <div class="toggle-row" id="row-show-footer">
               <div class="toggle-info">
                 <span class="toggle-title">Mostra Footer WeSmart</span>
                 <span class="toggle-desc">Barra inferiore con riepilogo e marchio WeSmart</span>
@@ -3131,13 +3685,17 @@
           const targetType = btn.dataset.type || modeToCanonicalType(targetMode);
           const patch = { card_type: targetType };
 
-          if (targetMode === 'single') {
+          if (targetMode === 'single' || targetMode === 'button') {
             if (!this._config.entity) {
               const list = this._getNormalizedEntities();
               if (list.length > 0) {
                 patch.entity = list[0].entity;
               } else if (this._hass) {
-                const first = Object.keys(this._hass.states).find(k => k.startsWith('light.'));
+                const first = Object.keys(this._hass.states).find(k =>
+                  targetMode === 'button'
+                    ? (k.startsWith('light.') || k.startsWith('switch.') || k.startsWith('scene.') || k.startsWith('script.'))
+                    : k.startsWith('light.')
+                );
                 if (first) patch.entity = first;
               }
             }
@@ -3167,23 +3725,53 @@
         });
       });
 
-      // Single mode HA Form
+      // Single / Button mode HA Form
       const singleForm = shadow.querySelector('#ha-single-form');
       if (singleForm) {
-        singleForm.schema = [
-          { name: 'entity', required: true,  selector: { entity: { domain: 'light' } } },
-          { name: 'name',   required: false, selector: { text: {} } },
-          { name: 'icon',   required: false, selector: { icon: { placeholder: 'mdi:lightbulb' } } },
-        ];
         singleForm.computeLabel = (s) => ({
-          entity: 'Entità Luce (light.*)',
-          name:   'Nome Personalizzato (opzionale)',
+          entity: this._getActiveMode() === 'button'
+            ? 'Entità Tasto (Luce, Scena, Switch, Script, ecc.)'
+            : 'Entità Luce (light.*)',
+          name:   'Nome / Etichetta Personalizzata (opzionale)',
           icon:   'Icona Personalizzata (opzionale)',
         }[s.name] || s.name);
         singleForm.addEventListener('value-changed', (ev) => {
           ev.stopPropagation();
           const v = ev.detail.value || {};
           this._updateConfig({ entity: v.entity || '', name: v.name || null, icon: v.icon || null });
+        });
+      }
+
+      // Button Pad controls (button_size, tap_action, hold_action, services)
+      shadow.querySelectorAll('.btn-size-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          this._updateConfig({ button_size: btn.dataset.bsize });
+        });
+      });
+
+      const tapSelect = shadow.querySelector('#tap-action-select');
+      if (tapSelect) {
+        tapSelect.addEventListener('change', (e) => {
+          this._updateConfig({ tap_action: e.target.value });
+        });
+      }
+      const tapSrvInput = shadow.querySelector('#tap-service-input');
+      if (tapSrvInput) {
+        tapSrvInput.addEventListener('change', (e) => {
+          this._updateConfig({ tap_service: e.target.value.trim() || null });
+        });
+      }
+
+      const holdSelect = shadow.querySelector('#hold-action-select');
+      if (holdSelect) {
+        holdSelect.addEventListener('change', (e) => {
+          this._updateConfig({ hold_action: e.target.value });
+        });
+      }
+      const holdSrvInput = shadow.querySelector('#hold-service-input');
+      if (holdSrvInput) {
+        holdSrvInput.addEventListener('change', (e) => {
+          this._updateConfig({ hold_service: e.target.value.trim() || null });
         });
       }
 
@@ -3247,8 +3835,8 @@
         });
       }
 
-      // Theme pills (exclude .hours-pill, .agg-editor-pill, .op-preset-pill)
-      shadow.querySelectorAll('.theme-pill:not(.hours-pill):not(.agg-editor-pill):not(.op-preset-pill)').forEach(btn => {
+      // Theme pills (exclude .hours-pill, .agg-editor-pill, .op-preset-pill, .btn-size-pill)
+      shadow.querySelectorAll('.theme-pill:not(.hours-pill):not(.agg-editor-pill):not(.op-preset-pill):not(.btn-size-pill)').forEach(btn => {
         btn.addEventListener('click', () => this._updateConfig({ theme: btn.dataset.theme }));
       });
 
@@ -3477,36 +4065,47 @@
 
     _syncUI() {
       if (!this._rendered) return;
-      const shadow   = this.shadowRoot;
-      const c        = this._config;
-      const mode     = this._getActiveMode();
-      const isSingle = mode === 'single';
-      const isGraph  = mode === 'chart' || mode === 'history';
-      const isChart  = mode === 'chart';
+      const shadow        = this.shadowRoot;
+      const c             = this._config;
+      const mode          = this._getActiveMode();
+      const isSingle      = mode === 'single';
+      const isButton      = mode === 'button';
+      const isSingleOrBtn = isSingle || isButton;
+      const isGraph       = mode === 'chart' || mode === 'history';
+      const isChart       = mode === 'chart';
 
       // Sync Card Type Buttons
       shadow.querySelectorAll('.type-card-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === mode);
       });
 
-      // Toggle Single vs Multi vs Graph panes
+      // Toggle Single vs Multi vs Graph vs Button panes
       const paneSingle         = shadow.querySelector('#pane-single');
       const paneMulti          = shadow.querySelector('#pane-multi');
       const secEntityTitle     = shadow.querySelector('#sec-entity-title');
       const secEntityIcon      = shadow.querySelector('#sec-entity-icon');
       const rowDynColor        = shadow.querySelector('#row-dyn-color');
       const controlsSingleOnly = shadow.querySelector('#controls-single-only');
+      const controlsButtonOnly = shadow.querySelector('#controls-button-only');
       const controlsGraphOnly  = shadow.querySelector('#controls-graph-only');
       const controlsChartOnly  = shadow.querySelector('#controls-chart-only');
+      const rowShowFooter      = shadow.querySelector('#row-show-footer');
 
-      if (paneSingle) paneSingle.style.display = isSingle ? 'block' : 'none';
-      if (paneMulti)  paneMulti.style.display  = isSingle ? 'none'  : 'flex';
+      if (paneSingle) paneSingle.style.display = isSingleOrBtn ? 'block' : 'none';
+      if (paneMulti)  paneMulti.style.display  = isSingleOrBtn ? 'none'  : 'flex';
       if (secEntityIcon) {
-        secEntityIcon.setAttribute('icon', isGraph ? 'mdi:chart-areaspline' : 'mdi:lightbulb');
+        const iconMap = {
+          single:  'mdi:lightbulb',
+          button:  'mdi:gesture-tap-button',
+          chart:   'mdi:chart-areaspline',
+          history: 'mdi:chart-timeline',
+        };
+        secEntityIcon.setAttribute('icon', iconMap[mode] || 'mdi:lightbulb-group');
       }
       if (secEntityTitle) {
         const modeLabels = {
           single:  '1. Entità & Identità (Luce Singola)',
+          button:  '1. Entità & Etichetta Tasto (Button Pad)',
           list:    '1. Gruppo & Lista Luci (Lights)',
           expand:  '1. Gruppo & Lista Luci (Lights Expand)',
           chart:   '1. Titolo & Entità del Grafico (Chart)',
@@ -3514,15 +4113,30 @@
         };
         secEntityTitle.textContent = modeLabels[mode] || '1. Entità & Identità';
       }
-      if (rowDynColor)        rowDynColor.style.display        = isSingle ? 'flex'  : 'none';
-      if (controlsSingleOnly) controlsSingleOnly.style.display = isSingle ? 'block' : 'none';
-      if (controlsGraphOnly)  controlsGraphOnly.style.display  = isGraph  ? 'flex'  : 'none';
-      if (controlsChartOnly)  controlsChartOnly.style.display  = isChart  ? 'flex'  : 'none';
+      if (rowDynColor)        rowDynColor.style.display        = isSingleOrBtn ? 'flex'  : 'none';
+      if (controlsSingleOnly) controlsSingleOnly.style.display = isSingle      ? 'block' : 'none';
+      if (controlsButtonOnly) controlsButtonOnly.style.display = isButton      ? 'flex'  : 'none';
+      if (controlsGraphOnly)  controlsGraphOnly.style.display  = isGraph       ? 'flex'  : 'none';
+      if (controlsChartOnly)  controlsChartOnly.style.display  = isChart       ? 'flex'  : 'none';
+      if (rowShowFooter)      rowShowFooter.style.display      = isButton      ? 'none'  : 'flex';
 
       // Sync Forms
       const singleForm = shadow.querySelector('#ha-single-form');
       if (singleForm) {
         if (this._hass) singleForm.hass = this._hass;
+        singleForm.schema = [
+          {
+            name: 'entity',
+            required: true,
+            selector: isButton ? { entity: {} } : { entity: { domain: 'light' } },
+          },
+          { name: 'name', required: false, selector: { text: {} } },
+          {
+            name: 'icon',
+            required: false,
+            selector: { icon: { placeholder: isButton ? 'mdi:gesture-tap-button' : 'mdi:lightbulb' } },
+          },
+        ];
         singleForm.data = { entity: c.entity || '', name: c.name || '', icon: c.icon || '' };
       }
 
@@ -3545,7 +4159,28 @@
         ];
       }
 
-      if (!isSingle) this._renderEntityList();
+      if (!isSingleOrBtn) this._renderEntityList();
+
+      // Sync Button Pad Controls
+      const curBtnSize = ['1x1', '2x2', 'full'].includes(c.button_size) ? c.button_size : '1x1';
+      shadow.querySelectorAll('.btn-size-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.bsize === curBtnSize);
+      });
+      const tapSelect    = shadow.querySelector('#tap-action-select');
+      const tapSrvRow    = shadow.querySelector('#tap-service-row');
+      const tapSrvInput  = shadow.querySelector('#tap-service-input');
+      const curTapAction = c.tap_action || 'toggle';
+      if (tapSelect)   tapSelect.value = curTapAction;
+      if (tapSrvRow)   tapSrvRow.style.display = curTapAction === 'call-service' ? 'block' : 'none';
+      if (tapSrvInput) tapSrvInput.value = c.tap_service || '';
+
+      const holdSelect    = shadow.querySelector('#hold-action-select');
+      const holdSrvRow    = shadow.querySelector('#hold-service-row');
+      const holdSrvInput  = shadow.querySelector('#hold-service-input');
+      const curHoldAction = c.hold_action || 'more-info';
+      if (holdSelect)   holdSelect.value = curHoldAction;
+      if (holdSrvRow)   holdSrvRow.style.display = curHoldAction === 'call-service' ? 'block' : 'none';
+      if (holdSrvInput) holdSrvInput.value = c.hold_service || '';
 
       // Sync Graph Controls
       const curAgg = c.aggregation === 'avg' ? 'avg' : 'raw';
@@ -3564,7 +4199,7 @@
 
       // Sync Theme
       const curTheme = c.theme || 'dark';
-      shadow.querySelectorAll('.theme-pill:not(.hours-pill):not(.agg-editor-pill):not(.op-preset-pill)').forEach(btn => {
+      shadow.querySelectorAll('.theme-pill:not(.hours-pill):not(.agg-editor-pill):not(.op-preset-pill):not(.btn-size-pill)').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === curTheme);
       });
 
@@ -3629,6 +4264,8 @@
       if (!next.name) delete next.name;
       if (!next.icon) delete next.icon;
       if (!next.bg_color) delete next.bg_color;
+      if (!next.tap_service) delete next.tap_service;
+      if (!next.hold_service) delete next.hold_service;
       this._config = next;
       this._syncUI();
       this.dispatchEvent(new CustomEvent('config-changed', {
