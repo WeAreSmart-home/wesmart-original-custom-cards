@@ -14,7 +14,7 @@
 (() => {
   'use strict';
 
-  const CARD_VERSION = '1.2.0';
+  const CARD_VERSION = '1.3.0-exp';
 
   const HOURS_OPTIONS = [1, 6, 24, 168];
   const HOURS_LABELS  = { 1: '1h', 6: '6h', 24: '24h', 168: '7d' };
@@ -23,6 +23,17 @@
   const ENTITY_COLOR_SWATCHES = [
     '#D97757', '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
     '#A855F7', '#EC4899', '#14B8A6', '#6366F1', '#84CC16',
+  ];
+
+  const BG_PRESET_COLORS = [
+    { hex: '#141210', name: 'WeSmart Carbon (Dark)' },
+    { hex: '#000000', name: 'Nero Puro (OLED)' },
+    { hex: '#0F172A', name: 'Blu Notte (Slate)' },
+    { hex: '#18181B', name: 'Grafite (Zinc)' },
+    { hex: '#1C1917', name: 'Pietra Calda (Stone)' },
+    { hex: '#1E293B', name: 'Ardesia Scuro' },
+    { hex: '#FFFFFF', name: 'Bianco Puro (Light)' },
+    { hex: '#F5F0EB', name: 'Crema Caldo (Light)' },
   ];
 
   // ─── Modular Card Type Registry (Extensible for Climate, Sensors, Doors, etc.) ─
@@ -80,7 +91,7 @@
 
   .card {
     background: var(--bg);
-    border: 1px solid var(--border);
+    border: 1px solid var(--card-border, var(--border));
     border-radius: var(--radius);
     padding: 18px 18px 16px;
     position: relative;
@@ -88,6 +99,11 @@
     transition: var(--transition);
     box-shadow: var(--shadow);
     color: var(--text);
+  }
+
+  .card.no-border {
+    border-color: transparent !important;
+    box-shadow: none !important;
   }
 
   /* ── Single Mode Glow ── */
@@ -104,13 +120,14 @@
   }
 
   .card.mode-single.light-on::before { opacity: 1; }
+  .card.mode-single.no-bg::before { display: none; }
 
   @keyframes pulse-glow {
     0%, 100% { box-shadow: var(--shadow), 0 0 60px var(--accent-glow); }
     50%       { box-shadow: var(--shadow), 0 0 80px var(--accent-glow-strong); }
   }
 
-  .card.mode-single.light-on {
+  .card.mode-single.light-on:not(.no-border) {
     border-color: var(--accent-border);
     animation: pulse-glow 3s ease-in-out infinite;
   }
@@ -690,6 +707,9 @@
         icon:                null,
         color:               '#D97757',
         theme:               'dark',
+        bg_color:            null,
+        bg_opacity:          100,
+        show_border:         true,
         show_brightness:     true,
         show_color_temp:     true,
         show_color:          true,
@@ -831,23 +851,89 @@
         ? this._buildPalette(overrideAccentHex, isDark)
         : p;
 
+      // Custom Style: bg_color, bg_opacity (0–100%), show_border
+      const { h, s: bS, l: bL } = this._hexToHsl(baseColor);
+      const c = this._clamp.bind(this);
+      let bgH = h;
+      let bgS = isDark ? c(Math.round(bS * 0.35), 25, 45) : c(Math.round(bS * 0.06), 4, 8);
+      let bgL = isDark ? 11 : 99;
+      let surfH = h;
+      let surfS = isDark ? c(Math.round(bS * 0.28), 20, 38) : c(Math.round(bS * 0.10), 6, 12);
+      let surfL = isDark ? 16 : 95;
+
+      const customBgHex = typeof this._config.bg_color === 'string' ? this._config.bg_color.trim() : '';
+      if (/^#[0-9A-Fa-f]{6}$/i.test(customBgHex)) {
+        const customHsl = this._hexToHsl(customBgHex);
+        bgH   = customHsl.h;
+        bgS   = customHsl.s;
+        bgL   = customHsl.l;
+        surfH = customHsl.h;
+        surfS = c(Math.round(customHsl.s * 0.85), 0, 100);
+        surfL = customHsl.l < 50 ? c(customHsl.l + 6, 0, 100) : c(customHsl.l - 5, 0, 100);
+      }
+
+      const rawOp = (this._config.bg_opacity !== undefined && this._config.bg_opacity !== null)
+        ? Number(this._config.bg_opacity)
+        : 100;
+      const bgOpacity = c(Number.isFinite(rawOp) ? rawOp : 100, 0, 100);
+      const alpha     = bgOpacity / 100;
+      const hasBorder = this._config.show_border !== false && bgOpacity > 0;
+
+      let bgCss, surfaceCss, borderCss, cardBorderCss, shadowCss, trackOffCss;
+      if (bgOpacity <= 0) {
+        bgCss         = 'transparent';
+        surfaceCss    = 'transparent';
+        borderCss     = 'transparent';
+        cardBorderCss = 'transparent';
+        shadowCss     = 'none';
+        trackOffCss   = isDark ? 'hsla(0,0%,100%,0.08)' : 'hsla(0,0%,0%,0.08)';
+      } else {
+        const aRound    = Number(alpha.toFixed(2));
+        const surfAlpha = Number(Math.max(0.08, alpha * 0.88).toFixed(2));
+        bgCss           = aRound >= 1 ? this._hsl(bgH, bgS, bgL) : this._hsla(bgH, bgS, bgL, aRound);
+        surfaceCss      = aRound >= 1 ? this._hsl(surfH, surfS, surfL) : this._hsla(surfH, surfS, surfL, surfAlpha);
+        trackOffCss     = surfaceCss;
+
+        const baseBorderAlpha = isDark ? 0.08 : 0.12;
+        const effBorderAlpha  = Number((baseBorderAlpha * alpha).toFixed(3));
+        const aL              = isDark ? c(bL, 50, 65) : c(bL, 35, 52);
+        borderCss             = isDark
+          ? `hsla(0,0%,100%,${effBorderAlpha})`
+          : `hsla(${h},${bS}%,${aL}%,${effBorderAlpha})`;
+        cardBorderCss         = hasBorder ? borderCss : 'transparent';
+
+        if (!hasBorder) {
+          shadowCss = 'none';
+        } else if (isDark) {
+          shadowCss = `0 8px 32px ${this._hsla(h, bS, 5, Number((0.45 * alpha).toFixed(2)))}`;
+        } else {
+          shadowCss = `0 2px 16px ${this._hsla(h, bS, 5, Number((0.10 * alpha).toFixed(2)))}, 0 0 0 1px ${this._hsla(h, bS, 5, Number((0.06 * alpha).toFixed(2)))}`;
+        }
+      }
+
       s.setProperty('--accent',             act.accent);
       s.setProperty('--accent-soft',        act.accentSoft);
       s.setProperty('--accent-glow',        act.accentGlow);
       s.setProperty('--accent-glow-strong', act.accentGlowStrong);
-      s.setProperty('--accent-border',      act.accentBorder);
-      s.setProperty('--bg',                 p.bg);
-      s.setProperty('--surface',            p.surface);
-      s.setProperty('--border',             p.border);
+      s.setProperty('--accent-border',      hasBorder ? act.accentBorder : 'transparent');
+      s.setProperty('--bg',                 bgCss);
+      s.setProperty('--surface',            surfaceCss);
+      s.setProperty('--border',             borderCss);
+      s.setProperty('--card-border',        cardBorderCss);
       s.setProperty('--text',               p.text);
       s.setProperty('--text-muted',         p.textMuted);
       s.setProperty('--text-dim',           p.textDim);
-      s.setProperty('--track-off',          p.trackOff);
+      s.setProperty('--track-off',          trackOffCss);
       s.setProperty('--thumb-off',          p.thumbOff);
       s.setProperty('--row-hover',          p.rowHover);
       s.setProperty('--row-active',         p.rowActive);
       s.setProperty('--overlay-bg',         p.overlayBg);
-      s.setProperty('--shadow',             p.shadow);
+      s.setProperty('--shadow',             shadowCss);
+
+      if (this._card) {
+        this._card.classList.toggle('no-bg', bgOpacity <= 0);
+        this._card.classList.toggle('no-border', !hasBorder);
+      }
 
       if (this._config.theme === 'auto' && !this._mqHandler) {
         this._mqHandler = () => this._applyPalette();
@@ -878,8 +964,13 @@
       shadow.appendChild(style);
 
       const mode = this._mode;
+      const rawOp = (this._config.bg_opacity !== undefined && this._config.bg_opacity !== null)
+        ? Number(this._config.bg_opacity)
+        : 100;
+      const bgOpacity = this._clamp(Number.isFinite(rawOp) ? rawOp : 100, 0, 100);
+      const hasBorder = this._config.show_border !== false && bgOpacity > 0;
       this._card = document.createElement('div');
-      this._card.className = `card mode-${mode}`;
+      this._card.className = `card mode-${mode}${bgOpacity <= 0 ? ' no-bg' : ''}${!hasBorder ? ' no-border' : ''}`;
 
       if (mode === 'single') {
         this._card.innerHTML = this._getSingleHTML();
@@ -2683,7 +2774,7 @@
       this._config = {};
       this._hass = null;
       this._rendered = false;
-      this._openSections = { entity: true, theme: true, controls: false };
+      this._openSections = { entity: true, theme: true, style: true, controls: false };
       this._expandedRow = null;
     }
 
@@ -2704,6 +2795,9 @@
         icon:                '',
         color:               '#D97757',
         theme:               'dark',
+        bg_color:            null,
+        bg_opacity:          100,
+        show_border:         true,
         show_brightness:     true,
         show_color_temp:     true,
         show_color:          true,
@@ -2845,12 +2939,67 @@
           </div>
         </div>
 
-        <!-- 3. Controlli & Opzioni -->
+        <!-- 3. Stile Card (Sfondo, Opacità & Trasparenza) -->
+        <div class="section open" id="sec-style">
+          <div class="section-header" data-sec="style">
+            <div class="section-title">
+              <ha-icon icon="mdi:brush-variant"></ha-icon>
+              <span>3. Stile (Sfondo, Opacità & Bordi)</span>
+            </div>
+            <ha-icon class="chevron" icon="mdi:chevron-down"></ha-icon>
+          </div>
+          <div class="section-body">
+            <div>
+              <div class="field-label" style="display:flex;justify-content:space-between;align-items:center">
+                <span>Colore di Sfondo Card (bg_color)</span>
+                <span id="bg-color-status" style="color:#D97757;text-transform:none;font-family:monospace">Default Tema</span>
+              </div>
+              <div class="swatches-grid" style="margin-bottom:8px">
+                <button type="button" class="entity-auto-btn active" id="bg-auto-btn" title="Usa lo sfondo automatico del tema InfiniteColor">Auto (Default)</button>
+                ${BG_PRESET_COLORS.map(p => `
+                  <button type="button" class="swatch-btn bg-swatch-btn" data-bg-hex="${p.hex}" title="${p.name} (${p.hex})" style="background:${p.hex};border-color:rgba(255,255,255,0.22)"></button>
+                `).join('')}
+              </div>
+              <div class="custom-color-row">
+                <input type="color" class="color-input-native" id="bg-color-native" value="#141210" title="Scegli colore di sfondo personalizzato">
+                <input type="text" class="color-input-hex" id="bg-color-hex" maxlength="7" placeholder="Default tema (es. #0F172A)">
+              </div>
+            </div>
+
+            <div>
+              <div class="field-label" style="display:flex;justify-content:space-between;align-items:center">
+                <span>Opacità Sfondo Card (bg_opacity)</span>
+                <span id="bg-opacity-lbl" style="color:#D97757;text-transform:none">100% (Solido)</span>
+              </div>
+              <input type="range" id="bg-opacity-range" min="0" max="100" step="1" value="100" style="width:100%;accent-color:#D97757;margin-bottom:8px">
+              <div class="theme-pills" style="grid-template-columns:repeat(5,1fr)">
+                <button type="button" class="theme-pill op-preset-pill" data-op="100" style="padding:7px 6px;font-size:12px">100%</button>
+                <button type="button" class="theme-pill op-preset-pill" data-op="75"  style="padding:7px 6px;font-size:12px">75%</button>
+                <button type="button" class="theme-pill op-preset-pill" data-op="50"  style="padding:7px 6px;font-size:12px">50%</button>
+                <button type="button" class="theme-pill op-preset-pill" data-op="25"  style="padding:7px 6px;font-size:12px">25%</button>
+                <button type="button" class="theme-pill op-preset-pill" data-op="0"   style="padding:7px 6px;font-size:12px" title="Trasparenza totale senza sfondo né bordi">0% Invisibile</button>
+              </div>
+            </div>
+
+            <div class="toggle-row" id="row-show-border">
+              <div class="toggle-info">
+                <span class="toggle-title">Mostra Bordi e Ombra Card</span>
+                <span class="toggle-desc" id="desc-show-border">Disattiva per rimuovere contorno e ombra (a opacità 0% vengono rimossi automaticamente)</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" data-toggle="show_border">
+                <span class="slider-tog"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Controlli & Opzioni -->
         <div class="section" id="sec-controls">
           <div class="section-header" data-sec="controls">
             <div class="section-title">
               <ha-icon icon="mdi:tune-variant"></ha-icon>
-              <span>3. Controlli & Comportamento</span>
+              <span>4. Controlli & Comportamento</span>
             </div>
             <ha-icon class="chevron" icon="mdi:chevron-down"></ha-icon>
           </div>
@@ -3103,17 +3252,17 @@
         });
       }
 
-      // Theme pills (exclude .hours-pill and .agg-editor-pill)
-      shadow.querySelectorAll('.theme-pill:not(.hours-pill):not(.agg-editor-pill)').forEach(btn => {
+      // Theme pills (exclude .hours-pill, .agg-editor-pill, .op-preset-pill)
+      shadow.querySelectorAll('.theme-pill:not(.hours-pill):not(.agg-editor-pill):not(.op-preset-pill)').forEach(btn => {
         btn.addEventListener('click', () => this._updateConfig({ theme: btn.dataset.theme }));
       });
 
-      // Swatches
-      shadow.querySelectorAll('.swatch-btn').forEach(btn => {
+      // Swatches (Accent color only, exclude .bg-swatch-btn)
+      shadow.querySelectorAll('.swatch-btn:not(.bg-swatch-btn)').forEach(btn => {
         btn.addEventListener('click', () => this._updateConfig({ color: btn.dataset.hex }));
       });
 
-      // Custom Color
+      // Custom Accent Color
       const colorNative = shadow.querySelector('#color-native');
       const colorHex    = shadow.querySelector('#color-hex');
       if (colorNative) {
@@ -3126,6 +3275,54 @@
           if (/^#[0-9A-Fa-f]{6}$/.test(val)) this._updateConfig({ color: val.toUpperCase() });
         });
       }
+
+      // Style: Background Color (bg_color)
+      const bgAutoBtn     = shadow.querySelector('#bg-auto-btn');
+      const bgColorNative = shadow.querySelector('#bg-color-native');
+      const bgColorHex    = shadow.querySelector('#bg-color-hex');
+      if (bgAutoBtn) {
+        bgAutoBtn.addEventListener('click', () => this._updateConfig({ bg_color: null }));
+      }
+      shadow.querySelectorAll('.bg-swatch-btn').forEach(btn => {
+        btn.addEventListener('click', () => this._updateConfig({ bg_color: btn.dataset.bgHex.toUpperCase() }));
+      });
+      if (bgColorNative) {
+        bgColorNative.addEventListener('input', (e) => this._updateConfig({ bg_color: e.target.value.toUpperCase() }));
+      }
+      if (bgColorHex) {
+        bgColorHex.addEventListener('change', (e) => {
+          let val = e.target.value.trim();
+          if (!val) {
+            this._updateConfig({ bg_color: null });
+            return;
+          }
+          if (!val.startsWith('#')) val = '#' + val;
+          if (/^#[0-9A-Fa-f]{6}$/.test(val)) this._updateConfig({ bg_color: val.toUpperCase() });
+        });
+      }
+
+      // Style: Background Opacity (bg_opacity)
+      const bgOpacityRange = shadow.querySelector('#bg-opacity-range');
+      if (bgOpacityRange) {
+        bgOpacityRange.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          const lbl = shadow.querySelector('#bg-opacity-lbl');
+          if (lbl) {
+            lbl.textContent = val === 0
+              ? '0% (Trasparente · Senza bordi)'
+              : val === 100
+                ? '100% (Solido)'
+                : `${val}%`;
+          }
+          this._updateConfig({ bg_opacity: val });
+        });
+      }
+      shadow.querySelectorAll('.op-preset-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = parseInt(btn.dataset.op, 10);
+          this._updateConfig({ bg_opacity: val });
+        });
+      });
 
       // Boolean toggles
       shadow.querySelectorAll('input[data-toggle]').forEach(chk => {
@@ -3372,13 +3569,13 @@
 
       // Sync Theme
       const curTheme = c.theme || 'dark';
-      shadow.querySelectorAll('.theme-pill:not(.hours-pill):not(.agg-editor-pill)').forEach(btn => {
+      shadow.querySelectorAll('.theme-pill:not(.hours-pill):not(.agg-editor-pill):not(.op-preset-pill)').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === curTheme);
       });
 
-      // Sync Color
+      // Sync Accent Color
       const curColor = (c.color || '#D97757').toUpperCase();
-      shadow.querySelectorAll('.swatch-btn').forEach(btn => {
+      shadow.querySelectorAll('.swatch-btn:not(.bg-swatch-btn)').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.hex.toUpperCase() === curColor);
       });
       const colorNative = shadow.querySelector('#color-native');
@@ -3386,11 +3583,49 @@
       if (colorNative && /^#[0-9A-Fa-f]{6}$/.test(curColor)) colorNative.value = curColor;
       if (colorHex) colorHex.value = curColor;
 
+      // Sync Style: Background Color (bg_color) & Opacity (bg_opacity)
+      const rawBgColor = typeof c.bg_color === 'string' && /^#[0-9A-Fa-f]{6}$/i.test(c.bg_color.trim())
+        ? c.bg_color.trim().toUpperCase()
+        : '';
+      const bgAutoBtn     = shadow.querySelector('#bg-auto-btn');
+      const bgColorStatus = shadow.querySelector('#bg-color-status');
+      const bgColorNative = shadow.querySelector('#bg-color-native');
+      const bgColorHex    = shadow.querySelector('#bg-color-hex');
+      if (bgAutoBtn)     bgAutoBtn.classList.toggle('active', !rawBgColor);
+      if (bgColorStatus) bgColorStatus.textContent = rawBgColor || 'Default Tema';
+      shadow.querySelectorAll('.bg-swatch-btn').forEach(btn => {
+        btn.classList.toggle('active', Boolean(rawBgColor) && btn.dataset.bgHex.toUpperCase() === rawBgColor);
+      });
+      if (bgColorNative) bgColorNative.value = rawBgColor || (curTheme === 'light' ? '#FFFFFF' : '#141210');
+      if (bgColorHex)    bgColorHex.value    = rawBgColor;
+
+      const rawOp = (c.bg_opacity !== undefined && c.bg_opacity !== null) ? Number(c.bg_opacity) : 100;
+      const curOp = Number.isFinite(rawOp) ? Math.max(0, Math.min(100, Math.round(rawOp))) : 100;
+      const bgOpRange = shadow.querySelector('#bg-opacity-range');
+      const bgOpLbl   = shadow.querySelector('#bg-opacity-lbl');
+      if (bgOpRange) bgOpRange.value = curOp;
+      if (bgOpLbl) {
+        bgOpLbl.textContent = curOp === 0
+          ? '0% (Trasparente · Senza bordi)'
+          : curOp === 100
+            ? '100% (Solido)'
+            : `${curOp}%`;
+      }
+      shadow.querySelectorAll('.op-preset-pill').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.op, 10) === curOp);
+      });
+
       // Sync Toggles
       shadow.querySelectorAll('input[data-toggle]').forEach(chk => {
         const key = chk.dataset.toggle;
         const def = (key === 'collapse_when_off' || key === 'dynamic_light_color' || key === 'show_grid') ? false : true;
-        chk.checked = c[key] !== undefined ? Boolean(c[key]) : def;
+        if (key === 'show_border' && curOp === 0) {
+          chk.checked  = false;
+          chk.disabled = true;
+        } else {
+          chk.disabled = false;
+          chk.checked  = c[key] !== undefined ? Boolean(c[key]) : def;
+        }
       });
     }
 
@@ -3398,6 +3633,7 @@
       const next = { ...this._config, ...patch };
       if (!next.name) delete next.name;
       if (!next.icon) delete next.icon;
+      if (!next.bg_color) delete next.bg_color;
       this._config = next;
       this._syncUI();
       this.dispatchEvent(new CustomEvent('config-changed', {
