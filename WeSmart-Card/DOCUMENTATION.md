@@ -1,4 +1,4 @@
-# WeSmart Card (`wesmart-card.js` v1.3.0) — Technical Documentation & Architecture
+# WeSmart Card (`wesmart-card.js` v1.4.0-exp) — Technical Documentation & Architecture
 
 **[Italiano](#italiano)** | **[English](#english)**
 
@@ -21,17 +21,24 @@ All'interno di `wesmart-card.js`, il registro `CARD_TYPES` definisce le tipologi
 
 ```js
 const CARD_TYPES = [
-  { id: 'light',         mode: 'single',  category: 'Lights', icon: 'mdi:lightbulb-on',         name: 'Light',         sub: '1 Luce · Slider completi' },
-  { id: 'lights',        mode: 'list',    category: 'Lights', icon: 'mdi:format-list-bulleted', name: 'Lights',        sub: 'Multi-luce · Toggle rapidi' },
-  { id: 'lights-expand', mode: 'expand',  category: 'Lights', icon: 'mdi:tune-vertical',        name: 'Lights Expand', sub: 'Multi-luce · Slider inline' },
-  { id: 'chart',         mode: 'chart',   category: 'Graphs', icon: 'mdi:chart-areaspline',     name: 'Chart',         sub: 'Grafico Zoom & Tooltip' },
-  { id: 'history',       mode: 'history', category: 'Graphs', icon: 'mdi:chart-timeline',       name: 'History',       sub: 'Storico per ogni riga' },
+  { id: 'light',         mode: 'single',  category: 'Lights',   icon: 'mdi:lightbulb-on',         name: 'Light',         sub: '1 Luce · Slider completi' },
+  { id: 'lights',        mode: 'list',    category: 'Lights',   icon: 'mdi:format-list-bulleted', name: 'Lights',        sub: 'Multi-luce · Toggle rapidi' },
+  { id: 'lights-expand', mode: 'expand',  category: 'Lights',   icon: 'mdi:tune-vertical',        name: 'Lights Expand', sub: 'Multi-luce · Slider inline' },
+  { id: 'button',        mode: 'button',  category: 'Controls', icon: 'mdi:gesture-tap-button',   name: 'Button Pad',    sub: 'Tasto Mixer 1x1 / 2x2 · LED' },
+  { id: 'chart',         mode: 'chart',   category: 'Graphs',   icon: 'mdi:chart-areaspline',     name: 'Chart',         sub: 'Grafico Zoom & Tooltip' },
+  { id: 'history',       mode: 'history', category: 'Graphs',   icon: 'mdi:chart-timeline',       name: 'History',       sub: 'Storico per ogni riga' },
 ];
 ```
 
 #### Adattamento dinamico dell'Editor Visuale (`WeSmartCardEditor`)
 Quando l'utente seleziona un `card_type` nel configuratore:
 - **Modalità `light`**: mostra il selettore entità singola (`domain: light`) e i toggle dedicati agli slider luce (*Luminosità*, *Kelvin*, *Hue RGB*, *Comprimi da spenta*, *Colore Dinamico RGB*).
+- **Modalità `button` (Button Pad Mixer)**:
+  - Sblocca il selettore entità singola per **tutti i domini** (`light.*`, `scene.*`, `switch.*`, `script.*`, `input_boolean.*`, `button.*`).
+  - Mostra i controlli dedicati al tasto fisico da mixer:
+    - **Formato & Dimensione (`button_size`)**: `1x1` (`136x136px`), `2x2` (`220x220px`) o `full` (100% larghezza).
+    - **Azioni `tap_action` e `hold_action`**: `toggle`, `more-info`, `turn_on`, `turn_off`, `call-service` (con campo servizio personalizzato `tap_service` / `hold_service`), `none`.
+    - **Visibilità elementi**: toggle per mostrare/nascondere `show_icon`, `show_name` e `show_state`.
 - **Modalità `lights` / `lights-expand`**: mostra l'elenco multi-entità con selettore filtrato su `domain: light`.
 - **Modalità `chart` / `history`**:
   - Sblocca automaticamente il selettore di aggiunta entità su **tutti i domini** di Home Assistant (`sensor.*`, `binary_sensor.*`, `light.*`, `switch.*`, `climate.*`, ecc.).
@@ -59,7 +66,7 @@ sequenceDiagram
     Card-->>HA: Restituisce document.createElement('wesmart-card-editor')
     HA->>Editor: Imposta editor.hass = hass
     HA->>Editor: Chiama editor.setConfig(config)
-    Editor-->>User: Mostra griglia CARD_TYPES (Light / Lights / Lights Expand / Chart / History)
+    Editor-->>User: Mostra griglia CARD_TYPES (Light / Lights / Lights Expand / Button Pad / Chart / History)
     User->>Editor: Clicca un Tipo di Card, sceglie Entità, Opzioni o Colore
     Editor->>HA: Dispara CustomEvent('config-changed', { detail: { config: newConfig } })
     HA->>Card: Chiama card.setConfig(newConfig) (Anteprima Live immediata)
@@ -74,7 +81,7 @@ sequenceDiagram
 | Proprietà | Tipo | Default | Descrizione |
 |---|---|---|---|
 | `type` | `string` | **Obbligatorio** | `custom:wesmart-card` |
-| `card_type` | `string` | `'light'` | Tipo di card: `'light'`, `'lights'`, `'lights-expand'`, `'chart'`, `'history'`. |
+| `card_type` | `string` | `'light'` | Tipo di card: `'light'`, `'lights'`, `'lights-expand'`, `'button'`, `'chart'`, `'history'`. |
 | `color` | `string` | `'#D97757'` | Colore base esadecimale (`#RRGGBB`) per il motore **InfiniteColor**. |
 | `theme` | `string` | `'dark'` | Tema superficie: `'dark'`, `'light'` oppure `'auto'`. |
 | `bg_color` | `string` | `null` *(Auto)* | Colore di sfondo personalizzato (`#RRGGBB`) che sovrascrive lo sfondo predefinito del tema e ricalcola il tono delle superfici interne. |
@@ -94,6 +101,23 @@ sequenceDiagram
 | `show_color` | `boolean` | `true` | Mostra lo slider Colore RGB (Hue 0–360°), se supportato. |
 | `collapse_when_off` | `boolean` | `false` | Nasconde gli slider quando la luce è spenta. |
 | `dynamic_light_color` | `boolean` | `false` | Adatta l'accento della card al colore reale RGB della lampadina accesa. |
+
+#### Opzioni per `card_type: button` (Button Pad / Tasto Fisico Mixer)
+
+| Proprietà | Tipo | Default | Descrizione |
+|---|---|---|---|
+| `entity` | `string` | **Obbligatorio** | Qualsiasi entità (`light.*`, `scene.*`, `switch.*`, `script.*`, `input_boolean.*`, `button.*`). |
+| `name` | `string` | `null` | Etichetta personalizzata sul tasto. |
+| `icon` | `string` | `null` | Icona MDI personalizzata sul tasto. |
+| `button_size` | `string` | `'1x1'` | Formato del tasto: `'1x1'` (`136x136px`), `'2x2'` (`220x220px`) oppure `'full'` (100% larghezza). |
+| `show_icon` | `boolean` | `true` | Mostra o nasconde l'icona sul tasto. |
+| `show_name` | `boolean` | `true` | Mostra o nasconde il nome/etichetta sul tasto (se nascosto, l'icona si centra e si ingrandisce). |
+| `show_state` | `boolean` | `true` | Mostra o nasconde la riga di stato sotto al nome. |
+| `tap_action` | `string` | `'toggle'` | Azione al tocco breve: `'toggle'`, `'more-info'`, `'turn_on'`, `'turn_off'`, `'call-service'`, `'none'`. |
+| `hold_action` | `string` | `'more-info'` | Azione alla pressione prolungata (500ms): `'more-info'`, `'toggle'`, `'turn_on'`, `'turn_off'`, `'call-service'`, `'none'`. |
+| `tap_service` | `string` | `null` | Servizio da eseguire se `tap_action: 'call-service'` (es. `'scene.turn_on'`). |
+| `hold_service` | `string` | `null` | Servizio da eseguire se `hold_action: 'call-service'` (es. `'script.buonanotte'`). |
+| `dynamic_light_color` | `boolean` | `false` | Adatta il colore del LED angolare e dell'icona al colore reale RGB della lampadina accesa. |
 
 #### Opzioni per `card_type: lights` e `card_type: lights-expand` (Multi-Luce)
 
@@ -133,17 +157,24 @@ Inside `wesmart-card.js`, the `CARD_TYPES` registry defines the card types selec
 
 ```js
 const CARD_TYPES = [
-  { id: 'light',         mode: 'single',  category: 'Lights', icon: 'mdi:lightbulb-on',         name: 'Light',         sub: '1 Luce · Slider completi' },
-  { id: 'lights',        mode: 'list',    category: 'Lights', icon: 'mdi:format-list-bulleted', name: 'Lights',        sub: 'Multi-luce · Toggle rapidi' },
-  { id: 'lights-expand', mode: 'expand',  category: 'Lights', icon: 'mdi:tune-vertical',        name: 'Lights Expand', sub: 'Multi-luce · Slider inline' },
-  { id: 'chart',         mode: 'chart',   category: 'Graphs', icon: 'mdi:chart-areaspline',     name: 'Chart',         sub: 'Grafico Zoom & Tooltip' },
-  { id: 'history',       mode: 'history', category: 'Graphs', icon: 'mdi:chart-timeline',       name: 'History',       sub: 'Storico per ogni riga' },
+  { id: 'light',         mode: 'single',  category: 'Lights',   icon: 'mdi:lightbulb-on',         name: 'Light',         sub: '1 Luce · Slider completi' },
+  { id: 'lights',        mode: 'list',    category: 'Lights',   icon: 'mdi:format-list-bulleted', name: 'Lights',        sub: 'Multi-luce · Toggle rapidi' },
+  { id: 'lights-expand', mode: 'expand',  category: 'Lights',   icon: 'mdi:tune-vertical',        name: 'Lights Expand', sub: 'Multi-luce · Slider inline' },
+  { id: 'button',        mode: 'button',  category: 'Controls', icon: 'mdi:gesture-tap-button',   name: 'Button Pad',    sub: 'Tasto Mixer 1x1 / 2x2 · LED' },
+  { id: 'chart',         mode: 'chart',   category: 'Graphs',   icon: 'mdi:chart-areaspline',     name: 'Chart',         sub: 'Grafico Zoom & Tooltip' },
+  { id: 'history',       mode: 'history', category: 'Graphs',   icon: 'mdi:chart-timeline',       name: 'History',       sub: 'Storico per ogni riga' },
 ];
 ```
 
 #### Dynamic Adaptation in the Visual Editor (`WeSmartCardEditor`)
 When the user selects a `card_type` in the configurator:
 - **`light` mode**: displays the single-entity picker (`domain: light`) and dedicated light slider toggles (*Brightness*, *Kelvin*, *Hue RGB*, *Collapse when off*, *Dynamic RGB light color*).
+- **`button` mode (Button Pad Mixer)**:
+  - Unlocks the single-entity picker across **all domains** (`light.*`, `scene.*`, `switch.*`, `script.*`, `input_boolean.*`, `button.*`).
+  - Displays physical mixer button controls:
+    - **Button Size (`button_size`)**: `1x1` (`136x136px`), `2x2` (`220x220px`), or `full` (100% width).
+    - **Tap (`tap_action`) & Hold (`hold_action`) Actions**: `toggle`, `more-info`, `turn_on`, `turn_off`, `call-service` (with custom `tap_service` / `hold_service` inputs), `none`.
+    - **Element Visibility**: toggles for `show_icon`, `show_name`, and `show_state`.
 - **`lights` / `lights-expand` modes**: displays the multi-entity list manager with the entity picker filtered to `domain: light`.
 - **`chart` / `history` modes**:
   - Automatically unlocks the entity picker across **all Home Assistant domains** (`sensor.*`, `binary_sensor.*`, `light.*`, `switch.*`, `climate.*`, etc.).
@@ -172,7 +203,7 @@ When the user selects a `card_type` in the configurator:
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `type` | `string` | **Required** | `custom:wesmart-card` |
-| `card_type` | `string` | `'light'` | Card mode: `'light'`, `'lights'`, `'lights-expand'`, `'chart'`, `'history'`. |
+| `card_type` | `string` | `'light'` | Card mode: `'light'`, `'lights'`, `'lights-expand'`, `'button'`, `'chart'`, `'history'`. |
 | `color` | `string` | `'#D97757'` | Base HEX color (`#RRGGBB`) for the **InfiniteColor** engine. |
 | `theme` | `string` | `'dark'` | Surface theme: `'dark'`, `'light'`, or `'auto'`. |
 | `bg_color` | `string` | `null` *(Auto)* | Custom background color (`#RRGGBB`) overriding the default theme background and adapting inner surface tones. |
@@ -192,6 +223,23 @@ When the user selects a `card_type` in the configurator:
 | `show_color` | `boolean` | `true` | Displays the RGB Hue slider (0–360°), if supported. |
 | `collapse_when_off` | `boolean` | `false` | Collapses all sliders when the light is turned off. |
 | `dynamic_light_color` | `boolean` | `false` | Tints the card accent with the real RGB color of the active bulb. |
+
+#### Options for `card_type: button` (Button Pad / Physical Mixer Key)
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `entity` | `string` | **Required** | Any entity ID (`light.*`, `scene.*`, `switch.*`, `script.*`, `input_boolean.*`, `button.*`). |
+| `name` | `string` | `null` | Custom button label override. |
+| `icon` | `string` | `null` | Custom MDI icon override. |
+| `button_size` | `string` | `'1x1'` | Button format: `'1x1'` (`136x136px`), `'2x2'` (`220x220px`), or `'full'` (100% width). |
+| `show_icon` | `boolean` | `true` | Shows or hides the button icon. |
+| `show_name` | `boolean` | `true` | Shows or hides the button name/text (when hidden, the icon automatically centers and scales up). |
+| `show_state` | `boolean` | `true` | Shows or hides the status line below the name. |
+| `tap_action` | `string` | `'toggle'` | Short press action: `'toggle'`, `'more-info'`, `'turn_on'`, `'turn_off'`, `'call-service'`, `'none'`. |
+| `hold_action` | `string` | `'more-info'` | Long press action (500ms): `'more-info'`, `'toggle'`, `'turn_on'`, `'turn_off'`, `'call-service'`, `'none'`. |
+| `tap_service` | `string` | `null` | Service to call when `tap_action: 'call-service'` (e.g. `'scene.turn_on'`). |
+| `hold_service` | `string` | `null` | Service to call when `hold_action: 'call-service'` (e.g. `'script.goodnight'`). |
+| `dynamic_light_color` | `boolean` | `false` | Tints the corner LED and icon with the real RGB color of the active bulb. |
 
 #### Options for `card_type: lights` & `card_type: lights-expand` (Multi-Light)
 
